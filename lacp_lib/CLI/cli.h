@@ -24,6 +24,7 @@
 #define _CLI_API__
 
 #define MAX_CLI_BUFF	80
+#define MAX_CLI_CMD_NAME 44
 #define MAXPARAMNUM     6
 #define MAXPARAMLEN     40
 #define MAX_CLI_PROMT	24
@@ -80,14 +81,10 @@ void cli_debug_dump_args (char* title, int argc, char** argv);
 void cli_register_language (const CMD_DSCR_T* cmd_list);
 void usage (void);
 int cli_execute_command (const char* line);
-#ifdef OLD_READLINE
 void rl_read_cli (void);
-#else
-void rl_read_cli (char *);
-#endif
 void rl_init (void);
 void rl_shutdown (void);
-char* UT_sprint_time_stamp (void);
+char* UT_sprint_time_stamp (char ticks_accuracy);
 
 #endif /* _CLI_API__ */
 
