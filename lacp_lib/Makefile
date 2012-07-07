@@ -20,80 +20,86 @@
 #* 02111-1307, USA.
 #**********************************************************************/
 
-DEFS=
-CC = gcc #-E
-#CFLAGS = -g -Wall -D_REENTRANT -D__LINUX__ -DSTP_DBG=1 -DOLD_READLINE
-CFLAGS = -g -Wall -D_REENTRANT -D__LINUX__ -DSTP_DBG=1 # -DOLD_READLINE
+top_srcdir = .
 
-INCLUDES = -I.
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CFLAGS)
-LIBS= -lutil -lreadline -ltermcap -lpthread
+include $(top_srcdir)/common.mk
 
-AR = ar
-#ARFLAGS = rcs
-ARFLAGS = cru
-RANLIB = ranlib
-SOFLAGS =  -nostartfiles -shared
+LIBS= -lutil -lreadline  -ltermcap
+INCLUDES = -IBITMAP -I$(RSTPLIBDIR) -I$(IPCDIR) -I$(CLIDIR) -I. 
 
 EXECUTABLE= bridge mngr
+RSTPLIBDIR = LACP
 RSTPLIBS = lacp
-RSTPLIBF = lib$(RSTPLIBS).a
-UIDLIBS  = uid
-UIDLIBF  = lib$(UIDLIBS).a
+RSTPLIBF = $(RSTPLIBDIR)/lib$(RSTPLIBS).a
+
+IPCDIR   = IPC
+IPCLIBS  = ipc
+IPCLIBF  = $(IPCDIR)/lib$(IPCLIBS).a
+
+CLIDIR   = CLI
 CLILIBS  = cli
-CLILIBF  = lib$(CLILIBS).a
+CLILIBF  = $(CLIDIR)/lib$(CLILIBS).a
 
-MNGRCFILES = mngr.c
-MNGROFILES = mngr.o
-BRIDGECFILES = bridge.c stp_cli.c lac_out.c
-BRIDGEOFILES = bridge.o stp_cli.o lac_out.o
+BITMAPDIR   = BITMAP
+BITMAPLIBS  = bitmap
+BITMAPLIBF  = $(BITMAPDIR)/lib$(BITMAPLIBS).a
 
-RSTPCFILES = statmch.c  lac_in.c  lac_bitmap.c \
-lac_pdu.c lac_mux.c  lac_port.c lac_rx.c lac_sel.c lac_sys.c lac_test.c lac_tx.c
+MNGRCFILES = mngr.c trace.c
+MNGROFILES = mngr.o trace.o
+BRIDGECFILES = bridge.c lac_cli.c lac_out.c trace.c
+BRIDGEOFILES = $(BRIDGECFILES:.c=.o)
 
-
-RSTPOFILES = statmch.o lac_in.o lac_bitmap.o lac_pdu.o lac_mux.o  lac_port.o lac_rx.o lac_sel.o lac_sys.o lac_test.o lac_tx.o 
-
-UIDCFILES = uid_sock.c
-UIDOFILES = uid_sock.o
-
-CLICFILES = cli.c
-CLIOFILES = cli.o
-
-CFILES= $(MNGRCFILES) $(BRIDGECFILES) $(RSTPCFILES) $(UIDCFILES) $(CLICFILES)
-
-OFILES= $(MNGROFILES) $(BRIDGEOFILES) $(RSTPOFILES) $(UIDOFILES) $(CLIOFILES)
+CFILES= $(MNGRCFILES) $(BRIDGECFILES)
+OFILES = $(CFILES:.c=.o)
 
 .SUFFIXES: .S .c .o .s
 
-all: depend $(EXECUTABLE)
+all: libs $(EXECUTABLE)
 
-mngr: ${MNGROFILES} $(UIDLIBF) $(CLILIBF)
-	$(CC) ${MNGROFILES} $(LIBS) -L. -l$(UIDLIBS) -l$(CLILIBS) -o $@
+mngr: ${MNGROFILES} $(IPCLIBF) $(CLILIBF) $(BITMAPLIBF)
+	$(CC) ${MNGROFILES} $(LIBS) \
+		-L$(IPCDIR) -l$(IPCLIBS) -L$(CLIDIR) -l$(CLILIBS) -L$(BITMAPDIR) -l$(BITMAPLIBS) -o $@
 
-bridge: ${BRIDGEOFILES} $(RSTPLIBF) $(UIDLIBF) $(CLILIBF)
-	$(CC) ${BRIDGEOFILES} $(LIBS) -L. -l$(RSTPLIBS) -l$(UIDLIBS) -l$(CLILIBS) -o $@
+bridge: ${BRIDGEOFILES} $(RSTPLIBF) $(IPCLIBF) $(CLILIBF)
+	$(CC) $(CFLAGS) ${BRIDGEOFILES} $(RSTPLIBDIR)/liblacp.a $(LIBS) \
+		-L$(IPCDIR) -l$(IPCLIBS) -L$(CLIDIR) -l$(CLILIBS) -L$(BITMAPDIR) -l$(BITMAPLIBS) -o $@
 
-$(RSTPLIBF): ${RSTPOFILES}
-	-rm -f $@
-	$(AR) $(ARFLAGS) $@ $(RSTPOFILES)
-	$(RANLIB)  $@
-	
-$(UIDLIBF): ${UIDOFILES}
-	-rm -f $@
-	$(AR) $(ARFLAGS) $@ $(UIDOFILES)
-	$(RANLIB) $@
-	
-$(CLILIBF): $(CLIOFILES)
-	-rm -f $@
-	$(AR) $(ARFLAGS) $@ $(CLIOFILES)
-	$(RANLIB) $@
+libs:
+	cd $(RSTPLIBDIR); make
+	cd $(IPCDIR); make
+	cd $(CLIDIR); make
+
+$(RSTPLIBF):
+	cd $(RSTPLIBDIR); make
+
+$(IPCLIBF):
+	cd $(IPCDIR); make
+
+$(CLILIBF):
+	cd $(CLIDIR); make
+
+$(BITMAPLIBF):
+	cd $(BITMAPDIR); make
 
 clean:
-	rm -f all *.o *.a *~ $(EXECUTABLE) *.bak make.depend
+	cd $(IPCDIR); make clean
+	cd $(CLIDIR); make clean
+	cd $(RSTPLIBDIR); make clean
+	rm -f all *.o *.a *.so *~ $(EXECUTABLE) *.bak make.depend
+
+indent: $(CFILES)
+	cd $(IPCDIR); make indent
+	cd $(CLIDIR); make indent
+	cd $(RSTPLIBDIR); make indent
+	for i in $(CFILES) ; do \
+	( indent $(INDENT_OPTIONS) $$i) ; \
+	done
 
 depend:
+	cd $(IPCDIR); make depend
+	cd $(CLIDIR); make depend
+	cd $(RSTPLIBDIR); make depend
 	echo "# DO NOT DELETE THIS LINE -- make  depend  depends  on it." > make.depend
-	makedepend -- $(DEFS) $(INCLUDES) $(CFLAGS) -- $(CFILES) -f make.depend
+	makedepend -- $(DEFS) $(CFLAGS)  -- $(CFILES) -f make.depend
 
 -include make.depend
