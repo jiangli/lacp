@@ -110,8 +110,38 @@ int lac_in_remove_port()
 int lac_in_init()
 {
 }
-int lac_in_port_enable()
+static void
+_stp_in_enable_port_on_stpm (LAC_SYS_T * stpm, int port_index, Bool enable)
 {
+  register LAC_PORT_T *port;
+
+  port = lac_port_find (stpm, port_index);
+  if (!port)
+    return;
+  if (port->port_enabled == enable) {	/* nothing to do :) */
+    return;
+  }
+
+  if (enable) {			/* clear port statistics */
+          port->rx_lacpdu_cnt = 0;
+          
+          port->tx_lacpdu_cnt = 0;
+          
+  }
+
+}
+
+int lac_in_enable_port(int port_index, Bool enable)
+{
+
+  register LAC_SYS_T *stpm;
+
+  LAC_CRITICAL_PATH_START;
+
+  lac_trace ("port p%02d => %sABLE", (int) port_index, enable ? "EN" : "DIS");
+
+    _stp_in_enable_port_on_stpm (stpm, port_index, enable);
+  LAC_CRITICAL_PATH_END;
 }
 int lac_in_port_disable()
 {

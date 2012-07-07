@@ -34,10 +34,11 @@
 
 #include "cli.h"
 #include "br_ipc.h"
-#include "stp_cli.h"
+#include "lac_cli.h"
 
 #include "lac_base.h"
 #include "lac_port.h"
+#include "lac_pdu.h"
 #include "lac_bitmap.h"
 #include "uid_lac.h"
 #include "lac_in.h"
@@ -46,7 +47,7 @@
 long my_pid = 0;
 BITMAP_T enabled_ports;
 IPC_SOCKET_T ipc_socket;
-#if 0
+
 int
 bridge_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 {
@@ -62,11 +63,17 @@ bridge_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 }
 
 int
-bridge_start (int number_of_ports)
+bridge_start ()
 {
   BR_IPC_MSG_T msg;
-  UID_STP_CFG_T ipc_cfg;
+
   register int iii;
+  
+          int number_of_ports = 4;
+  	UID_LAC_CFG_T uid_cfg;	
+	BITMAP_T Ports;
+	int max_valid_port = 144;
+	int i = 0;
 
   rl_callback_handler_install (get_prompt (), rl_read_cli);
 
@@ -89,20 +96,26 @@ bridge_start (int number_of_ports)
 
   stp_cli_init ();
 
-  STP_IN_init (number_of_ports);
-  BitmapClear (&enabled_ports);
-  BitmapClear (&ipc_cfg.ports);
-  for (iii = 1; iii <= number_of_ports; iii++) {
-    BitmapSetBit (&ipc_cfg.ports, iii - 1);
-  }
+	
+	/* 初始化lac系统 */
+	lac_sys_init();
+    BitmapClear (&enabled_ports);
+  BitmapClear (&uid_cfg.ports);
 
-  ipc_cfg.field_mask = BR_CFG_STATE;
-  ipc_cfg.stp_enabled = STP_ENABLED;
-  ipc_cfg.number_of_ports = number_of_ports;
-  snprintf (ipc_cfg.name, NAME_LEN - 1, "B%ld", (long) my_pid);
-  iii = STP_IN_stpm_set_cfg (0, &ipc_cfg);
-  if (STP_OK != iii) {
-    printf ("FATAL: can't enable:%s\n", STP_IN_get_error_explanation (iii));
+	/* 协议栈默认没有端口，需要初始化端口 */
+	uid_cfg.field_mask = BR_CFG_PBMP_ADD;
+	uid_cfg.number_of_ports = max_valid_port;
+	for (i=0;i<max_valid_port;i++)
+	{
+		/* 此处随意添加一些端口进行测试 */
+		if (i % 20 == 0)
+			BitmapSetBit(&uid_cfg.ports, i);
+	}
+	
+	iii = lac_sys_set_cfg(&uid_cfg);
+  if (0 != iii) {
+          printf ("FATAL: can't enable:%iii\n");
+          
     return (-1);
   }
   return 0;
@@ -120,18 +133,21 @@ bridge_shutdown (void)
   msg.body.cntrl.cmd = BR_IPC_BRIDGE_SHUTDOWN;
   IPC_SocketSendto (&ipc_socket, &msg, sizeof (BR_IPC_MSG_T));
 
+#if 0
   rc = STP_IN_stpm_delete (0);
-  if (STP_OK != rc) {
+  if (0 != rc) {
     printf ("FATAL: can't delete:%s\n", STP_IN_get_error_explanation (rc));
     exit (1);
   }
+#endif
+
 }
 
 char *
 get_prompt (void)
 {
   static char prompt[MAX_CLI_PROMT];
-  snprintf (prompt, MAX_CLI_PROMT - 1, "%s B%ld > ", UT_sprint_time_stamp (0),
+  snprintf (prompt, MAX_CLI_PROMT - 1, "%s B%ld > ", UT_sprint_time_stamp (),
 	    my_pid);
   return prompt;
 }
@@ -142,13 +158,13 @@ bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
   switch (cntrl->cmd) {
     case BR_IPC_PORT_CONNECT:
     printf ("connected port p%02d\n", port_index);
-    BitmapSetBit (&enabled_ports, port_index - 1);
-    STP_IN_enable_port (port_index, True);
+    BitmapSetBit (&enabled_ports, port_index);
+    lac_in_enable_port (port_index, True);
     break;
     case BR_IPC_PORT_DISCONNECT:
     printf ("disconnected port p%02d\n", port_index);
     BitmapClearBit (&enabled_ports, port_index - 1);
-    STP_IN_enable_port (port_index, False);
+    lac_in_enable_port (port_index, False);
     break;
     case BR_IPC_BRIDGE_SHUTDOWN:
     printf ("shutdown from manager :(\n");
@@ -165,20 +181,10 @@ bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
   register int port_index;
 
-  if (I_am_a_stupid_hub) {	// flooding
-    msg->header.sender_pid = my_pid;
-    for (port_index = 1; port_index <= number_of_ports; port_index++) {
-      if (BitmapGetBit (&enabled_ports, (port_index - 1)) &&
-	  msg->header.destination_port != port_index) {
-	msg->header.source_port = port_index;
-	IPC_SocketSendto (&ipc_socket, msg, msgsize);
-      }
-    }
-  } else {
-    STP_IN_rx_bpdu (msg->header.destination_port,
-		    (BPDU_T *) (msg->body.bpdu + sizeof (MAC_HEADER_T)),
-		    msg->header.body_len - sizeof (MAC_HEADER_T));
-  }
+ lac_in_rx (msg->header.destination_port,
+		    (LACPDU_T *) (msg->body.bpdu),
+		    msg->header.body_len);
+
   return 0;
 }
 
@@ -215,7 +221,7 @@ read_ipc (IPC_SOCKET_T * ipc_sock, int number_of_ports)
 char shutdown_flag = 0;
 
 int
-main_loop (int number_of_ports)
+main_loop ()
 {
   fd_set readfds;
   struct timeval tv;
@@ -271,7 +277,7 @@ main_loop (int number_of_ports)
     }
 
     if (!rc) {			// Timeout expired
-      STP_IN_one_second ();
+      lac_one_second ();
       gettimeofday (&earliest, NULL);
 
       earliest.tv_sec++;
@@ -283,7 +289,7 @@ main_loop (int number_of_ports)
     }
 
     if (FD_ISSET (sock, &readfds)) {
-      shutdown_flag |= read_ipc (&ipc_socket, number_of_ports);
+      shutdown_flag |= read_ipc (&ipc_socket, 144);
     }
 
   } while (!shutdown_flag);
@@ -318,8 +324,8 @@ main (int argc, char **argv)
 
   return 0;
 }
-#endif
 
+#if 0
 int lac_start()
 {	
 	UID_LAC_CFG_T uid_cfg;	
@@ -344,7 +350,7 @@ int lac_start()
 }
 int main()
 {
-        //rl_init ();
+        rl_init ();
   
   my_pid = getpid();
   printf ("my pid: %ld\n", my_pid); 
@@ -365,3 +371,4 @@ int main()
 }
 
 
+#endif

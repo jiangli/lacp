@@ -1,4 +1,4 @@
-#if 0
+
 /************************************************************************ 
  * RSTP library - Rapid Spanning Tree (802.1t, 802.1w) 
  * Copyright (C) 2001-2003 Optical Access 
@@ -31,14 +31,14 @@
 #include <unistd.h>
 
 #include "cli.h"
-#include "stp_cli.h"
-#include "bitmap.h"
-#include "uid_stp.h"
-#include "stp_in.h"
-#include "stp_to.h"
+#include "lac_cli.h"
+#include "lac_bitmap.h"
+#include "uid_lac.h"
+#include "lac_base.h"
+#include "lac_port.h"
+#include "lac_in.h"
 
-int I_am_a_stupid_hub = 0;
-
+#if 0
 static void
 print_bridge_id (UID_BRIDGE_ID_T *bridge_id, unsigned char cr)
 {
@@ -788,11 +788,16 @@ static CMD_DSCR_T lang[] = {
   END_OF_LANG
 };
 
+#endif
+
+static CMD_DSCR_T lang[] = {
+}
+        ;
+
 int stp_cli_init (void)
 {
-   I_am_a_stupid_hub = 0;
    cli_register_language (lang);
    return 0;
 }
 
-#endif
+
