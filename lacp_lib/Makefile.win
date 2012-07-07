@@ -1,0 +1,60 @@
+# Project: lacp_lib
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe -D__DEBUG__
+CC   = gcc.exe -D__DEBUG__
+WINDRES = windres.exe
+RES  = 
+OBJ  = lac_bitmap.o lac_in.o lac_out.o lac_pdu.o lac_port.o lac_rx.o lac_sys.o statmch.o lac_tx.o lac_mux.o lac_sel.o $(RES)
+LINKOBJ  = lac_bitmap.o lac_in.o lac_out.o lac_pdu.o lac_port.o lac_rx.o lac_sys.o statmch.o lac_tx.o lac_mux.o lac_sel.o $(RES)
+LIBS =  -L"C:/MinGW/lib" -L"d:/Dev-Cpp/lib" -g3  
+INCS =  -I"d:/Dev-Cpp/include" 
+CXXINCS =  -I"d:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"d:/Dev-Cpp/include/c++/3.4.2/backward"  -I"d:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"d:/Dev-Cpp/include/c++/3.4.2"  -I"d:/Dev-Cpp/include" 
+BIN  = lacp_lib.exe
+CXXFLAGS = $(CXXINCS)   -mno-cygwin -g3
+CFLAGS = $(INCS)   -mno-cygwin -g3
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before lacp_lib.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o "lacp_lib.exe" $(LIBS)
+
+lac_bitmap.o: lac_bitmap.c
+	$(CC) -c lac_bitmap.c -o lac_bitmap.o $(CFLAGS)
+
+lac_in.o: lac_in.c
+	$(CC) -c lac_in.c -o lac_in.o $(CFLAGS)
+
+lac_out.o: lac_out.c
+	$(CC) -c lac_out.c -o lac_out.o $(CFLAGS)
+
+lac_pdu.o: lac_pdu.c
+	$(CC) -c lac_pdu.c -o lac_pdu.o $(CFLAGS)
+
+lac_port.o: lac_port.c
+	$(CC) -c lac_port.c -o lac_port.o $(CFLAGS)
+
+lac_rx.o: lac_rx.c
+	$(CC) -c lac_rx.c -o lac_rx.o $(CFLAGS)
+
+lac_sys.o: lac_sys.c
+	$(CC) -c lac_sys.c -o lac_sys.o $(CFLAGS)
+
+statmch.o: statmch.c
+	$(CC) -c statmch.c -o statmch.o $(CFLAGS)
+
+lac_tx.o: lac_tx.c
+	$(CC) -c lac_tx.c -o lac_tx.o $(CFLAGS)
+
+lac_mux.o: lac_mux.c
+	$(CC) -c lac_mux.c -o lac_mux.o $(CFLAGS)
+
+lac_sel.o: lac_sel.c
+	$(CC) -c lac_sel.c -o lac_sel.o $(CFLAGS)

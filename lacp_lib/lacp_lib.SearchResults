@@ -1,0 +1,5 @@
+---- lac_sys Matches (4 in 0 files) ----
+Lac_sys.c:static LAC_SYS_T *lac_sys = NULL;
+Lac_sys.c:	return lac_sys;
+Lac_sys.c:	LAC_MALLOC(lac_sys, LAC_SYS_T, "Can't alloc for lac system");
+Lac_sys.c:	return lac_sys;

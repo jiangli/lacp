@@ -1,0 +1,221 @@
+# DO NOT DELETE THIS LINE -- make  depend  depends  on it.
+
+bridge.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+bridge.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+bridge.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+bridge.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+bridge.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+bridge.o: /usr/include/time.h /usr/include/endian.h
+bridge.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+bridge.o: /usr/include/sys/select.h /usr/include/bits/select.h
+bridge.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+bridge.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+bridge.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+bridge.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+bridge.o: /usr/include/_G_config.h /usr/include/wchar.h
+bridge.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+bridge.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_pdu.h lac_in.h
+lac_out.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_out.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_out.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_out.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_out.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_out.o: /usr/include/time.h /usr/include/endian.h
+lac_out.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_out.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_out.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_out.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_out.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_out.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_out.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_out.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_out.o: lac_bitmap.h
+statmch.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+statmch.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+statmch.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+statmch.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+statmch.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+statmch.o: /usr/include/time.h /usr/include/endian.h
+statmch.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+statmch.o: /usr/include/sys/select.h /usr/include/bits/select.h
+statmch.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+statmch.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+statmch.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+statmch.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+statmch.o: /usr/include/_G_config.h /usr/include/wchar.h
+statmch.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+statmch.o: lac_bitmap.h lac_port.h statmch.h
+lac_in.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_in.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_in.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_in.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_in.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_in.o: /usr/include/time.h /usr/include/endian.h
+lac_in.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_in.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_in.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_in.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_in.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_in.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_in.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_in.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_in.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_pdu.h lac_in.h
+lac_bitmap.o: /usr/include/string.h /usr/include/features.h
+lac_bitmap.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_bitmap.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_bitmap.o: /usr/include/gnu/stubs-32.h /usr/include/xlocale.h lac_base.h
+lac_bitmap.o: /usr/include/stdlib.h /usr/include/sys/types.h
+lac_bitmap.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_bitmap.o: /usr/include/time.h /usr/include/endian.h
+lac_bitmap.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_bitmap.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_bitmap.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_bitmap.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_bitmap.o: /usr/include/alloca.h lac_type.h /usr/include/stdio.h
+lac_bitmap.o: /usr/include/libio.h /usr/include/_G_config.h
+lac_bitmap.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+lac_bitmap.o: /usr/include/bits/sys_errlist.h lac_bitmap.h
+lac_mux.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_mux.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_mux.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_mux.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_mux.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_mux.o: /usr/include/time.h /usr/include/endian.h
+lac_mux.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_mux.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_mux.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_mux.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_mux.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_mux.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_mux.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_mux.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_mux.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_pdu.h choose.h
+lac_port.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_port.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_port.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_port.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_port.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_port.o: /usr/include/time.h /usr/include/endian.h
+lac_port.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_port.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_port.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_port.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_port.o: /usr/include/alloca.h /usr/include/string.h
+lac_port.o: /usr/include/xlocale.h lac_type.h /usr/include/stdio.h
+lac_port.o: /usr/include/libio.h /usr/include/_G_config.h
+lac_port.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+lac_port.o: /usr/include/bits/sys_errlist.h lac_bitmap.h statmch.h lac_sys.h
+lac_port.o: lac_port.h lac_in.h lac_default.h lac_rx.h lac_tx.h lac_mux.h
+lac_port.o: lac_sel.h lac_pdu.h
+lac_rx.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_rx.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_rx.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_rx.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_rx.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_rx.o: /usr/include/time.h /usr/include/endian.h
+lac_rx.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_rx.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_rx.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_rx.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_rx.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_rx.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_rx.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_rx.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_rx.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_pdu.h choose.h
+lac_sel.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_sel.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_sel.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_sel.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_sel.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_sel.o: /usr/include/time.h /usr/include/endian.h
+lac_sel.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_sel.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_sel.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_sel.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_sel.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_sel.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_sel.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_sel.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_sel.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_pdu.h choose.h
+lac_sys.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_sys.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_sys.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_sys.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_sys.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_sys.o: /usr/include/time.h /usr/include/endian.h
+lac_sys.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_sys.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_sys.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_sys.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_sys.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_sys.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_sys.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_sys.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_sys.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_default.h lac_in.h
+lac_tx.o: lac_base.h /usr/include/stdlib.h /usr/include/features.h
+lac_tx.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+lac_tx.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+lac_tx.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+lac_tx.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+lac_tx.o: /usr/include/time.h /usr/include/endian.h
+lac_tx.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+lac_tx.o: /usr/include/sys/select.h /usr/include/bits/select.h
+lac_tx.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+lac_tx.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+lac_tx.o: /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h
+lac_tx.o: lac_type.h /usr/include/stdio.h /usr/include/libio.h
+lac_tx.o: /usr/include/_G_config.h /usr/include/wchar.h
+lac_tx.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+lac_tx.o: lac_bitmap.h statmch.h lac_sys.h lac_port.h lac_pdu.h choose.h
+uid_sock.o: /usr/include/stdlib.h /usr/include/features.h
+uid_sock.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+uid_sock.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+uid_sock.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+uid_sock.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+uid_sock.o: /usr/include/time.h /usr/include/endian.h
+uid_sock.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+uid_sock.o: /usr/include/sys/select.h /usr/include/bits/select.h
+uid_sock.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+uid_sock.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+uid_sock.o: /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h
+uid_sock.o: /usr/include/_G_config.h /usr/include/wchar.h
+uid_sock.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+uid_sock.o: /usr/include/string.h /usr/include/xlocale.h /usr/include/errno.h
+uid_sock.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+uid_sock.o: /usr/include/asm/errno.h /usr/include/asm-generic/errno.h
+uid_sock.o: /usr/include/asm-generic/errno-base.h /usr/include/sys/time.h
+uid_sock.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+uid_sock.o: /usr/include/bits/confname.h /usr/include/getopt.h uid_sock.h
+uid_sock.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
+uid_sock.o: /usr/include/bits/uio.h /usr/include/bits/socket.h
+uid_sock.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+uid_sock.o: /usr/include/asm-generic/socket.h /usr/include/asm/sockios.h
+uid_sock.o: /usr/include/asm-generic/sockios.h /usr/include/netinet/in.h
+uid_sock.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+uid_sock.o: /usr/include/bits/in.h /usr/include/linux/un.h
+cli.o: /usr/include/stdio.h /usr/include/features.h
+cli.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+cli.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+cli.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
+cli.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+cli.o: /usr/include/_G_config.h /usr/include/wchar.h
+cli.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+cli.o: /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h
+cli.o: /usr/include/endian.h /usr/include/bits/endian.h
+cli.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+cli.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+cli.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+cli.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+cli.o: /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/wait.h
+cli.o: /usr/include/signal.h /usr/include/bits/signum.h
+cli.o: /usr/include/bits/siginfo.h /usr/include/bits/sigaction.h
+cli.o: /usr/include/bits/sigcontext.h /usr/include/bits/sigstack.h
+cli.o: /usr/include/bits/sigthread.h /usr/include/sys/resource.h
+cli.o: /usr/include/bits/resource.h /usr/include/bits/waitflags.h
+cli.o: /usr/include/bits/waitstatus.h /usr/include/sys/time.h
+cli.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+cli.o: /usr/include/bits/confname.h /usr/include/getopt.h
+cli.o: /usr/include/errno.h /usr/include/bits/errno.h
+cli.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
+cli.o: /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h
+cli.o: cli.h

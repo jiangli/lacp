@@ -1,0 +1,58 @@
+int test1()
+{
+	UID_LAC_PORT_CFG_T uid_port_cfg;	
+	LACPDU_T pdu;
+
+	/* 设置端口lacp enable */
+	uid_port_cfg.field_mask = PT_CFG_STATE;
+	uid_port_cfg.lacp_enabled = True;
+	BitmapSetBit(&uid_port_cfg.port_bmp, 20);
+	lac_port_set_cfg(&uid_port_cfg);
+
+	/* 端口up */
+	lac_in_link_change(20, 1);
+		
+	memset(&pdu, 0x1, sizeof(LACPDU_T));
+	//pdu.ethertype = 0x8809;
+	//pdu.actor.system_priority = 4096;
+	//pdu.actor.system_id = 4096;
+	//pdu.actor.key = 4096;
+	//pdu.actor.port_priority = 4096;
+	//pdu.actor.port_index = 0;
+	//pdu.actor.state = 0xff;
+
+	/* 接收报文 */
+	lac_in_rx(20, &pdu, sizeof(LACPDU_T));
+
+}
+
+int lac_start()
+{	
+	UID_LAC_CFG_T uid_cfg;	
+	BITMAP_T Ports;
+	int max_valid_port = 144;
+	int i = 0;
+	
+	/* 初始化lac系统 */
+	lac_sys_init();
+
+	/* 协议栈默认没有端口，需要初始化端口 */
+	uid_cfg.field_mask = BR_CFG_PBMP_ADD;
+	uid_cfg.number_of_ports = max_valid_port;
+	for (i=0;i<max_valid_port;i++)
+	{
+		/* 此处随意添加一些端口进行测试 */
+		if (i % 20 == 0)
+			BitmapSetBit(&uid_cfg.ports, i);
+	}
+	
+	lac_sys_set_cfg(&uid_cfg);
+}
+int main()
+{
+	lac_start();
+	test1();
+    printf("\r\n DONE \r\n");
+    getchar();	
+}
+
