@@ -15,7 +15,8 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 	LAC_PORT_T *this;
 	register unsigned int iii;
 	unsigned short port_prio;
-  
+    printf("\r\n create portIndex:%d", port_index);
+    
 	/* check, if the port has just been added */
 	for (this = lac_sys->ports; this; this = this->next) {
 		if (this->port_index == port_index) {

@@ -108,7 +108,7 @@ bridge_start ()
 	for (i=0;i<max_valid_port;i++)
 	{
 		/* 此处随意添加一些端口进行测试 */
-		if (i % 20 == 0)
+            if (i < 4)
 			BitmapSetBit(&uid_cfg.ports, i);
 	}
 	
@@ -147,7 +147,7 @@ char *
 get_prompt (void)
 {
   static char prompt[MAX_CLI_PROMT];
-  snprintf (prompt, MAX_CLI_PROMT - 1, "%s B%ld > ", UT_sprint_time_stamp (),
+  snprintf (prompt, MAX_CLI_PROMT - 1, "%s B%ld > ", UT_sprint_time_stamp (0),
 	    my_pid);
   return prompt;
 }
@@ -163,7 +163,7 @@ bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
     break;
     case BR_IPC_PORT_DISCONNECT:
     printf ("disconnected port p%02d\n", port_index);
-    BitmapClearBit (&enabled_ports, port_index - 1);
+    BitmapClearBit (&enabled_ports, port_index);
     lac_in_enable_port (port_index, False);
     break;
     case BR_IPC_BRIDGE_SHUTDOWN:
@@ -277,7 +277,7 @@ main_loop ()
     }
 
     if (!rc) {			// Timeout expired
-      lac_one_second ();
+            lac_one_second ();
       gettimeofday (&earliest, NULL);
 
       earliest.tv_sec++;
@@ -315,7 +315,7 @@ main (int argc, char **argv)
   printf ("my pid: %ld\n", my_pid);
 
   if (0 == bridge_start (number_of_ports)) {
-    main_loop (number_of_ports);
+    main_loop ();
   }
 
   bridge_shutdown ();

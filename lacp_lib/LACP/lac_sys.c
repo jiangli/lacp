@@ -128,7 +128,7 @@ int lac_sys_update(LAC_SYS_T *this, int reason)
 	  need_state_change = lac_iterate_machines (this,
 							  lac_check_condition,
 							  True);
-	  printf("\r\n need_state_change:%d", need_state_change);
+	  printf(" need_state_change:%d", need_state_change);
 	  if (!need_state_change)
 	  {
 		  

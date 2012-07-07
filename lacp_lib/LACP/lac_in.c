@@ -79,9 +79,9 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
 }
 
 void
-lac_one_second (LAC_SYS_T * param)
+lac_one_second ()
 {
-  LAC_SYS_T *this = (LAC_SYS_T *) param;
+  LAC_SYS_T *this = lac_get_sys_inst();
   register LAC_PORT_T *port;
   register int iii;
 
@@ -91,6 +91,7 @@ lac_one_second (LAC_SYS_T * param)
   LAC_CRITICAL_PATH_START;
   for (port = this->ports; port; port = port->next) {
     for (iii = 0; iii < TIMERS_NUMBER; iii++) {
+            //        printf("\r\n*******************88^^^port:%d iii:%d,timeraddr:%x\r\n", port->port_index, iii, port->timers[0]);
       if (*(port->timers[iii]) > 0) {
 	(*port->timers[iii])--;
       }
@@ -114,7 +115,8 @@ static void
 _stp_in_enable_port_on_stpm (LAC_SYS_T * stpm, int port_index, Bool enable)
 {
   register LAC_PORT_T *port;
-
+  printf("port_index:%x.%d", stpm, port_index);
+  
   port = lac_port_find (stpm, port_index);
   if (!port)
     return;
@@ -126,15 +128,14 @@ _stp_in_enable_port_on_stpm (LAC_SYS_T * stpm, int port_index, Bool enable)
           port->rx_lacpdu_cnt = 0;
           
           port->tx_lacpdu_cnt = 0;
-          
-  }
+}
 
 }
 
 int lac_in_enable_port(int port_index, Bool enable)
 {
 
-  register LAC_SYS_T *stpm;
+        register LAC_SYS_T *stpm = lac_get_sys_inst();
 
   LAC_CRITICAL_PATH_START;
 

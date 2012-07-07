@@ -327,7 +327,7 @@ static int cli_pr_get_cfg (int argc, char** argv)
   } else {
     port_index = strtoul(argv[1], 0, 10);
     BitmapClear(&ports_bitmap);
-    BitmapSetBit(&ports_bitmap, port_index - 1);
+    BitmapSetBit(&ports_bitmap, port_index);
     detail = 1;
   }
 
@@ -790,7 +790,35 @@ static CMD_DSCR_T lang[] = {
 
 #endif
 
+static int cli_enable (int argc, char** argv)
+{
+        int port_index = atoi(argv[1]);
+        
+        UID_LAC_PORT_CFG_T uid_cfg;
+        
+        uid_cfg.field_mask = PT_CFG_STATE;
+        uid_cfg.lacp_enabled = 1;
+        
+        BitmapSetBit(uid_cfg.port_bmp, port_index);
+        lac_port_set_cfg(&uid_cfg);
+        return 0;
+        
+}
+
 static CMD_DSCR_T lang[] = {
+  THE_COMMAND("enable", "enable rstp")
+  THE_FUNC(cli_enable)
+#if 0
+  THE_COMMAND("disable", "disable rstp")
+  THE_FUNC(cli_disable)
+
+  THE_COMMAND("show bridge", "get bridge config")
+  THE_FUNC(cli_br_get_cfg)
+
+  THE_COMMAND("show port", "get port config")
+  PARAM_NUMBER("port number on bridge", 1, NUMBER_OF_PORTS, "all")
+  THE_FUNC(cli_pr_get_cfg)
+#endif
 }
         ;
 

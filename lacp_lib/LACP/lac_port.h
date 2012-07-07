@@ -33,7 +33,7 @@ typedef struct /* LAC_PORT_INFO */
 
 } LAC_PORT_INFO;
 
-#define TIMERS_NUMBER   5
+#define TIMERS_NUMBER   3
 #include "statmch.h"
 typedef struct lac_port_t /* Lac_port */
 {
@@ -70,8 +70,6 @@ typedef struct lac_port_t /* Lac_port */
 	
 	LAC_TIME_T           current_while;
 	LAC_TIME_T           periodic_timer;
-	LAC_TIME_T           local_churn_when;
-	LAC_TIME_T           remote_churn_when;
 	LAC_TIME_T           wait_while;
 
 	LAC_TIME_T*	timers[TIMERS_NUMBER]; /*list of timers */
