@@ -69,25 +69,17 @@ int select_static_agg_aggregator_port(LAC_PORT_T *port)
 	LAC_SYS_T *this = port->system;
 	LAC_PORT_T *p;
 	LAC_PORT_T *best = port;
-
+    port->actor.key = lac_get_port_oper_key(port->port_index);
+    
 	/* select best port(master port) */
 	for (p = this->ports; p; p = p->next) 
 	{
-		if(p->agg_id == port->agg_id
-			&&(p->actor.system_priority == port->actor.system_priority)
+		if((p->actor.system_priority == port->actor.system_priority)
 			&& (!memcmp(p->actor.system_id, port->actor.system_id, 6))
-			&& p->port_enabled)
+           && (p->actor.key == best->actor.key)
+			&& p->port_enabled 
+			&& p->lacp_enabled)
 		{
-			if (p->actor.key > best->actor.key)
-				continue;
-			
-			if (p->actor.key < best->actor.key)
-			{
-				best = p;
-				continue;
-			}
-			
-			if (p->actor.key == best->actor.key)
 			{
 				if ((p->actor.port_priority < best->actor.port_priority )
 					||( (p->actor.port_priority == best->actor.port_priority )
@@ -99,7 +91,8 @@ int select_static_agg_aggregator_port(LAC_PORT_T *port)
 		}
 
 	}
-
+    printf("\r\n master port:%d", best->port_index);
+    
 	if ((best->partner.system_priority	  == port->partner.system_priority)
 		&& (!memcmp(best->partner.system_id, port->partner.system_id, 6))
 		&& (best->partner.key == port->partner.key)
@@ -107,20 +100,16 @@ int select_static_agg_aggregator_port(LAC_PORT_T *port)
 		&& (port->actor.state.aggregation && port->partner.state.aggregation))
 	{
 		port->selected = True;
+        printf("\r\n %s.%d. %d Selected",  __FUNCTION__, __LINE__, port->port_index);
 		port->aport = best;
 	}
 	return 0;
 }
 int lac_select(LAC_PORT_T *port)
 {
-	if (port->static_agg)
-	{
-		select_static_agg_aggregator_port(port);
-	}
-	else
-	{
-		//TODO::
-	}
+
+        select_static_agg_aggregator_port(port);
+
 	port->reselect = False;
 }
 void lac_sel_enter_state (LAC_STATE_MACH_T * this)
@@ -153,7 +142,12 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
 		
 	case SELECTION:		
 		if (port->reselect)
+        {
+                printf("port %d reselect. \r\n", port->port_index);
+                
 			return lac_hop_2_state (this, SELECTION);
+        }
+        
 		
 		break;
 		

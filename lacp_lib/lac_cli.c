@@ -795,18 +795,31 @@ static int cli_enable (int argc, char** argv)
         int port_index = atoi(argv[1]);
         
         UID_LAC_PORT_CFG_T uid_cfg;
+        printf("\r\n index:%d", port_index);
         
         uid_cfg.field_mask = PT_CFG_STATE;
         uid_cfg.lacp_enabled = 1;
         
-        BitmapSetBit(uid_cfg.port_bmp, port_index);
+        BitmapSetBit(&uid_cfg.port_bmp, port_index);
         lac_port_set_cfg(&uid_cfg);
+        return 0;
+        
+}
+static int cli_pr_get_cfg (int argc, char** argv)
+{
+        int port_index = atoi(argv[1]);
+        LAC_PORT_T port;
+        
+        lac_port_get_dbg_cfg(port_index, &port);
+        printf("\r\n-------------------\r\n port_index:%d , lacp_enabled:%d, port_enabled:%d, state:%d,%d,%d,%d,%d,%d,%d,%d, period:%d\r\n", port.port_index, port.lacp_enabled, port.port_enabled, port.actor.state.lacp_activity, port.actor.state.lacp_timeout,  port.actor.state.aggregation,  port.actor.state.collecting,  port.actor.state.distributing,  port.actor.state.defaulted, port.actor.state.expired,  port.actor.state.synchronization, port.periodic_timer);
+        
         return 0;
         
 }
 
 static CMD_DSCR_T lang[] = {
   THE_COMMAND("enable", "enable rstp")
+  PARAM_NUMBER("port number on bridge", 1, 4, "all")
   THE_FUNC(cli_enable)
 #if 0
   THE_COMMAND("disable", "disable rstp")
@@ -814,11 +827,13 @@ static CMD_DSCR_T lang[] = {
 
   THE_COMMAND("show bridge", "get bridge config")
   THE_FUNC(cli_br_get_cfg)
+#endif
 
   THE_COMMAND("show port", "get port config")
-  PARAM_NUMBER("port number on bridge", 1, NUMBER_OF_PORTS, "all")
+  PARAM_NUMBER("port number on bridge", 1, 4, "all")
   THE_FUNC(cli_pr_get_cfg)
-#endif
+
+  END_OF_LANG
 }
         ;
 

@@ -134,8 +134,8 @@ unsigned int lac_port_rx (LAC_PORT_T * this, LACPDU_T * bpdu, size_t len)
 }
 
 int lac_set_port_reselect(LAC_PORT_T *port)
-{
-	LAC_PORT_T  *p, *p0;
+{
+        LAC_PORT_T  *p, *p0;
 	LAC_SYS_T *lac_sys;
 	
 	if (!port)

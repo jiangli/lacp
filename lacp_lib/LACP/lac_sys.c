@@ -123,12 +123,13 @@ int lac_sys_update(LAC_SYS_T *this, int reason)
 	register int count = 0;
 	
 	need_state_change = False;
+    if (reason != 2)
 	printf("\r\n update reason:%d", reason);
 	for (;;) {			  /* loop until not need changes */
 	  need_state_change = lac_iterate_machines (this,
 							  lac_check_condition,
 							  True);
-	  printf(" need_state_change:%d", need_state_change);
+//	  printf(" need_state_change:%d", need_state_change);
 	  if (!need_state_change)
 	  {
 		  

@@ -12,7 +12,7 @@ int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
 	register LAC_SYS_T *this;
 	int iret;
 	LAC_CRITICAL_PATH_START;
-	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+	printf("\r\n %s.%d ********* ",  __FUNCTION__, __LINE__);
 	this = lac_get_sys_inst();
 	if (!this) {			/*	the instance had not yet been created :( */
 		LAC_CRITICAL_PATH_END;
@@ -51,9 +51,41 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
 	register LAC_PORT_T *port;
 	int port_no;
 	
-	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+	
 
 	LAC_CRITICAL_PATH_START;
+	this = lac_get_sys_inst();
+	
+	for (port_no = 0; port_no < max_port; port_no++) {
+	  if (!BitmapGetBit (&uid_cfg->port_bmp, port_no))
+		continue;
+	
+	  port = lac_port_find (this, port_no);
+	  if (!port) {		  /* port is absent in the stpm :( */
+		continue;
+	  }
+	
+	  if (uid_cfg->field_mask & PT_CFG_STATE)
+	  {
+        port->lacp_enabled = uid_cfg->lacp_enabled;
+	  }
+     port->reselect = True;
+	}		
+	    
+    lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
+	
+	LAC_CRITICAL_PATH_END;
+	return 0;
+}
+
+int lac_port_get_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
+{
+	register LAC_SYS_T *this;
+	register LAC_PORT_T *port;
+	int port_no;
+	
+	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+
 	this = lac_get_sys_inst();
 
 	for (port_no = 0; port_no < max_port; port_no++) {
@@ -65,17 +97,28 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
 		continue;
 	  }
 
-	  if (uid_cfg->field_mask & PT_CFG_STATE)
-	  {
-        port->lacp_enabled = uid_cfg->lacp_enabled;
+      uid_cfg->lacp_enabled = port->lacp_enabled;
+    }
+}
+
+int lac_port_get_dbg_cfg(int port_index, LAC_PORT_T * port)
+{
+	register LAC_SYS_T *this;
+	register LAC_PORT_T *p;
+	int port_no;
+	
+	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+
+	this = lac_get_sys_inst();
+
+	  p = lac_port_find (this, port_index);
+	  if (!port) {		  /* port is absent in the stpm :( */
+		return 1;
 	  }
-	}		
-	
-	lac_set_port_reselect(port);
-    lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
-	
-	LAC_CRITICAL_PATH_END;
-	return 0;
+
+      memcpy(port, p, sizeof(LAC_PORT_T));
+      return 0;
+      
 }
 
 void
@@ -124,6 +167,8 @@ _stp_in_enable_port_on_stpm (LAC_SYS_T * stpm, int port_index, Bool enable)
     return;
   }
 
+  port->port_enabled = enable;
+  
   if (enable) {			/* clear port statistics */
           port->rx_lacpdu_cnt = 0;
           
