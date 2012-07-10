@@ -15,7 +15,7 @@ void LAC_OUT_get_port_mac (unsigned char *mac)
 	return ;
 }
 
-void memdump(char *buf, int len)
+void memdump(unsigned char *buf, int len)
 {
 	int i = 0;
 	printf("\r\n buf:0x%x, len:%d\r\n---------\r\n", (unsigned int)buf, len);

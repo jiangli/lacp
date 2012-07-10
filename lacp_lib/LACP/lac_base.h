@@ -29,7 +29,8 @@
 #else
 #  include <stddef.h>
 #  include <stdio.h>
-//#  include <netinet/in.h>
+#  include <netinet/in.h>
+#include <arpa/inet.h>
 #  include "lac_bitmap.h"
 #  define Print printf
 #endif
@@ -55,7 +56,21 @@ typedef unsigned short USHORT;
 typedef unsigned long ULONG;
 typedef unsigned char	Octet;
 
+#ifndef __LINUX__
+extern char* strdup (const char *s);
 
+extern USHORT Ntohs (USHORT n); 
+extern ULONG Htonl (ULONG h);   
+extern USHORT Htons (USHORT h);
+extern ULONG Ntohl (ULONG n);
+
+#define htonl Htonl
+#define htons Htons
+#define ntohl Ntohl
+#define ntohs Ntohs
+
+#endif
+#if 0
 #ifndef __VXWORKS__
 extern char* strdup (const char *s);
 
@@ -70,7 +85,7 @@ extern ULONG Ntohl (ULONG n);
 #define ntohs Ntohs
 
 #endif
-
+#endif
 
 #ifdef __VXWORKS__
 #define LAC_FATAL(TXT, MSG, EXCOD)                      \

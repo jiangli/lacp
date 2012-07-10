@@ -141,7 +141,7 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
     	return lac_hop_2_state (this, SELECTION);
 		
 	case SELECTION:		
-		if (port->reselect)
+		if (port->lacp_enabled && port->reselect)
         {
                 printf("port %d reselect. \r\n", port->port_index);
                 

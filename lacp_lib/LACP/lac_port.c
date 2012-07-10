@@ -57,7 +57,8 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 	this->partner_admin.state.distributing	 = True;
 	this->partner_admin.state.defaulted		 = True;
 	this->partner_admin.state.expired		 = False;
-
+    this->aport = this;
+    
 	
 	iii = 0;
 	this->timers[iii++] = &this->current_while;

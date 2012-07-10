@@ -39,17 +39,18 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
 
 	memcpy(lacpdu_packet.slow_protocols_address, slow_protocols_address, 6);
 	LAC_OUT_get_port_mac (lacpdu_packet.src_address);
-	lacpdu_packet.ethertype = 0x8809;
+	lacpdu_packet.ethertype = htons (0x8809);
+    
 	lacpdu_packet.protocol_subtype = 1;
 	lacpdu_packet.protocol_version = 1;
 
 	lacpdu_packet.type_actor = 1;
 	lacpdu_packet.len_actor = 20;
-	lacpdu_packet.actor.system_priority = port->actor.system_priority;
+	lacpdu_packet.actor.system_priority = htons(port->actor.system_priority);
 	memcpy(lacpdu_packet.actor.system_id, port->actor.system_id, 6);
-	lacpdu_packet.actor.key = port->actor.key;
-	lacpdu_packet.actor.port_priority = port->actor.port_priority;
-	lacpdu_packet.actor.port_index = port->actor.port_index;
+	lacpdu_packet.actor.key = htons(port->actor.key);
+	lacpdu_packet.actor.port_priority = htons(port->actor.port_priority);
+	lacpdu_packet.actor.port_index = htons(port->actor.port_index);
 	lacpdu_packet.actor.state.lacp_activity = port->actor.state.lacp_activity;
 	lacpdu_packet.actor.state.lacp_timeout = port->actor.state.lacp_timeout;
 	lacpdu_packet.actor.state.aggregation = port->actor.state.aggregation;
@@ -61,11 +62,11 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
 
 	lacpdu_packet.type_partner = 2;
 	lacpdu_packet.len_partner = 20;
-	lacpdu_packet.partner.system_priority = port->partner.system_priority;
+	lacpdu_packet.partner.system_priority = htons(port->partner.system_priority);
 	memcpy(lacpdu_packet.partner.system_id, port->partner.system_id, 6);
-	lacpdu_packet.partner.key = port->partner.key;
-	lacpdu_packet.partner.port_priority = port->partner.port_priority;
-	lacpdu_packet.partner.port_index = port->partner.port_index;
+	lacpdu_packet.partner.key = htons(port->partner.key);
+	lacpdu_packet.partner.port_priority = htons(port->partner.port_priority);
+	lacpdu_packet.partner.port_index = htons(port->partner.port_index);
 	lacpdu_packet.partner.state.lacp_activity = port->partner.state.lacp_activity;
 	lacpdu_packet.partner.state.lacp_timeout = port->partner.state.lacp_timeout;
 	lacpdu_packet.partner.state.aggregation = port->partner.state.aggregation;
@@ -76,7 +77,7 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
 
 	lacpdu_packet.type_collector = 3;
 	lacpdu_packet.len_collector = 16;
-	lacpdu_packet.collector_max_delay = 10;
+	lacpdu_packet.collector_max_delay = htons(10);
 
 	/* statictic */
 	port->tx_lacpdu_cnt++;

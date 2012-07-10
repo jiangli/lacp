@@ -95,7 +95,11 @@ static void choose_matched(LAC_PORT_T *port)
       )  )  )
       port->matched = True;
    else
+   {
+                 port->reselect = True;
       port->matched = False;
+   }
+   
 }
 
 int update_selected(LAC_PORT_T *port)
@@ -154,7 +158,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
    switch (this->State) {
    	case BEGIN:
 	case RXM_INITIALIZE:
-		port->selected= False;
+		port->selected = False;
 		port->standby  = False;
 		actor_default(port);
 		record_default(port);

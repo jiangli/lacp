@@ -5,6 +5,7 @@
 
 #define STATES {        \
   CHOOSE(DETACHED),    \
+  CHOOSE(DISABLE),    \
   CHOOSE(WAITING),    \
   CHOOSE(ATTACHED),         \
   CHOOSE(RX_TX),  \
@@ -19,18 +20,20 @@ int sys_is_ready()
 }
 int disable_collecting_distributing()
 {
-	
+	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);	
 }
 int enable_collecting_distributing()
 {
-	
+		printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
 }
 
 int detach_mux_from_aggregator()
 {
+	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
 }
 int attach_mux_to_aggregator()
 {
+	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
 }
 
 void lac_mux_enter_state (LAC_STATE_MACH_T * this)
@@ -39,6 +42,9 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 
   switch (this->State) {
     case BEGIN:
+  case DISABLE:
+          break;
+          
     case DETACHED:
 		detach_mux_from_aggregator(port);
 		port->actor.state.synchronization = False;
@@ -74,10 +80,22 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
 {
   register LAC_PORT_T *port = this->owner.port;
-  
+            if (!port->port_enabled || !port->lacp_enabled)
+            {
+                    if (this->State == DISABLE)
+                            return False;
+                    else
+                            return lac_hop_2_state (this, DISABLE);
+            }
+            
   switch (this->State) {
     case BEGIN:
-	case DETACHED:
+            return lac_hop_2_state (this, DETACHED);
+  case DISABLE:
+          if (port->port_enabled && port->lacp_enabled)
+            return lac_hop_2_state (this, DETACHED);
+
+  case DETACHED:
 		if (port->selected == True)
 	    	return lac_hop_2_state (this, WAITING);
 		break;

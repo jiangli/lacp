@@ -14,7 +14,9 @@ int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
 	LAC_CRITICAL_PATH_START;
 	printf("\r\n %s.%d ********* ",  __FUNCTION__, __LINE__);
 	this = lac_get_sys_inst();
-	if (!this) {			/*	the instance had not yet been created :( */
+	if (!this) {	
+            lac_trace("the instance had not yet been created");
+            
 		LAC_CRITICAL_PATH_END;
 		return M_LAC_NOT_CREATED;
 	}
@@ -38,7 +40,9 @@ int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
 	}
 	
 	  iret = lac_port_rx (port, bpdu, len);
-	  lac_set_port_reselect(port);
+//	  lac_set_port_reselect(port);
+
+      
 	  lac_sys_update (this, LAC_SYS_UPDATE_READON_RX);
 	  LAC_CRITICAL_PATH_END;
 	

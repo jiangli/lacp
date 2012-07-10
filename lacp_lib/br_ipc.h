@@ -54,7 +54,7 @@ typedef struct br_ipc_msg_s {
   BR_IPC_MSG_HEADER_T  header;
   union {
     BR_IPC_CNTRL_BODY_T    cntrl;
-    char bpdu[64];
+    char bpdu[500];
   } body;
 
 } BR_IPC_MSG_T;
