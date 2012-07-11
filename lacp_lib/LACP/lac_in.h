@@ -8,8 +8,8 @@ typedef struct {
     unsigned short port_priority;
     Bool			  lacp_enabled;
     LAC_STATE 	  state;
-        int agg_id;
-        
+    int agg_id;
+
 } UID_LAC_PORT_CFG_T;
 
 #define BR_CFG_PBMP_ADD         (1L << 0)

@@ -94,9 +94,9 @@ typedef struct lac_port_t /* Lac_port */
     struct lac_port_t      *alink;
 
 //for selection logic
-        int speed;
-        int duplex;
-        
+    int speed;
+    int duplex;
+
     Bool            static_agg;
     int             agg_id;
 

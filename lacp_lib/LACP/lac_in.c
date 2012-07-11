@@ -73,13 +73,13 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
         {
             port->lacp_enabled = uid_cfg->lacp_enabled;
             port->static_agg = True;
-            
+
             port->agg_id = uid_cfg->agg_id;
         }
-        
+
 //        port->reselect = True;
         lac_set_port_reselect(port);
-        
+
     }
 
     lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
@@ -227,7 +227,7 @@ int lac_in_link_change(int port_index, int link_status)
 
 //    p->reselect = True;
     lac_set_port_reselect(p);
-    
+
     lac_sys_update(this, LAC_SYS_UPDATE_READON_LINK);
 
     LAC_CRITICAL_PATH_END;

@@ -16,8 +16,8 @@
 
 int sys_is_ready()
 {
-        return 1;
-        
+    return 1;
+
 }
 int disable_collecting_distributing()
 {

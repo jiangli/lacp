@@ -833,14 +833,14 @@ static int cli_enable (int argc, char** argv)
 {
     int port_index = atoi(argv[1]);
     int agg_id = atoi(argv[2]);
-    
+
     UID_LAC_PORT_CFG_T uid_cfg;
     printf("\r\n index:%d", port_index);
 
     uid_cfg.field_mask = PT_CFG_STATE;
     uid_cfg.lacp_enabled = 1;
     uid_cfg.agg_id = agg_id;
-    
+
     BitmapSetBit(&uid_cfg.port_bmp, port_index);
     lac_port_set_cfg(&uid_cfg);
     return 0;
@@ -850,12 +850,12 @@ static void
 print_system_info (int prio, unsigned char *addr, unsigned char *str)
 {
     sprintf(str, "%u-%02x%02x%02x%02x%02x%02x", prio,
-             (unsigned char) addr[0],
-             (unsigned char) addr[1],
-             (unsigned char) addr[2],
-             (unsigned char) addr[3],
-             (unsigned char) addr[4],
-             (unsigned char) addr[5]);
+            (unsigned char) addr[0],
+            (unsigned char) addr[1],
+            (unsigned char) addr[2],
+            (unsigned char) addr[3],
+            (unsigned char) addr[4],
+            (unsigned char) addr[5]);
     return 0;
 
 }
@@ -863,9 +863,9 @@ static void print_info(LAC_PORT_INFO *lac_info)
 {
     unsigned char sysid_str[40] = {0};
     print_system_info(lac_info->system_priority, lac_info->system_id, sysid_str);
-    
+
     printf("System ID:%s", sysid_str);
-    
+
     printf("port:%d, priority:%d key:%d state:activity:%d,Timeout:%d,aggregation:%d,syn:%d,collect:%d,distribute:%d,defaulted:%d,expired:%d\r\n", lac_info->port_index, lac_info->port_priority, lac_info->key, LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_ACT), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_TMT), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_AGG), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_SYN), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_COL), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_DIS), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_DEF), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_EXP));
     return 0;
 

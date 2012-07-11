@@ -63,12 +63,12 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->aport = this;
     this->selected = False;
     printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
-    
+
     this->lacp_enabled = False;
     this->port_moved = False;
     this->static_agg = False;
     this->agg_id = 0;
-    
+
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
@@ -153,9 +153,10 @@ int lac_set_port_reselect(LAC_PORT_T *port)
 
         while (p = p->next)
         {
-                    printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);            p->selected = False;
+            printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
+            p->selected = False;
         }
-        
+
 
         return 0;
     }
@@ -170,7 +171,7 @@ int lac_set_port_reselect(LAC_PORT_T *port)
                 if (p->agg_id == port->agg_id)
                 {
 //                    p->reselect = True;
-                        printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
+                    printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
                     p->selected = False;
                 }
             }

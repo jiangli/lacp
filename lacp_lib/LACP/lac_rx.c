@@ -59,8 +59,8 @@ static Bool lac_same_partner(LAC_PORT_INFO *a, LAC_PORT_INFO *b)
 void
 lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
 {
-        LAC_PORT_T *p;
-        
+    LAC_PORT_T *p;
+
     /* msg check */
 
     /* statistic */
@@ -78,19 +78,19 @@ lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
 
     for (p = port->system->ports; p; p=p->next)
     {
-            if (p==port) continue;
-            
-            if (same_port(&p->partner, &port->msg_partner))
-            {
-                    printf("port %d moved to port %d \r\n", port->port_index, p->port_index);
-                    
-                    p->port_moved = True;            
-                    break;
-                    
-            }
-            
+        if (p==port) continue;
+
+        if (same_port(&p->partner, &port->msg_partner))
+        {
+            printf("port %d moved to port %d \r\n", port->port_index, p->port_index);
+
+            p->port_moved = True;
+            break;
+
+        }
+
     }
-    
+
     return 0;
 }
 static void actor_default(LAC_PORT_T *port)
@@ -105,9 +105,9 @@ int record_default(LAC_PORT_T *port)
 }
 static void update_partner_syn(LAC_PORT_T *port)
 {
-        Bool partner_sync = False;
-        Bool partner_matched = False;
-        
+    Bool partner_sync = False;
+    Bool partner_matched = False;
+
     if (  (  (lac_same_partner(&port->msg_partner, &port->actor)
               && LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_AGG) == LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG))
              || (  !LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG))
@@ -125,20 +125,20 @@ static void update_partner_syn(LAC_PORT_T *port)
         partner_matched = False;
     }
     partner_sync = partner_matched && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN);
-    
+
     LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, partner_sync);
-    
+
 }
 
 int update_selected(LAC_PORT_T *port)
 {
     if (!lac_same_partner(&port->msg_actor, &port->partner))
     {
-    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected					= False;
 //        port->reselect					= True;
         lac_set_port_reselect(port);
-        
+
 //        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
     }
@@ -162,7 +162,7 @@ int update_default_selected(LAC_PORT_T *port)
 {
     if (!lac_same_partner(&port->partner_admin, &port->partner))
     {
-    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected					= False;
 //        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
@@ -183,7 +183,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
     case RXM_INITIALIZE:
-    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
 //        port->standby  = False;
         actor_default(port);
@@ -196,12 +196,12 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         port->rcvdLacpdu = False;
         port->current_while = 0;
-    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
         break;
 
     case RXM_LACP_DISABLED:
-    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected 				 = False;
 //        port->standby					 = False;
         record_default(port);
