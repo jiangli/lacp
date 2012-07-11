@@ -1,6 +1,6 @@
 
 /* Mutual LAC definitions */
- 
+
 #ifndef _LAC_BASE_H__
 #define _LAC_BASE_H__
 
@@ -59,8 +59,8 @@ typedef unsigned char	Octet;
 #ifndef __LINUX__
 extern char* strdup (const char *s);
 
-extern USHORT Ntohs (USHORT n); 
-extern ULONG Htonl (ULONG h);   
+extern USHORT Ntohs (USHORT n);
+extern ULONG Htonl (ULONG h);
 extern USHORT Htons (USHORT h);
 extern ULONG Ntohl (ULONG n);
 
@@ -74,8 +74,8 @@ extern ULONG Ntohl (ULONG n);
 #ifndef __VXWORKS__
 extern char* strdup (const char *s);
 
-extern USHORT Ntohs (USHORT n); 
-extern ULONG Htonl (ULONG h);   
+extern USHORT Ntohs (USHORT n);
+extern ULONG Htonl (ULONG h);
 extern USHORT Htons (USHORT h);
 extern ULONG Ntohl (ULONG n);
 
@@ -134,17 +134,17 @@ void LAC_break_trace (void);
 
 #ifdef LAC_DBG
 /* for debug trace messages */
- /* modify by zhangli to remove time stamp function */
+/* modify by zhangli to remove time stamp function */
 /*#define SPRINT_TIME UT_sprint_time_stamp */
 /*extern char* UT_sprint_time_stamp (char ticks_accuracy); */
 #endif
 
 
 typedef enum {
-	M_LAC_NOT_CREATED,
-	M_RSTP_PORT_IS_ABSENT,
-	M_RSTP_NOT_ENABLE,
-}LAC_ERROR_E;
+    M_LAC_NOT_CREATED,
+    M_RSTP_PORT_IS_ABSENT,
+    M_RSTP_NOT_ENABLE,
+} LAC_ERROR_E;
 
 
 #endif /*  _LAC_BASE_H__ */
