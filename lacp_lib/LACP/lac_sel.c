@@ -10,12 +10,16 @@
 
 #define GET_STATE_NAME lac_sel_get_state_name
 #include "choose.h"
-#if 0
-static Bool partners_aport(LAC_PORT_T *aport, LAC_PORT_T *port)
+
+static Bool partners_aport(LAC_PORT_T *port)
 {
-    LAC_PORT_T *p = aport;
-    do
+    LAC_PORT_T *p = NULL;
+
+    for (p = port->system->ports; p; p = p->next)
     {
+        if (port->agg_id != p->agg_id )
+            continue;
+
         if(  (p->actor.system_priority   == port->partner.system_priority     )
                 && (!memcmp(p->actor.system_id, port->partner.system_id, 6)           )
                 && (p->actor.key               == port->partner.key                 )
@@ -26,10 +30,10 @@ static Bool partners_aport(LAC_PORT_T *aport, LAC_PORT_T *port)
                      )   ) )
             return(True);
     }
-    while ((p = p->alink) != aport);
+
     return(False);
 }
-
+#if 0
 /*
 find a port 's aggregator port
 aggregator port has the same:{ actor system id, [agg id], actor key, partner system id, partner key}
@@ -150,7 +154,8 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
                 && LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_AGG)
                 && LAC_STATE_GET_BIT(p->partner.state, LAC_STATE_AGG)
                 && LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_AGG)
-                && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG))
+                && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG)
+                && !partners_aport(p))
         {
             p->selected = True;
             printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);

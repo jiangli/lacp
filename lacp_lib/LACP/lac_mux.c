@@ -7,6 +7,7 @@
   CHOOSE(DETACHED),    \
   CHOOSE(DISABLE),    \
   CHOOSE(WAITING),    \
+CHOOSE(READY_N),         \
   CHOOSE(ATTACHED),         \
   CHOOSE(RX_TX),  \
 }
@@ -14,9 +15,22 @@
 #define GET_STATE_NAME lac_mux_get_state_name
 #include "choose.h"
 
-int sys_is_ready()
+int sys_is_ready(LAC_PORT_T *port)
 {
-    return 1;
+    LAC_PORT_T *p = NULL;
+    LAC_SYS_T *this = lac_get_sys_inst();
+
+    //update port info
+    for (p = this->ports; p; p = p->next)
+    {
+        if (port->agg_id != p->agg_id )
+            continue;
+
+        if (p->selected && !p->standby && !p->ready_n)
+            return False;
+    }
+
+    return True;
 
 }
 int disable_collecting_distributing()
@@ -57,6 +71,12 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 
     case WAITING:
         port->wait_while = port->system->aggregate_wait_time;
+        port->ready_n = False;
+
+        break;
+
+    case READY_N:
+        port->ready_n = True;
         break;
 
     case ATTACHED:
@@ -100,13 +120,21 @@ Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
         if (port->selected && !port->standby)
             return lac_hop_2_state (this, WAITING);
         break;
+
+
     case WAITING:
-        if (!port->wait_while && port->selected && !port->standby && sys_is_ready())
+        if (!port->wait_while)
+            return lac_hop_2_state (this, READY_N);
+        break;
+
+    case READY_N:
+        if (port->selected && !port->standby && sys_is_ready(port))
             return lac_hop_2_state (this, ATTACHED);
 
         if (!port->selected || port->standby)
             return lac_hop_2_state (this, DETACHED);
         break;
+
 
     case ATTACHED:
         if (port->selected && !port->standby && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))

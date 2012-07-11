@@ -20,7 +20,6 @@ LACP/lac_mux.h
 LACP/lac_pdu.c
 LACP/lac_pdu.h
 LACP/lac_port.c
-LACP/.#lac_port.h
 LACP/lac_port.h
 LACP/lac_rx.c
 LACP/lac_rx.h

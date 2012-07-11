@@ -847,9 +847,9 @@ static int cli_enable (int argc, char** argv)
 
 }
 static void
-print_system_info (int prio, unsigned char *addr, unsigned char *str)
+get_sysid_str (int prio, unsigned char *addr, unsigned char *str)
 {
-    sprintf(str, "%u-%02x%02x%02x%02x%02x%02x", prio,
+    sprintf(str, "%u-%02x:%02x:%02x:%02x:%02x:%02x", prio,
             (unsigned char) addr[0],
             (unsigned char) addr[1],
             (unsigned char) addr[2],
@@ -859,15 +859,50 @@ print_system_info (int prio, unsigned char *addr, unsigned char *str)
     return 0;
 
 }
+
+static void
+_lac_in_display_bit (unsigned char bitmask,
+                     char *bit_name, char *bit_fmt, unsigned char flags)
+{
+    int the_bit = (flags & bitmask) ? 1 : 0;
+
+    printf ("    ");
+    printf (bit_fmt, the_bit);
+    printf (" %-20s  %s\n", bit_name, the_bit ? "- yes" : "");
+}
+
 static void print_info(LAC_PORT_INFO *lac_info)
 {
     unsigned char sysid_str[40] = {0};
-    print_system_info(lac_info->system_priority, lac_info->system_id, sysid_str);
+    unsigned char flag_str[200] = {0};
 
-    printf("System ID:%s", sysid_str);
+    get_sysid_str(lac_info->system_priority, lac_info->system_id, sysid_str);
 
-    printf("port:%d, priority:%d key:%d state:activity:%d,Timeout:%d,aggregation:%d,syn:%d,collect:%d,distribute:%d,defaulted:%d,expired:%d\r\n", lac_info->port_index, lac_info->port_priority, lac_info->key, LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_ACT), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_TMT), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_AGG), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_SYN), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_COL), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_DIS), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_DEF), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_EXP));
+    printf("\r\n System ID:%s", sysid_str);
+    printf("\r\n port     :%d", lac_info->port_index);
+    printf("\t priority :%d", lac_info->port_priority);
+    printf("\t key      :%d", lac_info->key);
+    printf("\r\n state    \r\n");
+    _lac_in_display_bit(LAC_STATE_ACT, "LACP_Activity", "%d.......", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_TMT, "LACP_Timeout", ".%d......", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_AGG, "Aggregation", "..%d.....", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_SYN, "Synchronization", "...%d....", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_COL, "Collecting", "....%d...", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_DIS, "Distributing", ".....%d..", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_DEF, "Defaulted", "......%d.", lac_info->state);
+    _lac_in_display_bit(LAC_STATE_EXP, "Expired", ".......%d", lac_info->state);
+
     return 0;
+
+}
+
+void print_sep(int *i)
+{
+    if ((*i)%3 == 0)
+        printf("\r\n");
+    else
+        printf("\t");
+    (*i)++;
 
 }
 
@@ -875,21 +910,68 @@ static int cli_pr_get_cfg (int argc, char** argv)
 {
     int port_index = atoi(argv[1]);
     LAC_PORT_T port;
+    int i = 0;
 
     lac_port_get_dbg_cfg(port_index, &port);
-    printf("\r\n-------------------\r\n port_index:%d , lacp_enabled:%d, port_enabled:%d\r\n", port.port_index, port.lacp_enabled, port.port_enabled);
-    printf("\r\n agg id:%d selected:%d, standby:%d, aport:%d, ntt:%d, hold_count:%d rcvLacpdu:%d", port.agg_id, port.selected, port.standby, port.aport->port_index,port.ntt, port.hold_count, port.rcvdLacpdu);
 
-    printf("\r\n actor-----------\r\n " );
+    print_sep(&i);
+    printf(" port_index      : %d", port.port_index);
+    print_sep(&i);
+    printf(" lacp_enabled    : %d", port.lacp_enabled);
+    print_sep(&i);
+    printf(" port_enabled    : %d", port.port_enabled);
+    print_sep(&i);
+    printf(" rx state        : %d", port.rx->State);
+    print_sep(&i);
+    printf(" sel state       : %d", port.sel->State);
+    print_sep(&i);
+    printf(" mux state       : %d", port.mux->State);
+    print_sep(&i);
+    printf(" tx state        : %d", port.tx->State);
+    print_sep(&i);
+    printf(" port_moved      : %d", port.port_moved);
+    print_sep(&i);
+    printf(" static_agg      : %d", port.static_agg);
+    print_sep(&i);
+    printf(" agg id          : %d", port.agg_id);
+    print_sep(&i);
+    printf(" selected        : %d", port.selected);
+    print_sep(&i);
+    printf(" standby         : %d", port.standby);
+    print_sep(&i);
+    printf(" aport           : %d", port.aport->port_index);
+    print_sep(&i);
+    printf(" ntt             : %d", port.ntt);
+    print_sep(&i);
+    printf(" hold_count      : %d", port.hold_count);
+    print_sep(&i);
+    printf(" ready_n         : %d", port.ready_n);
+    print_sep(&i);
+    printf(" speed           : %d", port.speed);
+    print_sep(&i);
+    printf(" duplex          : %d", port.duplex);
+    print_sep(&i);
+    printf(" rcvLacpdu       : %d", port.rcvdLacpdu);
+    print_sep(&i);
+    printf(" tx_cnt          : %d", port.tx_lacpdu_cnt);
+    print_sep(&i);
+    printf(" rx_cnt          : %d", port.rx_lacpdu_cnt);
+    print_sep(&i);
+    printf(" periodic_while  : %d", port.periodic_timer);
+    print_sep(&i);
+    printf(" current_while   : %d", port.current_while);
+    print_sep(&i);
+    printf(" wait_while      : %d", port.wait_while);
+    print_sep(&i);
+
+    printf("\r\n actor:" );
     print_info(&port.actor);
-    printf("\r\n parttor-----------\r\n " );
+    printf("\r\n parttor: " );
     print_info(&port.partner);
-    printf("\r\n timers----------\r\n period:%d, current_while:%d, wait_while:%d\r\n", port.periodic_timer, port.current_while, port.wait_while);
-    /*        printf("\r\n state machine------\r\n %s.%d, %s.%d, %s.%d, %s.%d", port.machines->name, port.machines->State, port.machines->next.name, port.machines[1].State,port.machines[2].name, port.machines[2].State,port.machines[3].name, port.machines[3].State);
-     */
-    printf("\r\n msg actor-----------\r\n " );
+
+    printf("\r\n msg actor: " );
     print_info(&port.msg_actor);
-    printf("\r\n msg parttor-----------\r\n " );
+    printf("\r\n msg parttor: " );
     print_info(&port.msg_partner);
 
     return 0;

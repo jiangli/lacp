@@ -105,6 +105,7 @@ typedef struct lac_port_t /* Lac_port */
     Bool         	standby;
     Bool         	ntt;
     int             hold_count;
+    Bool ready_n;
 
 //    Time          tick_timer;
     Bool 			rcvdLacpdu;
