@@ -86,7 +86,7 @@ int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
 
     }
 
-    lac_set_port_reselect(NULL);
+    //lac_set_port_reselect(NULL);
     lac_sys_update (this, LAC_SYS_UPDATE_READON_SYS_CFG);
 
     LAC_CRITICAL_PATH_END;

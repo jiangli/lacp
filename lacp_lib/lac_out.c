@@ -14,6 +14,12 @@ void LAC_OUT_get_port_mac (unsigned char *mac)
     mac[5] = 0xfe;
     return ;
 }
+int lac_get_port_oper_speed(int port_index)
+{       
+}
+int lac_get_port_oper_duplex(int port_index)
+{       
+}
 
 void memdump(unsigned char *buf, int len)
 {

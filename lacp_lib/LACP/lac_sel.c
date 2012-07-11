@@ -63,53 +63,126 @@ LAC_PORT_T get_dyn_agg_aggregator_port(LAC_PORT_T *port)
 
 }
 #endif
-
-int select_static_agg_aggregator_port(LAC_PORT_T *port)
+int select_master_port(LAC_SYS_T *this, int agg_id)
 {
-    LAC_SYS_T *this = port->system;
-    LAC_PORT_T *p;
-    LAC_PORT_T *best = port;
-    port->actor.key = lac_get_port_oper_key(port->port_index);
 
+        LAC_PORT_T *best = NULL;
+        LAC_PORT_T *p = NULL;
+        
+        //update port info
+        for (p = this->ports; p; p = p->next)
+        {
+            if (agg_id != p->agg_id )
+                    continue;
+            
+            p->speed = lac_get_port_oper_speed(p->port_index);
+            p->duplex = lac_get_port_oper_duplex(p->port_index);
+            p->actor.key = lac_get_port_oper_key(p->port_index);
+            
+        }
+    
     /* select best port(master port) */
     for (p = this->ports; p; p = p->next)
     {
-        if((p->actor.system_priority == port->actor.system_priority)
-                && (!memcmp(p->actor.system_id, port->actor.system_id, 6))
-                && (p->actor.key == best->actor.key)
-                && p->port_enabled
-                && p->lacp_enabled)
-        {
+            /* reduce the search range */
+            if (agg_id != p->agg_id || !p->port_enabled || !p->lacp_enabled || !p->duplex)
             {
-                if ((p->actor.port_priority < best->actor.port_priority )
-                        ||( (p->actor.port_priority == best->actor.port_priority )
-                            &&(p->actor.port_index < best->actor.port_index)))
+                    continue;
+            }            
+        
+            if (!best)
+            {
+                    best = p;
+            }
+            
+            if( p->speed > best->speed)
+            {
+                    best = p;
+                    continue;
+                    
+            }
+            else if ( p->speed < best->speed)
+            {
+                    continue;
+            }
+            else if (p->actor.port_priority < best->actor.port_priority)
+            {
+                        best = p;
+                        continue;
+                        
+                }
+             else if     (p->actor.port_priority > best->actor.port_priority)
+            {
+                    continue;
+                    
+            }
+            else if (p->actor.port_index < best->actor.port_index)
                 {
                     best = p;
+                    continue;
+                    
                 }
-            }
-        }
-
     }
-    printf("\r\n master port:%d", best->port_index);
-
-    if ((best->partner.system_priority	  == port->partner.system_priority)
-            && (!memcmp(best->partner.system_id, port->partner.system_id, 6))
-            && (best->partner.key == port->partner.key)
-            && (LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_AGG) && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG))
-            && (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG) && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_AGG)))
+    
+    return best;
+    
+}
+int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
+{
+    LAC_PORT_T *best = NULL;
+    LAC_PORT_T *p = NULL;
+    best = select_master_port(this, agg_id);
+    for (p = this->ports; p; p = p->next)
     {
-        port->selected = True;
-        printf("\r\n %s.%d. %d Selected",  __FUNCTION__, __LINE__, port->port_index);
-        port->aport = best;
+            /* reduce the search range */
+            if (p->agg_id != agg_id)
+            {
+                    continue;
+            }            
+            
+            if(best
+               && p->port_enabled 
+               && p->lacp_enabled 
+               && p->actor.key == best->actor.key
+               && p->partner.system_priority == best->partner.system_priority
+               && (!memcmp(p->partner.system_id, best->partner.system_id, 6))
+               && (p->partner.key == best->partner.key)
+               && LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_AGG)
+               && LAC_STATE_GET_BIT(p->partner.state, LAC_STATE_AGG)
+               && LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_AGG) 
+               && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG))
+            {
+                    p->selected = True;
+                    p->aport = best;
+                    p->reselect = False;
+                    printf("\r\n <%s.%d> %d Selected",  __FUNCTION__, __LINE__, p->port_index);
+            } else {
+                    p->selected = False;
+                    p->reselect = False;
+                    printf("\r\n <%s.%d> %d NOT Selected",  __FUNCTION__, __LINE__, p->port_index);
+            }
+}
+}
+
+
+int selection_logic(LAC_PORT_T *port)
+{
+    LAC_SYS_T *this = port->system;
+    LAC_PORT_T *p;
+    LAC_PORT_T *best = NULL;
+    if (port->aport->agg_id != port->agg_id)
+    {
+            update_agg_ports_select(this, port->aport->agg_id);
     }
+
+    update_agg_ports_select(this, port->agg_id);
+    
     return 0;
 }
 int lac_select(LAC_PORT_T *port)
 {
 
-    select_static_agg_aggregator_port(port);
-
+        selection_logic(port);
     port->reselect = False;
 }
 void lac_sel_enter_state (LAC_STATE_MACH_T * this)
@@ -141,7 +214,7 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
         return lac_hop_2_state (this, SELECTION);
 
     case SELECTION:
-        if (port->lacp_enabled && port->reselect)
+        if (port->reselect)
         {
             printf("port %d reselect. \r\n", port->port_index);
 

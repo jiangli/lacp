@@ -38,24 +38,6 @@ static void copy_info_from_net(LAC_PORT_INFO *from, LAC_PORT_INFO *to)
     to->state		  = from->state;
 }
 
-void
-lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
-{
-    /* msg check */
-
-    /* statistic */
-    port->rx_lacpdu_cnt++;
-
-    if (port->lacp_enabled == False)
-        return;
-
-    port->rcvdLacpdu = True;
-    memdump(Lacpdu, len);
-
-    copy_info_from_net(&Lacpdu->actor, &port->msg_actor);
-    copy_info_from_net(&Lacpdu->partner, &port->msg_partner);
-    return 0;
-}
 static Bool same_port(LAC_PORT_INFO *a, LAC_PORT_INFO *b)
 {
     return (  (a->port_index			== b->port_index)
@@ -73,6 +55,42 @@ static Bool lac_same_partner(LAC_PORT_INFO *a, LAC_PORT_INFO *b)
               && (LAC_STATE_GET_BIT(a->state, LAC_STATE_AGG)   == LAC_STATE_GET_BIT(b->state, LAC_STATE_AGG))
            );
 }
+
+void
+lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
+{
+        LAC_PORT_T *p;
+        
+    /* msg check */
+
+    /* statistic */
+    port->rx_lacpdu_cnt++;
+
+    if (port->lacp_enabled == False)
+        return;
+
+    port->rcvdLacpdu = True;
+
+//    memdump(Lacpdu, len);
+
+    copy_info_from_net(&Lacpdu->actor, &port->msg_actor);
+    copy_info_from_net(&Lacpdu->partner, &port->msg_partner);
+
+    for (p = port->system->ports; p; p=p->next)
+    {
+            if (same_port(&p->partner, &port->msg_partner))
+            {
+                    printf("port %d moved to port %d \r\n", port->port_index, p->port_index);
+                    
+                    p->port_moved = True;            
+                    break;
+                    
+            }
+            
+    }
+    
+    return 0;
+}
 static void actor_default(LAC_PORT_T *port)
 {
     copy_info(&port->actor_admin, &port->actor);
@@ -83,8 +101,11 @@ int record_default(LAC_PORT_T *port)
     copy_info(&port->partner_admin, &port->partner);
     LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF , True);
 }
-static void choose_matched(LAC_PORT_T *port)
+static void update_partner_syn(LAC_PORT_T *port)
 {
+        Bool partner_sync = False;
+        Bool partner_matched = False;
+        
     if (  (  (lac_same_partner(&port->msg_partner, &port->actor)
               && LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_AGG) == LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG))
              || (  !LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG))
@@ -93,15 +114,18 @@ static void choose_matched(LAC_PORT_T *port)
                    || (   LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)
                           &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))
                 )))
-        port->matched = True;
+        partner_matched = True;
     else
     {
         printf("\r\n port:%d partner changed  ! ", port->port_index);
 
         port->ntt = True;
-        port->matched = False;
+        partner_matched = False;
     }
-
+    partner_sync = partner_matched && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN);
+    
+    LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, partner_sync);
+    
 }
 
 int update_selected(LAC_PORT_T *port)
@@ -109,8 +133,10 @@ int update_selected(LAC_PORT_T *port)
     if (!lac_same_partner(&port->msg_actor, &port->partner))
     {
         port->selected					= False;
-        port->reselect					= True;
-        port->standby 					= False;
+//        port->reselect					= True;
+        lac_set_port_reselect(port);
+        
+//        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
     }
 }
@@ -134,13 +160,9 @@ int update_default_selected(LAC_PORT_T *port)
     if (!lac_same_partner(&port->partner_admin, &port->partner))
     {
         port->selected					= False;
-        port->standby 					= False;
+//        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
     }
-}
-static int lac_check_moved(LAC_PORT_T *port)
-{
-
 }
 static void start_current_while_timer(LAC_PORT_T *port, Bool timeout)
 {
@@ -158,14 +180,14 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
     case BEGIN:
     case RXM_INITIALIZE:
         port->selected = False;
-        port->standby  = False;
+//        port->standby  = False;
         actor_default(port);
         record_default(port);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP, False);
         port->port_moved = False;
 
     case RXM_PORT_DISABLED:
-        port->matched	= False;
+//        port->matched	= False;
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         port->rcvdLacpdu = False;
         port->current_while = 0;
@@ -174,14 +196,14 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 
     case RXM_LACP_DISABLED:
         port->selected 				 = False;
-        port->standby					 = False;
+//        port->standby					 = False;
         record_default(port);
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_AGG, False);
-        port->matched					 = True;
+//        port->matched					 = True;
         break;
 
     case RXM_EXPIRED:
-        port->matched					  = False;
+//        port->matched					  = False;
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_TMT, SHORT_TIMEOUT);
         start_current_while_timer(port, SHORT_TIMEOUT);
@@ -192,7 +214,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
     case RXM_DEFAULTED:
         update_default_selected(port);
         record_default(port);
-        port->matched			  = True;
+//        port->matched			  = True;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP, False);
 
         break;
@@ -202,7 +224,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         update_selected(port);
         update_ntt(port);
         record_pdu(port);
-        choose_matched( port);
+        update_partner_syn( port);
         start_current_while_timer(port, LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_TMT));
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP , False);
         port->rcvdLacpdu = False;
@@ -243,6 +265,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         {
             return lac_hop_2_state (this, RXM_LACP_DISABLED);
         }
+
         break;
 
     case RXM_LACP_DISABLED:

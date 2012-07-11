@@ -77,13 +77,12 @@ typedef struct lac_port_t /* Lac_port */
     LAC_PORT_INFO        msg_actor;
     LAC_PORT_INFO        msg_partner;
 
-    //              lacp_reinitialize is an internal event, no variable required.
     Bool         	lacp_enabled;
     Bool         	reselect;
     Bool         	selected;
-    Bool         	matched;
-    Bool         	local_churn;
-    Bool         	remote_churn;
+//    Bool         	matched;
+//    Bool         	local_churn;
+//    Bool         	remote_churn;
 
     LAC_TIME_T           current_while;
     LAC_TIME_T           periodic_timer;
@@ -93,16 +92,21 @@ typedef struct lac_port_t /* Lac_port */
 
     struct lac_port_t      *aport;
     struct lac_port_t      *alink;
+
+//for selection logic
+        int speed;
+        int duplex;
+        
     Bool            static_agg;
     int             agg_id;
 
-    Bool         	attach;
-    Bool         	attached;
+//    Bool         	attach;
+//    Bool         	attached;
     Bool         	standby;
     Bool         	ntt;
     int             hold_count;
 
-    Time          tick_timer;
+//    Time          tick_timer;
     Bool 			rcvdLacpdu;
 
     unsigned int tx_lacpdu_cnt;
