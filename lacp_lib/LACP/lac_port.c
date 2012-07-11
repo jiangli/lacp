@@ -60,7 +60,7 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_DEF,	 True);
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_EXP, False);
     this->aport = this;
-
+    this->selected = False;
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
@@ -147,7 +147,7 @@ int lac_set_port_reselect(LAC_PORT_T *port)
         p = p0 = lac_sys->ports;
 
         while (p = p->next)
-            p->reselect = True;
+            p->selected = False;
 
         return 0;
     }
@@ -161,8 +161,8 @@ int lac_set_port_reselect(LAC_PORT_T *port)
             {
                 if (p->agg_id == port->agg_id)
                 {
-                    p->reselect = True;
-                    //p->selected = False;
+//                    p->reselect = True;
+                    p->selected = False;
                 }
             }
         }

@@ -876,7 +876,7 @@ static int cli_pr_get_cfg (int argc, char** argv)
 
     lac_port_get_dbg_cfg(port_index, &port);
     printf("\r\n-------------------\r\n port_index:%d , lacp_enabled:%d, port_enabled:%d\r\n", port.port_index, port.lacp_enabled, port.port_enabled);
-    printf("\r\n selected:%d, reselected:%d, aport:%d, attach:%d, attached:%d, ntt:%d, hold_count:%d rcvLacpdu:%d", port.selected, port.reselect, port.aport->port_index, port.attach, port.attached, port.ntt, port.hold_count, port.rcvdLacpdu);
+    printf("\r\n selected:%d, standby:%d, aport:%d, ntt:%d, hold_count:%d rcvLacpdu:%d", port.selected, port.standby, port.aport->port_index,port.ntt, port.hold_count, port.rcvdLacpdu);
 
     printf("\r\n actor-----------\r\n " );
     print_info(&port.actor);

@@ -153,12 +153,16 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
                && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG))
             {
                     p->selected = True;
+                    p->standby = False;
+                    
                     p->aport = best;
-                    p->reselect = False;
+//                    p->reselect = False;
                     printf("\r\n <%s.%d> %d Selected",  __FUNCTION__, __LINE__, p->port_index);
             } else {
-                    p->selected = False;
-                    p->reselect = False;
+                    p->selected = True;
+//                    p->reselect = False;
+                    p->standby = True;
+                    
                     printf("\r\n <%s.%d> %d NOT Selected",  __FUNCTION__, __LINE__, p->port_index);
             }
 }
@@ -170,21 +174,32 @@ int selection_logic(LAC_PORT_T *port)
     LAC_SYS_T *this = port->system;
     LAC_PORT_T *p;
     LAC_PORT_T *best = NULL;
-    if (port->aport->agg_id != port->agg_id)
+    
+    /* maybe port delete from agg */
+    if (!port->lacp_enabled)
     {
-            update_agg_ports_select(this, port->aport->agg_id);
+            port->selected = True;
+            port->standby = True;
+            return 0;
     }
-
+    
+    if (!port->agg_id)
+    {
+            printf("\r\n warning:port:%d agg error.", port->port_index);
+            return 1;
+            
+    }
+    
     update_agg_ports_select(this, port->agg_id);
     
     return 0;
 }
+
 int lac_select(LAC_PORT_T *port)
 {
-
         selection_logic(port);
-    port->reselect = False;
 }
+
 void lac_sel_enter_state (LAC_STATE_MACH_T * this)
 {
     register LAC_PORT_T *port = this->owner.port;
@@ -192,7 +207,7 @@ void lac_sel_enter_state (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
     case INIT:
-        port->reselect = True;
+//        port->reselect = True;
         port->selected = False;
         break;
 
@@ -214,9 +229,9 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
         return lac_hop_2_state (this, SELECTION);
 
     case SELECTION:
-        if (port->reselect)
+        if (!port->selected)
         {
-            printf("port %d reselect. \r\n", port->port_index);
+            printf("port %d select begin. \r\n", port->port_index);
 
             return lac_hop_2_state (this, SELECTION);
         }
