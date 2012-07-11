@@ -16,7 +16,8 @@
 
 int sys_is_ready()
 {
-
+        return 1;
+        
 }
 int disable_collecting_distributing()
 {
@@ -96,26 +97,27 @@ Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
             return lac_hop_2_state (this, DETACHED);
 
     case DETACHED:
-        if (port->selected == True)
+        if (port->selected && !port->standby)
             return lac_hop_2_state (this, WAITING);
         break;
     case WAITING:
-        if (port->selected == True && sys_is_ready())
+        if (!port->wait_while && port->selected && !port->standby && sys_is_ready())
             return lac_hop_2_state (this, ATTACHED);
 
-        if (!port->selected)
+        if (!port->selected || port->standby)
             return lac_hop_2_state (this, DETACHED);
         break;
 
     case ATTACHED:
-        if (port->selected && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))
+        if (port->selected && !port->standby && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))
             return lac_hop_2_state (this, RX_TX);
-        if (!port->selected)
+
+        if (!port->selected || port->standby)
             return lac_hop_2_state (this, DETACHED);
         break;
 
     case RX_TX:
-        if (!port->selected || !LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))
+        if (!port->selected || port->standby || !LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))
             return lac_hop_2_state (this, ATTACHED);
         break;
 

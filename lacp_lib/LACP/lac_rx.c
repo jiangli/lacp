@@ -78,6 +78,8 @@ lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
 
     for (p = port->system->ports; p; p=p->next)
     {
+            if (p==port) continue;
+            
             if (same_port(&p->partner, &port->msg_partner))
             {
                     printf("port %d moved to port %d \r\n", port->port_index, p->port_index);
@@ -132,6 +134,7 @@ int update_selected(LAC_PORT_T *port)
 {
     if (!lac_same_partner(&port->msg_actor, &port->partner))
     {
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected					= False;
 //        port->reselect					= True;
         lac_set_port_reselect(port);
@@ -159,6 +162,7 @@ int update_default_selected(LAC_PORT_T *port)
 {
     if (!lac_same_partner(&port->partner_admin, &port->partner))
     {
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected					= False;
 //        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
@@ -179,6 +183,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
     case RXM_INITIALIZE:
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
 //        port->standby  = False;
         actor_default(port);
@@ -191,10 +196,12 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         port->rcvdLacpdu = False;
         port->current_while = 0;
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
         break;
 
     case RXM_LACP_DISABLED:
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected 				 = False;
 //        port->standby					 = False;
         record_default(port);

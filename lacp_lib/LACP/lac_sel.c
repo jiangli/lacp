@@ -153,12 +153,14 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
                && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG))
             {
                     p->selected = True;
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
                     p->standby = False;
                     
                     p->aport = best;
 //                    p->reselect = False;
                     printf("\r\n <%s.%d> %d Selected",  __FUNCTION__, __LINE__, p->port_index);
             } else {
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
                     p->selected = True;
 //                    p->reselect = False;
                     p->standby = True;
@@ -178,6 +180,7 @@ int selection_logic(LAC_PORT_T *port)
     /* maybe port delete from agg */
     if (!port->lacp_enabled)
     {
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, True);
             port->selected = True;
             port->standby = True;
             return 0;
@@ -185,7 +188,8 @@ int selection_logic(LAC_PORT_T *port)
     
     if (!port->agg_id)
     {
-            printf("\r\n warning:port:%d agg error.", port->port_index);
+//            printf("\r\n warning:port:%d agg error.", port->port_index);
+            
             return 1;
             
     }
@@ -208,6 +212,7 @@ void lac_sel_enter_state (LAC_STATE_MACH_T * this)
     case BEGIN:
     case INIT:
 //        port->reselect = True;
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
         break;
 
@@ -231,7 +236,7 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
     case SELECTION:
         if (!port->selected)
         {
-            printf("port %d select begin. \r\n", port->port_index);
+//            printf("port %d select begin. \r\n", port->port_index);
 
             return lac_hop_2_state (this, SELECTION);
         }

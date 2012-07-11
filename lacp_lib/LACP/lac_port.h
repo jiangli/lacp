@@ -78,7 +78,7 @@ typedef struct lac_port_t /* Lac_port */
     LAC_PORT_INFO        msg_partner;
 
     Bool         	lacp_enabled;
-    Bool         	reselect;
+//    Bool         	reselect;
     Bool         	selected;
 //    Bool         	matched;
 //    Bool         	local_churn;

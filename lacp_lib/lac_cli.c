@@ -832,13 +832,15 @@ static CMD_DSCR_T lang[] = {
 static int cli_enable (int argc, char** argv)
 {
     int port_index = atoi(argv[1]);
-
+    int agg_id = atoi(argv[2]);
+    
     UID_LAC_PORT_CFG_T uid_cfg;
     printf("\r\n index:%d", port_index);
 
     uid_cfg.field_mask = PT_CFG_STATE;
     uid_cfg.lacp_enabled = 1;
-
+    uid_cfg.agg_id = agg_id;
+    
     BitmapSetBit(&uid_cfg.port_bmp, port_index);
     lac_port_set_cfg(&uid_cfg);
     return 0;
@@ -847,7 +849,7 @@ static int cli_enable (int argc, char** argv)
 static void
 print_system_info (int prio, unsigned char *addr, unsigned char *str)
 {
-    snprintf(str, "%u-%02x%02x%02x%02x%02x%02x", prio,
+    sprintf(str, "%u-%02x%02x%02x%02x%02x%02x", prio,
              (unsigned char) addr[0],
              (unsigned char) addr[1],
              (unsigned char) addr[2],
@@ -876,7 +878,7 @@ static int cli_pr_get_cfg (int argc, char** argv)
 
     lac_port_get_dbg_cfg(port_index, &port);
     printf("\r\n-------------------\r\n port_index:%d , lacp_enabled:%d, port_enabled:%d\r\n", port.port_index, port.lacp_enabled, port.port_enabled);
-    printf("\r\n selected:%d, standby:%d, aport:%d, ntt:%d, hold_count:%d rcvLacpdu:%d", port.selected, port.standby, port.aport->port_index,port.ntt, port.hold_count, port.rcvdLacpdu);
+    printf("\r\n agg id:%d selected:%d, standby:%d, aport:%d, ntt:%d, hold_count:%d rcvLacpdu:%d", port.agg_id, port.selected, port.standby, port.aport->port_index,port.ntt, port.hold_count, port.rcvdLacpdu);
 
     printf("\r\n actor-----------\r\n " );
     print_info(&port.actor);
@@ -897,6 +899,7 @@ static int cli_pr_get_cfg (int argc, char** argv)
 static CMD_DSCR_T lang[] = {
     THE_COMMAND("enable", "enable rstp")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    PARAM_NUMBER("agg group on bridge", 1, 32, 1)
     THE_FUNC(cli_enable)
 #if 0
     THE_COMMAND("disable", "disable rstp")

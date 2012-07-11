@@ -59,8 +59,16 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_DIS, True);
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_DEF,	 True);
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_EXP, False);
+
     this->aport = this;
     this->selected = False;
+    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
+    
+    this->lacp_enabled = False;
+    this->port_moved = False;
+    this->static_agg = False;
+    this->agg_id = 0;
+    
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
@@ -84,9 +92,6 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
         this->periodic_timer =
             this->wait_while = 0;
 
-    this->port_moved = False;
-
-    this->selected = False;
 
     return this;
 }
@@ -147,7 +152,10 @@ int lac_set_port_reselect(LAC_PORT_T *port)
         p = p0 = lac_sys->ports;
 
         while (p = p->next)
-            p->selected = False;
+        {
+                    printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);            p->selected = False;
+        }
+        
 
         return 0;
     }
@@ -162,6 +170,7 @@ int lac_set_port_reselect(LAC_PORT_T *port)
                 if (p->agg_id == port->agg_id)
                 {
 //                    p->reselect = True;
+                        printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
                     p->selected = False;
                 }
             }
