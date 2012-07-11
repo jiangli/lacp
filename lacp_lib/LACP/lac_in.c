@@ -138,7 +138,7 @@ lac_one_second ()
   LAC_CRITICAL_PATH_START;
   for (port = this->ports; port; port = port->next) {
     for (iii = 0; iii < TIMERS_NUMBER; iii++) {
-            //        printf("\r\n*******************88^^^port:%d iii:%d,timeraddr:%x\r\n", port->port_index, iii, port->timers[0]);
+//            printf("\r\n*******************88^^^port:%d iii:%d,value:%d\r\n", port->port_index, iii, *(port->timers[iii]));
       if (*(port->timers[iii]) > 0) {
 	(*port->timers[iii])--;
       }

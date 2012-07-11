@@ -37,26 +37,28 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 	this->actor_admin.system_priority	   = Default_system_priority;
 	memcpy(this->actor_admin.system_id, this->system->id, 6);
 	this->actor_admin.key				   = Default_key;
-	this->actor_admin.state.lacp_activity   = Default_lacp_activity;
-	this->actor_admin.state.lacp_timeout    = Default_lacp_timeout;
-	this->actor_admin.state.aggregation	   = Default_aggregation;
-	this->actor_admin.state.synchronization = False;
-	this->actor_admin.state.defaulted	   = True;
-	this->actor_admin.state.expired		   = False;
+	
+    LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_ACT, Default_lacp_activity);
+    
+	LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_TMT, Default_lacp_timeout);
+	LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_AGG, Default_aggregation);
+	LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_SYN, False);
+	LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_DEF, True);
+	LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_EXP, False);
   
 	this->partner_admin.port_priority		 = Default_port_priority;
 	this->partner_admin.port_index				 = port_index;/* TODO:: */
 	this->partner_admin.system_priority		 = Default_system_priority;
 	memset(this->partner_admin.system_id, 0, 6);
 	this->partner_admin.key					 = this->port_index;
-	this->partner_admin.state.lacp_activity	 = False; /* Passive	  */
-	this->partner_admin.state.lacp_timeout	 = False; /* Long timeout */
-	this->partner_admin.state.aggregation	 = False; /* Individual   */
-	this->partner_admin.state.synchronization = True;
-	this->partner_admin.state.collecting 	 = True;
-	this->partner_admin.state.distributing	 = True;
-	this->partner_admin.state.defaulted		 = True;
-	this->partner_admin.state.expired		 = False;
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_ACT, False); /* Passive	  */
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_TMT, False); /* Long timeout */
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_AGG, False); /* Individual   */
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_SYN,  True);
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_COL, True);
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_DIS, True);
+    LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_DEF,	 True);
+	LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_EXP, False);
     this->aport = this;
     
 	

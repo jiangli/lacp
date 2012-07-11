@@ -1,10 +1,10 @@
 
 typedef LAC_KEY  Key;
 
-typedef enum {LACP_ACTIVE = 1, LAC_PASSIVE = 2} LACP_ACTIVE_E;
+typedef enum {LACP_ACTIVE = True, LAC_PASSIVE = False} LACP_ACTIVE_E;
 typedef enum {SHORT_TIMEOUT = True, LONG_TIMEOUT = False} LACP_TIMEOUT_E;
 typedef enum {LACP_ENABLED  = True, LACP_DISABLED= False} LACP_ENABLE_E;
-
+#if 0
 typedef struct /* LAC_STATE */
 {
    unsigned lacp_activity   : 1;
@@ -16,6 +16,23 @@ typedef struct /* LAC_STATE */
    unsigned defaulted       : 1;
    unsigned expired         : 1;
 } LAC_STATE;
+#endif
+typedef unsigned char LAC_STATE;
+
+#define LAC_STATE_ACT 0x1
+#define LAC_STATE_TMT 0X2
+#define LAC_STATE_AGG 0X4
+#define LAC_STATE_SYN 0X8
+#define LAC_STATE_COL 0X10
+#define LAC_STATE_DIS 0X20
+#define LAC_STATE_DEF 0X40
+#define LAC_STATE_EXP 0X80
+
+
+#define LAC_STATE_SET_BIT(flag,mask,value) (value) ? (flag |= mask) : (flag &= ~mask)
+#define LAC_STATE_GET_BIT(flag,mask) ((flag & mask) ? 1 : 0)
+#define LAC_STATE_COPY_BIT(flag_to, flag_from, mask) (flag_from & mask) ?  (flag_to |= mask) : (flag_to &= ~mask)
+#define LAC_STATE_CMP_BIT(flag1, flag2, mask) ((flag1 & mask) != (flag2 & mask))
 
 typedef struct /* LAC_PORT_INFO */
 {

@@ -25,14 +25,7 @@
 	to->system_priority 	  = from->system_priority;
 	memcpy(to->system_id, from->system_id, 6);
 	to->key 				  = from->key;
-	to->state.lacp_activity   = from->state.lacp_activity;
-	to->state.lacp_timeout	  = from->state.lacp_timeout;
-	to->state.aggregation	  = from->state.aggregation;
-	to->state.synchronization = from->state.synchronization;
-	to->state.collecting	  = from->state.collecting;
-	to->state.distributing	  = from->state.distributing;
-	to->state.defaulted 	  = from->state.defaulted;
-	to->state.expired		  = from->state.expired;
+	to->state                 = from->state;
  }
 
  static void copy_info_from_net(LAC_PORT_INFO *from, LAC_PORT_INFO *to)
@@ -42,14 +35,7 @@
          to->system_priority 	  = ntohs(from->system_priority);
 	memcpy(to->system_id, from->system_id, 6);
 	to->key 				  = ntohs(from->key);
-	to->state.lacp_activity   = from->state.lacp_activity;
-	to->state.lacp_timeout	  = from->state.lacp_timeout;
-	to->state.aggregation	  = from->state.aggregation;
-	to->state.synchronization = from->state.synchronization;
-	to->state.collecting	  = from->state.collecting;
-	to->state.distributing	  = from->state.distributing;
-	to->state.defaulted 	  = from->state.defaulted;
-	to->state.expired		  = from->state.expired;
+	to->state		  = from->state;
  }
 
  void
@@ -64,7 +50,7 @@
 		return;
 	
  	port->rcvdLacpdu = True;
-    memdump(Lacpdu, len);
+          memdump(Lacpdu, len);
     
 	copy_info_from_net(&Lacpdu->actor, &port->msg_actor);
 	copy_info_from_net(&Lacpdu->partner, &port->msg_partner);
@@ -84,7 +70,7 @@
 		   && (a->system_priority	  == b->system_priority)
 		   && (!memcmp(a->system_id, b->system_id, 6))
 		   && (a->key				  == b->key)
-		   && (a->state.aggregation   == b->state.aggregation)
+              && (LAC_STATE_GET_BIT(a->state, LAC_STATE_AGG)   == LAC_STATE_GET_BIT(b->state, LAC_STATE_AGG))
 		   );
  }
  static void actor_default(LAC_PORT_T *port)
@@ -95,25 +81,24 @@
 int record_default(LAC_PORT_T *port)
 {
 	copy_info(&port->partner_admin, &port->partner);
-	port->actor.state.defaulted = True;
+	LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF , True);
 }
 static void choose_matched(LAC_PORT_T *port)
 {
-   if (  (  (   lac_same_partner(&port->msg_partner, &port->actor)
-            && (port->msg_partner.state.aggregation ==
-                port->actor.state.aggregation)
+   if (  (  (lac_same_partner(&port->msg_partner, &port->actor)
+             && LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_AGG) == LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG))
+            || (  !LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG))
+            && (  (    LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT)
             )
-         || (  !port->msg_actor.state.aggregation
-         )  )
-      && (  (   port->msg_actor.state.lacp_activity
-            )
-         || (   port->actor.state.lacp_activity
-            &&  port->msg_partner.state.lacp_activity
-      )  )  )
+                  || (   LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)
+                         &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))
+                    )))
       port->matched = True;
    else
    {
-                 port->reselect = True;
+           printf("\r\n port:%d partner changed  ! ", port->port_index);
+           
+                 port->ntt = True;
       port->matched = False;
    }
    
@@ -124,28 +109,25 @@ int update_selected(LAC_PORT_T *port)
 	   if (!lac_same_partner(&port->msg_actor, &port->partner))
 	   {
 		  port->selected					= False;
+		  port->reselect					= True;
 		  port->standby 					= False;
-		  port->actor.state.synchronization = False;
+		  LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
 	}
 }
 static void update_ntt(LAC_PORT_T *port)
 {
    if ( !(lac_same_partner(&port->msg_partner, &port->actor))
-      || (port->msg_partner.state.lacp_activity   !=
-          port->actor.state.lacp_activity)
-      || (port->msg_partner.state.aggregation     !=
-          port->actor.state.aggregation)
-      || (port->msg_partner.state.synchronization !=
-          port->actor.state.synchronization)
-      || (port->msg_partner.state.collecting      !=
-          port->actor.state.collecting)
+        || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_ACT))
+        || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_AGG)
+            || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_SYN))
+            || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state,LAC_STATE_COL)))
       )
       port->ntt = True;
 }
 int record_pdu(LAC_PORT_T *port)
 {
    copy_info(&port->msg_actor, &port->partner);
-   port->actor.state.defaulted = False;
+   LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF, False);
 }
 int update_default_selected(LAC_PORT_T *port)
 {
@@ -153,7 +135,7 @@ int update_default_selected(LAC_PORT_T *port)
 	   {
 		  port->selected					= False;
 		  port->standby 					= False;
-		  port->actor.state.synchronization = False;
+		  LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
 	   } 
 }
 static int lac_check_moved(LAC_PORT_T *port)
@@ -179,12 +161,12 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 		port->standby  = False;
 		actor_default(port);
 		record_default(port);
-		port->actor.state.expired = False;
+		LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP, False);
 		port->port_moved = False;
 		
 	 case RXM_PORT_DISABLED:
 		 port->matched	= False;
-	 	 port->partner.state.synchronization = False;
+	 	 LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
 		 port->rcvdLacpdu = False;
 		 port->current_while = 0;
 		 port->selected = False;
@@ -194,16 +176,16 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 		 port->selected 				 = False;
 		 port->standby					 = False;
 		 record_default(port);
-		 port->partner.state.aggregation = False;
+		 LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_AGG, False);
 		 port->matched					 = True;
 	 	break;
 		
 	 case RXM_EXPIRED:
 		 port->matched					  = False;
-		 port->partner.state.synchronization = False;
-		 port->partner.state.lacp_timeout = SHORT_TIMEOUT;
+		 LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
+		 LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_TMT, SHORT_TIMEOUT);
 		 start_current_while_timer(port, SHORT_TIMEOUT);
-		 port->actor.state.expired = True;
+		 LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP, True);
 		 break;
 		 
 		 
@@ -211,7 +193,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 		update_default_selected(port);
 		record_default(port);
 		port->matched			  = True;
-		port->actor.state.expired = False;
+		LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP, False);
 			
 		break;
 
@@ -221,8 +203,8 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 		update_ntt(port);
 		record_pdu(port);		  
 		choose_matched( port);
-		start_current_while_timer(port, port->actor.state.lacp_timeout);		  
-		port->actor.state.expired = False;	  
+		start_current_while_timer(port, LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_TMT));		  
+		LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_EXP , False);	  
 		port->rcvdLacpdu = False;
 		break;
    }
@@ -283,7 +265,8 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 		 break;
 		 
 	 case RXM_CURRENT:
- 
+//             printf("\r\n current_while:%d, rcvdLacpdu:%d", port->current_while, port->rcvdLacpdu);
+             
 		 if (!port->current_while && !port->rcvdLacpdu) {
 		   return lac_hop_2_state (this, RXM_EXPIRED);
 		 }

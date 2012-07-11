@@ -51,13 +51,7 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
 	lacpdu_packet.actor.key = htons(port->actor.key);
 	lacpdu_packet.actor.port_priority = htons(port->actor.port_priority);
 	lacpdu_packet.actor.port_index = htons(port->actor.port_index);
-	lacpdu_packet.actor.state.lacp_activity = port->actor.state.lacp_activity;
-	lacpdu_packet.actor.state.lacp_timeout = port->actor.state.lacp_timeout;
-	lacpdu_packet.actor.state.aggregation = port->actor.state.aggregation;
-	lacpdu_packet.actor.state.collecting = port->actor.state.collecting;
-	lacpdu_packet.actor.state.distributing = port->actor.state.distributing;
-	lacpdu_packet.actor.state.defaulted = port->actor.state.defaulted;
-	lacpdu_packet.actor.state.expired = port->actor.state.expired;
+	lacpdu_packet.actor.state = port->actor.state;
 
 
 	lacpdu_packet.type_partner = 2;
@@ -67,13 +61,8 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
 	lacpdu_packet.partner.key = htons(port->partner.key);
 	lacpdu_packet.partner.port_priority = htons(port->partner.port_priority);
 	lacpdu_packet.partner.port_index = htons(port->partner.port_index);
-	lacpdu_packet.partner.state.lacp_activity = port->partner.state.lacp_activity;
-	lacpdu_packet.partner.state.lacp_timeout = port->partner.state.lacp_timeout;
-	lacpdu_packet.partner.state.aggregation = port->partner.state.aggregation;
-	lacpdu_packet.partner.state.collecting = port->partner.state.collecting;
-	lacpdu_packet.partner.state.distributing = port->partner.state.distributing;
-	lacpdu_packet.partner.state.defaulted = port->partner.state.defaulted;
-	lacpdu_packet.partner.state.expired = port->partner.state.expired;
+	lacpdu_packet.partner.state = port->partner.state;
+
 
 	lacpdu_packet.type_collector = 3;
 	lacpdu_packet.len_collector = 16;
@@ -102,13 +91,13 @@ void lac_tx_enter_state (LAC_STATE_MACH_T * this)
 		port->hold_count = 0;
 		port->ntt = True;
 
-		if (port->partner.state.lacp_timeout == LONG_TIMEOUT)
+		if (LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_TMT) == LONG_TIMEOUT)
 		{
-		    port->periodic_timer = port->system->fast_periodic_time;
+		    port->periodic_timer = port->system->slow_periodic_time;
 		}
 		else
 		{
-		    port->periodic_timer = port->system->slow_periodic_time;
+		    port->periodic_timer = port->system->fast_periodic_time;
 		}
 		break;
 		
@@ -125,9 +114,12 @@ Bool lac_tx_check_conditions (LAC_STATE_MACH_T * this)
   register LAC_PORT_T *port = this->owner.port;
   
   if (BEGIN == this->State || !port->lacp_enabled || !port->port_enabled 
-	|| (port->actor.state.lacp_activity == LAC_PASSIVE 
-		&& port->partner.state.lacp_activity == LAC_PASSIVE))
+      || ((LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT) == LAC_PASSIVE )
+          && (LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_ACT) == LAC_PASSIVE)))
   {  	
+//          printf("\r\n GET:%d, %d",LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT), LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_ACT));
+          
+          
 	/*printf("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d", 
 	port->port_index, this->State, port->port_enabled, port->lacp_enabled);*/
 	if (NO_PERIODIC == this->State)
@@ -148,6 +140,8 @@ Bool lac_tx_check_conditions (LAC_STATE_MACH_T * this)
 		return lac_hop_2_state (this, IDLE);
 				
 	case IDLE:
+            //printf("\r\n IDEL:port:%d, periodic_timer:%d", port->port_index, port->periodic_timer);
+            
 		if (!port->periodic_timer)
 		{
 			return lac_hop_2_state (this, PERIODIC_TX);		

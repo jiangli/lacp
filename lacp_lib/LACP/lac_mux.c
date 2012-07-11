@@ -47,10 +47,10 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
           
     case DETACHED:
 		detach_mux_from_aggregator(port);
-		port->actor.state.synchronization = False;
-		port->actor.state.collecting = False;
-		disable_collecting_distributing(port);
-		port->actor.state.distributing = False;
+		LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
+		LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, False);
+        disable_collecting_distributing(port);
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DIS, False);
 		port->ntt = True;
 		break;
 		
@@ -60,17 +60,17 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 		
 	case ATTACHED:
 		attach_mux_to_aggregator(port);
-		port->actor.state.synchronization = True;
-		port->actor.state.collecting = False;
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, True);
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, False);
 		disable_collecting_distributing(port);
-		port->actor.state.distributing = False;
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DIS, False);
 		port->ntt = True;
 		break;
 		
 	case RX_TX:
-		port->actor.state.distributing = True;
-		enable_collecting_distributing(port);
-		port->actor.state.collecting = True;
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DIS, True);
+        enable_collecting_distributing(port);
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, True);
 		port->ntt = True;
 		break;
 
@@ -108,14 +108,14 @@ Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
 		break;
 		
 	case ATTACHED:
-		if (port->selected && port->partner.state.synchronization)
+            if (port->selected && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))
 	    	return lac_hop_2_state (this, RX_TX);
 		if (!port->selected)
 	    	return lac_hop_2_state (this, DETACHED);
 		break;
 		
 	case RX_TX:
-		if (!port->selected || !port->partner.state.synchronization)
+            if (!port->selected || !LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_SYN))
 	    	return lac_hop_2_state (this, ATTACHED);
 		break;
 		

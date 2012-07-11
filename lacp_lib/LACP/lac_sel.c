@@ -96,8 +96,8 @@ int select_static_agg_aggregator_port(LAC_PORT_T *port)
 	if ((best->partner.system_priority	  == port->partner.system_priority)
 		&& (!memcmp(best->partner.system_id, port->partner.system_id, 6))
 		&& (best->partner.key == port->partner.key)
-		&& (best->actor.state.aggregation && best->partner.state.aggregation)
-		&& (port->actor.state.aggregation && port->partner.state.aggregation))
+		&& (LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_AGG) && LAC_STATE_GET_BIT(best->partner.state, LAC_STATE_AGG))
+		&& (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG) && LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_AGG)))
 	{
 		port->selected = True;
         printf("\r\n %s.%d. %d Selected",  __FUNCTION__, __LINE__, port->port_index);

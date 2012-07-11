@@ -36,11 +36,11 @@ LAC_SYS_T *lac_sys_init ()
 	LAC_OUT_get_port_mac(sys_mac);	
 	memcpy(this->id, sys_mac, 6);
 	this->short_timeout_time = 3;
-	this->long_timeout_time = 30;
+	this->long_timeout_time = 90;
 	this->admin_state = LACP_ENABLED;
 	this->tx_hold_count = Max_tx_per_interval;
 	this->slow_periodic_time = 30;
-	this->fast_periodic_time = 30;
+	this->fast_periodic_time = 1;
 
 	LAC_INIT_CRITICAL_PATH_PROTECTIO;
 
@@ -148,7 +148,7 @@ int lac_sys_update(LAC_SYS_T *this, int reason)
 		  //taskDelay(10);
 	  }
 	  
-	  printf("\r\n number_of_loops:%d", number_of_loops);
+//	  printf("\r\n number_of_loops:%d", number_of_loops);
 	}
 	
 	return number_of_loops;

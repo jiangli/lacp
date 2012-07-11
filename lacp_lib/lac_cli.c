@@ -823,7 +823,9 @@ static void print_info(LAC_PORT_INFO *lac_info)
 {
         print_system_info(lac_info->system_priority, lac_info->system_id, True);
         
-        printf("port:%d, priority:%d key:%d state:activity:%d,Timeout:%d,aggregation:%d,syn:%d,collect:%d,distribute:%d,defaulted:%d,expired:%d\r\n", lac_info->port_index, lac_info->port_priority, lac_info->key, lac_info->state.lacp_activity, lac_info->state.lacp_timeout,  lac_info->state.aggregation, lac_info->state.synchronization,  lac_info->state.collecting,  lac_info->state.distributing,  lac_info->state.defaulted, lac_info->state.expired);
+        printf("port:%d, priority:%d key:%d state:activity:%d,Timeout:%d,aggregation:%d,syn:%d,collect:%d,distribute:%d,defaulted:%d,expired:%d\r\n", lac_info->port_index, lac_info->port_priority, lac_info->key, LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_ACT), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_TMT), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_AGG), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_SYN), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_COL), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_DIS), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_DEF), LAC_STATE_GET_BIT(lac_info->state, LAC_STATE_EXP));
+        return 0;
+        
 }
 
 static int cli_pr_get_cfg (int argc, char** argv)
@@ -833,15 +835,20 @@ static int cli_pr_get_cfg (int argc, char** argv)
         
         lac_port_get_dbg_cfg(port_index, &port);
         printf("\r\n-------------------\r\n port_index:%d , lacp_enabled:%d, port_enabled:%d\r\n", port.port_index, port.lacp_enabled, port.port_enabled);
-        printf("\r\n selected:%d, reselected:%d, aport:%d, attach:%d, attached:%d, ntt:%d, hold_count:%d", port.selected, port.reselect, port.aport->port_index, port.attach, port.attached, port.ntt, port.hold_count);
+        printf("\r\n selected:%d, reselected:%d, aport:%d, attach:%d, attached:%d, ntt:%d, hold_count:%d rcvLacpdu:%d", port.selected, port.reselect, port.aport->port_index, port.attach, port.attached, port.ntt, port.hold_count, port.rcvdLacpdu);
         
         printf("\r\n actor-----------\r\n " );
         print_info(&port.actor);
         printf("\r\n parttor-----------\r\n " );
         print_info(&port.partner);
         printf("\r\n timers----------\r\n period:%d, current_while:%d, wait_while:%d\r\n", port.periodic_timer, port.current_while, port.wait_while); 
+/*        printf("\r\n state machine------\r\n %s.%d, %s.%d, %s.%d, %s.%d", port.machines->name, port.machines->State, port.machines->next.name, port.machines[1].State,port.machines[2].name, port.machines[2].State,port.machines[3].name, port.machines[3].State);
+ */      
+        printf("\r\n msg actor-----------\r\n " );
+        print_info(&port.msg_actor);
+        printf("\r\n msg parttor-----------\r\n " );
+        print_info(&port.msg_partner);
 
-        
         return 0;
         
 }
