@@ -35,6 +35,22 @@
 	to->state.expired		  = from->state.expired;
  }
 
+ static void copy_info_from_net(LAC_PORT_INFO *from, LAC_PORT_INFO *to)
+ {
+         to->port_priority		  = ntohs(from->port_priority);
+         to->port_index            = ntohs(from->port_index);
+         to->system_priority 	  = ntohs(from->system_priority);
+	memcpy(to->system_id, from->system_id, 6);
+	to->key 				  = ntohs(from->key);
+	to->state.lacp_activity   = from->state.lacp_activity;
+	to->state.lacp_timeout	  = from->state.lacp_timeout;
+	to->state.aggregation	  = from->state.aggregation;
+	to->state.synchronization = from->state.synchronization;
+	to->state.collecting	  = from->state.collecting;
+	to->state.distributing	  = from->state.distributing;
+	to->state.defaulted 	  = from->state.defaulted;
+	to->state.expired		  = from->state.expired;
+ }
 
  void
  lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
@@ -48,9 +64,10 @@
 		return;
 	
  	port->rcvdLacpdu = True;
-
-	copy_info(&Lacpdu->actor, &port->msg_actor);
-	copy_info(&Lacpdu->partner, &port->msg_partner);
+    memdump(Lacpdu, len);
+    
+	copy_info_from_net(&Lacpdu->actor, &port->msg_actor);
+	copy_info_from_net(&Lacpdu->partner, &port->msg_partner);
 	return 0; 
  }
  static Bool same_port(LAC_PORT_INFO *a, LAC_PORT_INFO *b)
@@ -216,10 +233,10 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
  {
 	register LAC_PORT_T *port = this->owner.port;
  
-	if ((port->port_enabled == False && port->port_moved == False)
-		|| RXM_INITIALIZE == this->State) {
-	 /*	printf("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d", 
-	 	port->port_index, this->State, port->port_enabled, port->lacp_enabled);*/
+	if (port->port_enabled == False && port->port_moved == False
+		&& BEGIN != this->State) {
+/*            if (this->debug)                    printf("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d", 
+                      port->port_index, this->State, port->port_enabled, port->lacp_enabled);*/
 
 		if (this->State == RXM_PORT_DISABLED)
 			return False;
@@ -245,7 +262,15 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
 		   return lac_hop_2_state (this, RXM_LACP_DISABLED);
 		 }
 		 break;
-		 
+
+	 case RXM_LACP_DISABLED:
+		if (port->port_enabled == True
+			&& port->lacp_enabled == True) 
+		 {
+		   return lac_hop_2_state (this, RXM_EXPIRED);
+		 }
+        break;
+        
 	 case RXM_EXPIRED:
 		 if (!port->current_while) 
 		 {

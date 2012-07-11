@@ -32,8 +32,8 @@ void memdump(unsigned char *buf, int len)
 
 int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 {
-	printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
-	memdump(bpdu, bpdu_len);
+        //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+//	memdump(bpdu, bpdu_len);
     bridge_tx_bpdu(port_index, bpdu, bpdu_len);
     
 }
