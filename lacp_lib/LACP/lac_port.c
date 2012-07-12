@@ -164,7 +164,7 @@ int lac_set_port_reselect(LAC_PORT_T *port)
     {
         p = p0 = port->system->ports;
 
-        if (port->static_agg)
+        if (port->static_agg && port->agg_id)
         {
             while (p = p->next)
             {

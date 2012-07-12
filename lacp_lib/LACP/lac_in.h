@@ -8,6 +8,8 @@ typedef struct {
     unsigned short port_priority;
     Bool			  lacp_enabled;
     LAC_STATE 	  state;
+        int sel_state;
+        
     int agg_id;
 
 } UID_LAC_PORT_CFG_T;

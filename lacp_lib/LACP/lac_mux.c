@@ -33,22 +33,33 @@ int sys_is_ready(LAC_PORT_T *port)
     return True;
 
 }
-int disable_collecting_distributing()
+int disable_collecting_distributing(LAC_PORT_T  *port)
 {
-    printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+    printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+    lac_set_port_cd(port->port_index, False);
+    return 0;
+    
 }
-int enable_collecting_distributing()
+int enable_collecting_distributing(LAC_PORT_T  *port)
 {
-    printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+        printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+    lac_set_port_cd(port->port_index, True);
+    return 0;
 }
 
-int detach_mux_from_aggregator()
+int detach_mux_from_aggregator(LAC_PORT_T  *port)
 {
-    printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+        printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+        lac_set_port_attach_to_tid(port->port_index, False, port->agg_id);
+        return 0;
+        
 }
-int attach_mux_to_aggregator()
+int attach_mux_to_aggregator(LAC_PORT_T  *port)
 {
-    printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+        printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+        lac_set_port_attach_to_tid(port->port_index, True, port->agg_id);
+        return 0;
+        
 }
 
 void lac_mux_enter_state (LAC_STATE_MACH_T * this)
@@ -58,6 +69,12 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
     case DISABLE:
+        detach_mux_from_aggregator(port);
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, True);
+        enable_collecting_distributing(port);
+        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DIS, True);
+        port->ntt = False;            
         break;
 
     case DETACHED:

@@ -71,14 +71,18 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
 
         if (uid_cfg->field_mask & PT_CFG_STATE)
         {
+                /* maybe delete from agg. so update selected first */
+                if (port->agg_id)
+                        lac_set_port_reselect(port);
+
             port->lacp_enabled = uid_cfg->lacp_enabled;
             port->static_agg = True;
-
             port->agg_id = uid_cfg->agg_id;
-        }
 
-//        port->reselect = True;
-        lac_set_port_reselect(port);
+                if (port->agg_id)
+                        lac_set_port_reselect(port);
+
+        }
 
     }
 
@@ -88,27 +92,29 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
     return 0;
 }
 
-int lac_port_get_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
+int lac_port_get_cfg(int port_index, UID_LAC_PORT_CFG_T * uid_cfg)
 {
     register LAC_SYS_T *this;
     register LAC_PORT_T *port;
     int port_no;
 
-    printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
-
     this = lac_get_sys_inst();
 
-    for (port_no = 0; port_no < max_port; port_no++) {
-        if (!BitmapGetBit (&uid_cfg->port_bmp, port_no))
-            continue;
 
-        port = lac_port_find (this, port_no);
+        port = lac_port_find (this, port_index);
         if (!port) {		  /* port is absent in the stpm :( */
-            continue;
+                return -1;
         }
 
         uid_cfg->lacp_enabled = port->lacp_enabled;
-    }
+        if (port->selected && !port->standby)
+                uid_cfg->sel_state = True;
+        else
+                uid_cfg->sel_state = False;
+        
+        
+        return 0;
+        
 }
 
 int lac_port_get_dbg_cfg(int port_index, LAC_PORT_T * port)

@@ -829,14 +829,76 @@ static CMD_DSCR_T lang[] = {
 
 #endif
 
+typedef struct 
+{
+        int cnt;
+        
+        int ports[8];
+}LINK_GROUP_T;
+
+        
+LINK_GROUP_T g_link_groups[32];
+int aggregator_init()
+{
+        int i; 
+        memset(g_link_groups, 0xff, sizeof(g_link_groups));
+        for (i = 0; i < 32; i++)
+                g_link_groups[i].cnt = 0;
+        
+}
+int aggregator_add_member(int agg_id, int port_index)
+{
+        int i;
+        for (i=0;i<8;i++)
+        {
+                if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
+                {
+                        g_link_groups[agg_id - 1].ports[i] = port_index;
+                        g_link_groups[agg_id - 1].cnt ++;
+                        return 0;
+                        
+                }
+                
+        }
+        printf("\r\n agg %d full !", agg_id);
+        return -1 ;
+        
+        
+}
+int aggregator_del_member(int agg_id, int port_index)
+{
+        int i;
+        for (i=0;i<8;i++)
+        {
+                if (g_link_groups[agg_id - 1].ports == port_index)
+                {
+                        g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
+                        g_link_groups[agg_id - 1].cnt --;
+                        return 0;
+                        
+                }
+                
+        }
+        printf("\r\n agg %d not found port:%d !", agg_id, port_index);
+        return -1 ;
+        
+        
+}
+
 static int cli_enable (int argc, char** argv)
 {
     int port_index = atoi(argv[1]);
     int agg_id = atoi(argv[2]);
-
+    
     UID_LAC_PORT_CFG_T uid_cfg;
-    printf("\r\n index:%d", port_index);
-
+    if (!agg_id || agg_id >32)
+    {
+            printf("aggid error. r\n");
+            return -1;
+    }
+    
+    aggregator_add_member(agg_id, port_index);
+    
     uid_cfg.field_mask = PT_CFG_STATE;
     uid_cfg.lacp_enabled = 1;
     uid_cfg.agg_id = agg_id;
@@ -846,6 +908,67 @@ static int cli_enable (int argc, char** argv)
     return 0;
 
 }
+
+static int cli_disable (int argc, char** argv)
+{
+    int port_index = atoi(argv[1]);
+    int agg_id = atoi(argv[2]);
+    
+    UID_LAC_PORT_CFG_T uid_cfg;
+    if (!agg_id || agg_id >32)
+    {
+            printf("aggid error. r\n");
+            return -1;
+    }
+    
+    aggregator_add_member(agg_id, port_index);
+    
+    uid_cfg.field_mask = PT_CFG_STATE;
+    uid_cfg.lacp_enabled = 0;
+    uid_cfg.agg_id = 0;
+    
+    BitmapSetBit(&uid_cfg.port_bmp, port_index);
+    lac_port_set_cfg(&uid_cfg);
+    return 0;
+
+}
+
+
+static int cli_br_get_cfg (int argc, char** argv)
+{
+        int i, j;
+        UID_LAC_PORT_CFG_T uid_cfg;
+        
+        printf("\r\n agg_id \t ports list");
+        
+        for (i = 0; i < 32; i++)
+        {
+                if (g_link_groups[i].cnt)
+                {
+                        printf("\r\n %d \t", i+1);
+                        
+                        for (j = 0; j < 8; j++)
+                        {
+                                if (g_link_groups[i].ports[j] == 0xffffffff)
+                                        continue;
+                                
+                                lac_port_get_cfg(g_link_groups[i].ports[j], &uid_cfg);
+                                if (uid_cfg.sel_state)
+                                        printf("%d(*), ", g_link_groups[i].ports[j]);
+                                else
+                                        printf("%d, ", g_link_groups[i].ports[j]);
+                        }
+                        
+                }
+                                        
+        }
+        
+        printf("\r\n");
+        return 0;
+        
+        
+}
+
 static void
 get_sysid_str (int prio, unsigned char *addr, unsigned char *str)
 {
@@ -978,23 +1101,70 @@ static int cli_pr_get_cfg (int argc, char** argv)
 
 }
 
+int cli_pr_set_speed(int argc, char **argv)
+{
+
+        int port_index = atoi(argv[1]);
+        int speed = atoi(argv[2]);
+        lac_set_port_speed(port_index, speed);
+        
+}
+
+int cli_pr_set_duplex(int argc, char **argv)
+{
+
+        int port_index = atoi(argv[1]);
+        int speed = atoi(argv[2]);
+        lac_set_port_duplex(port_index, speed);
+        
+}
+extern port_attr g_port_list[100];
+
+int cli_pr_get_attr(int argc, char **argv)
+{
+        int port_index = atoi(argv[1]);
+
+        printf("speed \t duplex \t rx&tx \t chip_tgid");
+        
+        printf("\r\n %d \t %d \t %d \t %d", g_port_list[port_index].speed, g_port_list[port_index].duplex,  g_port_list[port_index].cd, g_port_list[port_index].tid);
+
+        return 0;                
+}
+
 static CMD_DSCR_T lang[] = {
-    THE_COMMAND("enable", "enable rstp")
+    THE_COMMAND("enable ", "enable lacp")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
     PARAM_NUMBER("agg group on bridge", 1, 32, 1)
     THE_FUNC(cli_enable)
-#if 0
-    THE_COMMAND("disable", "disable rstp")
+
+    THE_COMMAND("disable", "disable lacp")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    PARAM_NUMBER("agg group on bridge", 1, 32, 1)
     THE_FUNC(cli_disable)
 
     THE_COMMAND("show bridge", "get bridge config")
     THE_FUNC(cli_br_get_cfg)
-#endif
+
 
     THE_COMMAND("show port", "get port config")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
     THE_FUNC(cli_pr_get_cfg)
 
+    THE_COMMAND("set speed ", "set port speed")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    PARAM_NUMBER("speed", 1, 10000, "all")
+    THE_FUNC(cli_pr_set_speed)
+
+
+    THE_COMMAND("set duplex ", "set port speed")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    PARAM_NUMBER("duplex", 0, 10000, "all")
+    THE_FUNC(cli_pr_set_duplex)
+
+    THE_COMMAND("show attr ", "show port speed")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    THE_FUNC(cli_pr_get_attr)
+    
     END_OF_LANG
 }
 ;
@@ -1002,6 +1172,8 @@ static CMD_DSCR_T lang[] = {
 int stp_cli_init (void)
 {
     cli_register_language (lang);
+    aggregator_init();
+    
     return 0;
 }
 
