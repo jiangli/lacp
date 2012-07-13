@@ -1,8 +1,64 @@
 #include "lac_base.h"
 #include "stdarg.h"
-//#include "stdafx.h"
+#include "lac_port.h"
+#include "lac_in.h"
 
 port_attr g_port_list[100];
+LINK_GROUP_T g_link_groups[32];
+int aggregator_add_member(int agg_id, int port_index)
+{
+        int i;
+        for (i=0;i<8;i++)
+        {
+                if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
+                {
+                        g_link_groups[agg_id - 1].ports[i] = port_index;
+                        g_link_groups[agg_id - 1].cnt ++;
+                        return 0;
+                        
+                }
+                
+        }
+        printf("\r\n agg %d full !", agg_id);
+        return -1 ;
+        
+        
+}
+int aggregator_del_member(int agg_id, int port_index)
+{
+        int i;
+        for (i=0;i<8;i++)
+        {
+                if (g_link_groups[agg_id - 1].ports == port_index)
+                {
+                        g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
+                        g_link_groups[agg_id - 1].cnt --;
+                        return 0;
+                        
+                }
+                
+        }
+        printf("\r\n agg %d not found port:%d !", agg_id, port_index);
+        return -1 ;
+        
+        
+}
+int aggregator_get_id(int port_index)
+{
+  int i,j;
+        for (i=0;i<32;i++)
+        {
+          for (j=0;j<8;j++)
+                if (g_link_groups[i].ports[j] == port_index)
+                {
+                  return i+1;
+                }
+        }
+        return 0;
+        
+        
+  
+}
 
 const char * LAC_OUT_get_port_name (int port_index)
 {
@@ -35,13 +91,25 @@ int lac_get_port_oper_duplex(int port_index)
 }
 int lac_set_port_speed(int port_index, int speed)
 {
+        UID_LAC_PORT_CFG_T uid_cfg;
+  
         g_port_list[port_index].speed = speed;
+        BitmapSetBit(&uid_cfg.port_bmp, port_index);
+        uid_cfg.field_mask = PT_CFG_COST;
+        
+        lac_port_set_cfg(&uid_cfg);
+        
         return 0;
         
 }
 int lac_set_port_duplex(int port_index, int duplex)
 {
+UID_LAC_PORT_CFG_T uid_cfg;
         g_port_list[port_index].duplex = duplex;
+        BitmapSetBit(&uid_cfg.port_bmp, port_index);
+        uid_cfg.field_mask = PT_CFG_COST;
+        
+        lac_port_set_cfg(&uid_cfg);
         return 0;
         
 }
@@ -108,8 +176,7 @@ int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 int lac_get_port_oper_key(int port_index)
 {
         int speed, duplex, tid;
-        
-        lac_get_port_attach_to_tid(port_index, &tid);
+        tid = aggregator_get_id(port_index);
         speed = lac_get_port_oper_speed(port_index);
         duplex = lac_get_port_oper_duplex(port_index);
         
@@ -138,7 +205,7 @@ int lac_out_sem_give()
 
 void lac_trace (const char *format, ...)
 {
-#define MAX_MSG_LEN  128
+  #define MAX_MSG_LEN  128
     char msg[MAX_MSG_LEN];
     va_list args;
 

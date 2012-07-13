@@ -59,3 +59,11 @@ typedef enum {
 } UID_LAC_MODE_T;
 
 
+
+typedef struct 
+{
+        int cnt;
+        
+        int ports[8];
+}LINK_GROUP_T;
+

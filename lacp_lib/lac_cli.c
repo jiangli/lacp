@@ -828,60 +828,14 @@ static CMD_DSCR_T lang[] = {
 };
 
 #endif
-
-typedef struct 
-{
-        int cnt;
         
-        int ports[8];
-}LINK_GROUP_T;
-
-        
-LINK_GROUP_T g_link_groups[32];
+extern LINK_GROUP_T g_link_groups[32];
 int aggregator_init()
 {
         int i; 
         memset(g_link_groups, 0xff, sizeof(g_link_groups));
         for (i = 0; i < 32; i++)
                 g_link_groups[i].cnt = 0;
-        
-}
-int aggregator_add_member(int agg_id, int port_index)
-{
-        int i;
-        for (i=0;i<8;i++)
-        {
-                if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
-                {
-                        g_link_groups[agg_id - 1].ports[i] = port_index;
-                        g_link_groups[agg_id - 1].cnt ++;
-                        return 0;
-                        
-                }
-                
-        }
-        printf("\r\n agg %d full !", agg_id);
-        return -1 ;
-        
-        
-}
-int aggregator_del_member(int agg_id, int port_index)
-{
-        int i;
-        for (i=0;i<8;i++)
-        {
-                if (g_link_groups[agg_id - 1].ports == port_index)
-                {
-                        g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
-                        g_link_groups[agg_id - 1].cnt --;
-                        return 0;
-                        
-                }
-                
-        }
-        printf("\r\n agg %d not found port:%d !", agg_id, port_index);
-        return -1 ;
-        
         
 }
 

@@ -1,0 +1,6 @@
+a ---- b
+
+change b 's key. then a is not sync , but can't sync again.
+
+so how to tell mux to reselect before select login.
+think about make select as a logic in mux

@@ -83,6 +83,13 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
                         lac_set_port_reselect(port);
 
         }
+        else if (uid_cfg->field_mask & PT_CFG_COST)
+        {
+          lac_set_port_reselect(port);
+          
+        }
+        
+
 
     }
 
