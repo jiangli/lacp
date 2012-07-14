@@ -105,7 +105,7 @@ int record_default(LAC_PORT_T *port)
     LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF , True);
 
     return 0;
-    
+
 }
 static void update_partner_syn(LAC_PORT_T *port)
 {
@@ -113,9 +113,9 @@ static void update_partner_syn(LAC_PORT_T *port)
     Bool partner_matched = False;
 
     if ( (  (lac_same_partner(&port->msg_partner, &port->actor) && (LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_AGG) == LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG)))
-           || (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)))
-         && ((LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT))
-             || (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)     &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))))
+            || (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)))
+            && ((LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT))
+                || (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)     &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))))
         partner_matched = True;
     else
     {
@@ -143,7 +143,7 @@ int update_selected(LAC_PORT_T *port)
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
     }
     return 0;
-    
+
 }
 static void update_ntt(LAC_PORT_T *port)
 {
@@ -161,7 +161,7 @@ int record_pdu(LAC_PORT_T *port)
     LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF, False);
 
     return 0;
-    
+
 }
 int update_default_selected(LAC_PORT_T *port)
 {
@@ -174,7 +174,7 @@ int update_default_selected(LAC_PORT_T *port)
     }
 
     return 0;
-    
+
 }
 static void start_current_while_timer(LAC_PORT_T *port, Bool timeout)
 {
@@ -208,7 +208,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_LACP_DISABLED:
-            //lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        //lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected 				 = False;
 //        port->standby					 = False;
         record_default(port);
@@ -302,7 +302,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_CURRENT:
-            if (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)
+        if (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)
                 || (!port->current_while && !port->rcvdLacpdu)) {
             return lac_hop_2_state (this, RXM_EXPIRED);
         }

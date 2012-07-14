@@ -113,7 +113,7 @@ bridge_start ()
 
     iii = lac_sys_set_cfg(&uid_cfg);
     if (0 != iii) {
-            printf ("FATAL: can't enable:%iii\n", iii);
+        printf ("FATAL: can't enable:%iii\n", iii);
 
         return (-1);
     }

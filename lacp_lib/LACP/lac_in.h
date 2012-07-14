@@ -8,8 +8,8 @@ typedef struct {
     unsigned short port_priority;
     Bool			  lacp_enabled;
     LAC_STATE 	  state;
-        int sel_state;
-        
+    int sel_state;
+
     int agg_id;
 
 } UID_LAC_PORT_CFG_T;
@@ -60,12 +60,12 @@ typedef enum {
 
 
 
-typedef struct 
+typedef struct
 {
-        int cnt;
-        
-        int ports[8];
-}LINK_GROUP_T;
+    int cnt;
+
+    int ports[8];
+} LINK_GROUP_T;
 
 LAC_SYS_T *lac_get_sys_inst (void);
 int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg);

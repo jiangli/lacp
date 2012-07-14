@@ -26,7 +26,7 @@ int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
     int iret;
     LAC_CRITICAL_PATH_START;
     lac_trace("\r\n port %d rx lacpdu", port_index);
-    
+
     this = lac_get_sys_inst();
     if (!this) {
         lac_trace("the instance had not yet been created");
@@ -85,35 +85,35 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
 
         if (uid_cfg->field_mask & PT_CFG_STATE)
         {
-                /* maybe delete from agg. so update selected first */
-                if (port->agg_id && !uid_cfg->lacp_enabled)
-                {
-                        port->ntt = True;
+            /* maybe delete from agg. so update selected first */
+            if (port->agg_id && !uid_cfg->lacp_enabled)
+            {
+                port->ntt = True;
 //                        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_TMT, SHORT_TIMEOUT);
-                        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, False);
-                        lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
-                          
-                } else {
-                                        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, True);        
-                }
-                
-                
+                LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, False);
+                lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
+
+            } else {
+                LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, True);
+            }
+
+
             lac_set_port_reselect(port);
             port->lacp_enabled = uid_cfg->lacp_enabled;
             port->static_agg = True;
             port->agg_id = uid_cfg->agg_id;
-            
-                if (port->agg_id)
-                        lac_set_port_reselect(port);
-                
+
+            if (port->agg_id)
+                lac_set_port_reselect(port);
+
 
         }
         else if (uid_cfg->field_mask & PT_CFG_COST)
         {
-          lac_set_port_reselect(port);
-          
+            lac_set_port_reselect(port);
+
         }
-        
+
 
 
     }
@@ -132,20 +132,20 @@ int lac_port_get_cfg(int port_index, UID_LAC_PORT_CFG_T * uid_cfg)
     this = lac_get_sys_inst();
 
 
-        port = lac_port_find (this, port_index);
-        if (!port) {		  /* port is absent in the stpm :( */
-                return -1;
-        }
+    port = lac_port_find (this, port_index);
+    if (!port) {		  /* port is absent in the stpm :( */
+        return -1;
+    }
 
-        uid_cfg->lacp_enabled = port->lacp_enabled;
-        if (port->selected && !port->standby)
-                uid_cfg->sel_state = True;
-        else
-                uid_cfg->sel_state = False;
-        
-        
-        return 0;
-        
+    uid_cfg->lacp_enabled = port->lacp_enabled;
+    if (port->selected && !port->standby)
+        uid_cfg->sel_state = True;
+    else
+        uid_cfg->sel_state = False;
+
+
+    return 0;
+
 }
 
 int lac_port_get_dbg_cfg(int port_index, LAC_PORT_T * port)
@@ -195,54 +195,17 @@ lac_one_second ()
 }
 int lac_in_create_port()
 {
-        //TODO:: create port
-        return 0;
-        
+    //TODO:: create port
+    return 0;
+
 }
 int lac_in_remove_port()
 {
 //TODO:: remove port
-        return 0;
-        
-}
-
-static void
-_stp_in_enable_port_on_stpm (LAC_SYS_T * stpm, int port_index, Bool enable)
-{
-    register LAC_PORT_T *port;
-    lac_trace("port_index:%x.%d", stpm, port_index);
-
-    port = lac_port_find (stpm, port_index);
-    if (!port)
-        return;
-    if (port->port_enabled == enable) {	/* nothing to do :) */
-        return;
-    }
-
-    port->port_enabled = enable;
-
-    if (enable) {			/* clear port statistics */
-        port->rx_lacpdu_cnt = 0;
-
-        port->tx_lacpdu_cnt = 0;
-    }
-
-}
-
-int lac_in_enable_port(int port_index, Bool enable)
-{
-
-    register LAC_SYS_T *stpm = lac_get_sys_inst();
-
-    LAC_CRITICAL_PATH_START;
-
-    lac_trace ("port p%02d => %sABLE", (int) port_index, enable ? "EN" : "DIS");
-
-    _stp_in_enable_port_on_stpm (stpm, port_index, enable);
-    LAC_CRITICAL_PATH_END;
     return 0;
-    
+
 }
+
 int lac_in_link_change(int port_index, int link_status)
 {
     LAC_SYS_T *this;
@@ -255,6 +218,9 @@ int lac_in_link_change(int port_index, int link_status)
     if (!p) {		/* port is absent in the stpm :( */
         return -1;
     }
+    if (p->port_enabled == link_status) {	/* nothing to do :) */
+        return;
+    }
 
     if (link_status)
     {
@@ -265,15 +231,24 @@ int lac_in_link_change(int port_index, int link_status)
         p->port_enabled = False;
     }
 
-//    p->reselect = True;
     lac_set_port_reselect(p);
 
     lac_sys_update(this, LAC_SYS_UPDATE_READON_LINK);
 
     LAC_CRITICAL_PATH_END;
     return 0;
-    
+
 }
+int lac_in_enable_port(int port_index, Bool enable)
+{
+    lac_trace ("port p%02d => %sABLE", (int) port_index, enable ? "EN" : "DIS");
+
+    lac_in_link_change(port_index, enable);
+
+    return 0;
+
+}
+
 int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
 {
     LAC_SYS_T *this = lac_get_sys_inst();

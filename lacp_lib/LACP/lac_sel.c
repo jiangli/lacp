@@ -88,61 +88,61 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
     for (p = this->ports; p; p = p->next)
     {
         /* reduce the search range */
-            if (agg_id != p->agg_id || !p->port_enabled || !p->lacp_enabled || !p->duplex)
+        if (agg_id != p->agg_id || !p->port_enabled || !p->lacp_enabled || !p->duplex)
         {
-                printf("<%s.%d>", __FUNCTION__, __LINE__);
+            printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
         }
 
         if (!best)
         {
-                printf("<%s.%d>", __FUNCTION__, __LINE__);
-                
+            printf("<%s.%d>", __FUNCTION__, __LINE__);
+
             best = p;
             continue;
         }
 
         if( p->speed > best->speed)
         {
-                printf("<%s.%d>", __FUNCTION__, __LINE__);
+            printf("<%s.%d>", __FUNCTION__, __LINE__);
             best = p;
             continue;
 
         }
         else if ( p->speed < best->speed)
         {
-                printf("<%s.%d>", __FUNCTION__, __LINE__);
+            printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
         }
         else if (p->actor.port_priority < best->actor.port_priority)
         {
-                printf("<%s.%d>", __FUNCTION__, __LINE__);
+            printf("<%s.%d>", __FUNCTION__, __LINE__);
             best = p;
             continue;
 
         }
         else if     (p->actor.port_priority > best->actor.port_priority)
         {
-                printf("<%s.%d>", __FUNCTION__, __LINE__);
+            printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
 
         }
         else if ( (!LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) &&  LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
         {
 //                printf("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
-                best = p;
-                continue;
-                
-        }        
+            best = p;
+            continue;
+
+        }
         else if ( (LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) &&  !LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
         {
-                continue;
-                                
-        }        
+            continue;
+
+        }
         else if (p->actor.port_index < best->actor.port_index)
         {
 //                lac_trace("<%s.%d>", __FUNCTION__, __LINE__);
-                //              lac_trace("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
+            //              lac_trace("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
 
             best = p;
             continue;
@@ -150,11 +150,11 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
         }
     }
     if (best)
-            lac_trace("\r\n agg %d get best port: %d", agg_id, best->port_index);
+        lac_trace("\r\n agg %d get best port: %d", agg_id, best->port_index);
     else
-            lac_trace("\r\n agg %d NO best port.", agg_id);
-    
-    
+        lac_trace("\r\n agg %d NO best port.", agg_id);
+
+
     return best;
 
 }
@@ -201,7 +201,7 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
         }
     }
     return 0;
-    
+
 }
 
 
@@ -256,7 +256,7 @@ void lac_sel_enter_state (LAC_STATE_MACH_T * this)
     };
 
     return ;
-    
+
 }
 
 Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)

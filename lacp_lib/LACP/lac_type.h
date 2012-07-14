@@ -188,9 +188,9 @@ typedef struct lac_sys_t /* Lac_system */
 } LAC_SYS_T;
 
 typedef struct {
-        int speed;
-        int duplex;
-        int cd;
-        int tid;
-        
-}port_attr;
+    int speed;
+    int duplex;
+    int cd;
+    int tid;
+
+} port_attr;

@@ -11,78 +11,78 @@ bridge_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len);
 char *
 UT_sprint_time_stamp (char ticks_accuracy);
 
-        
+
 int aggregator_init()
 {
-        int i; 
-        memset(g_link_groups, 0xff, sizeof(g_link_groups));
-        for (i = 0; i < 32; i++)
-                g_link_groups[i].cnt = 0;
+    int i;
+    memset(g_link_groups, 0xff, sizeof(g_link_groups));
+    for (i = 0; i < 32; i++)
+        g_link_groups[i].cnt = 0;
 
-        for (i = 0; i < sizeof(g_port_list)/sizeof(g_port_list[0]); i++)
-        {
-                g_port_list[i].speed = 1000;
-                g_port_list[i].duplex = 1;
-                g_port_list[i].cd = 1;
-        }
-        
-        return 0;
-        
+    for (i = 0; i < sizeof(g_port_list)/sizeof(g_port_list[0]); i++)
+    {
+        g_port_list[i].speed = 1000;
+        g_port_list[i].duplex = 1;
+        g_port_list[i].cd = 1;
+    }
+
+    return 0;
+
 }
 
 int aggregator_add_member(int agg_id, int port_index)
 {
-        int i;
-        for (i=0;i<8;i++)
+    int i;
+    for (i=0; i<8; i++)
+    {
+        if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
         {
-                if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
-                {
-                        g_link_groups[agg_id - 1].ports[i] = port_index;
-                        g_link_groups[agg_id - 1].cnt ++;
-                        return 0;
-                        
-                }
-                
+            g_link_groups[agg_id - 1].ports[i] = port_index;
+            g_link_groups[agg_id - 1].cnt ++;
+            return 0;
+
         }
-        printf("\r\n agg %d full !", agg_id);
-        return -1 ;
-        
-        
+
+    }
+    printf("\r\n agg %d full !", agg_id);
+    return -1 ;
+
+
 }
 int aggregator_del_member(int agg_id, int port_index)
 {
-        int i;
-        for (i=0;i<8;i++)
+    int i;
+    for (i=0; i<8; i++)
+    {
+        if (g_link_groups[agg_id - 1].ports[i] == port_index)
         {
-                if (g_link_groups[agg_id - 1].ports[i] == port_index)
-                {
-                        g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
-                        g_link_groups[agg_id - 1].cnt --;
-                        return 0;
-                        
-                }
-                
+            g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
+            g_link_groups[agg_id - 1].cnt --;
+            return 0;
+
         }
-        printf("\r\n agg %d not found port:%d !", agg_id, port_index);
-        return -1 ;
-        
-        
+
+    }
+    printf("\r\n agg %d not found port:%d !", agg_id, port_index);
+    return -1 ;
+
+
 }
 int aggregator_get_id(int port_index)
 {
-  int i,j;
-        for (i=0;i<32;i++)
-        {
-          for (j=0;j<8;j++)
-                if (g_link_groups[i].ports[j] == port_index)
-                {
-                  return i+1;
-                }
-        }
-        return 0;
-        
-        
-  
+    int i,j;
+    for (i=0; i<32; i++)
+    {
+        for (j=0; j<8; j++)
+            if (g_link_groups[i].ports[j] == port_index)
+            {
+                return i+1;
+            }
+    }
+    return 0;
+
+
+
 }
 
 const char * LAC_OUT_get_port_name (int port_index)
@@ -94,87 +94,87 @@ const char * LAC_OUT_get_port_name (int port_index)
 
 void LAC_OUT_get_port_mac (unsigned char *mac)
 {
-      static long pid = -1;
-  static unsigned char mac_beg[] = { '\0', '\0', '\0', '\0', '\0', '\0' };
+    static long pid = -1;
+    static unsigned char mac_beg[] = { '\0', '\0', '\0', '\0', '\0', '\0' };
 
-  if (pid < 0) {
-    pid = getpid ();
-    memcpy (mac_beg + 1, &pid, 4);
-  }
-  memcpy (mac, mac_beg, 5);
+    if (pid < 0) {
+        pid = getpid ();
+        memcpy (mac_beg + 1, &pid, 4);
+    }
+    memcpy (mac, mac_beg, 5);
 
     return ;
 }
 int lac_get_port_oper_speed(int port_index)
 {
-        return g_port_list[port_index].speed;
-        
+    return g_port_list[port_index].speed;
+
 }
 int lac_get_port_oper_duplex(int port_index)
 {
-        return g_port_list[port_index].duplex;
+    return g_port_list[port_index].duplex;
 }
 int lac_set_port_speed(int port_index, int speed)
 {
-        UID_LAC_PORT_CFG_T uid_cfg;
-  
-        g_port_list[port_index].speed = speed;
-        BitmapSetBit(&uid_cfg.port_bmp, port_index);
-        uid_cfg.field_mask = PT_CFG_COST;
-        
-        lac_port_set_cfg(&uid_cfg);
-        
-        return 0;
-        
+    UID_LAC_PORT_CFG_T uid_cfg;
+
+    g_port_list[port_index].speed = speed;
+    BitmapSetBit(&uid_cfg.port_bmp, port_index);
+    uid_cfg.field_mask = PT_CFG_COST;
+
+    lac_port_set_cfg(&uid_cfg);
+
+    return 0;
+
 }
 int lac_set_port_duplex(int port_index, int duplex)
 {
-UID_LAC_PORT_CFG_T uid_cfg;
-        g_port_list[port_index].duplex = duplex;
-        BitmapSetBit(&uid_cfg.port_bmp, port_index);
-        uid_cfg.field_mask = PT_CFG_COST;
-        
-        lac_port_set_cfg(&uid_cfg);
-        return 0;
-        
+    UID_LAC_PORT_CFG_T uid_cfg;
+    g_port_list[port_index].duplex = duplex;
+    BitmapSetBit(&uid_cfg.port_bmp, port_index);
+    uid_cfg.field_mask = PT_CFG_COST;
+
+    lac_port_set_cfg(&uid_cfg);
+    return 0;
+
 }
 
 int lac_set_port_attach_to_tid(int port_index, Bool attach, int tid)
 {
-        if(attach)
-        {
-                g_port_list[port_index].tid = tid;
-                printf("\r\n attach %d --> %d!!",  port_index, tid);
-                
-        }
-        
-        else //if (tid != g_port_list[port_index].tid)
-        {
-//                printf("\r\n !!!!!!!!! detach from error tid:%d, actually in:%d", tid, g_port_list[port_index].tid);
-                
-                g_port_list[port_index].tid = 0;
-        }
-        
+    if(attach)
+    {
+        g_port_list[port_index].tid = tid;
+        printf("\r\n attach %d --> %d!!",  port_index, tid);
 
-        return 0;
+    }
+
+    else //if (tid != g_port_list[port_index].tid)
+    {
+//                printf("\r\n !!!!!!!!! detach from error tid:%d, actually in:%d", tid, g_port_list[port_index].tid);
+
+        g_port_list[port_index].tid = 0;
+    }
+
+
+    return 0;
 }
 int lac_get_port_attach_to_tid(int port_index, int *tid)
 {
-                *tid = g_port_list[port_index].tid;
-                return 0;
-                
+    *tid = g_port_list[port_index].tid;
+    return 0;
+
 }
 int lac_get_port_cd(int port_index)
 {
-        return g_port_list[port_index].cd;
-        
+    return g_port_list[port_index].cd;
+
 }
 int lac_set_port_cd(int port_index, int state)
 {
-        g_port_list[port_index].cd = state;
-        
-        return 0;
-        
+    g_port_list[port_index].cd = state;
+
+    return 0;
+
 }
 
 
@@ -199,19 +199,19 @@ int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 //	memdump(bpdu, bpdu_len);
     bridge_tx_bpdu(port_index, bpdu, bpdu_len);
     return 0;
-    
+
 }
 
 //HANDLE hMutex;
 int lac_get_port_oper_key(int port_index)
 {
-        int speed, duplex, tid;
-        tid = aggregator_get_id(port_index);
-        speed = lac_get_port_oper_speed(port_index);
-        duplex = lac_get_port_oper_duplex(port_index);
-        
-        return (tid+speed+duplex);
-        
+    int speed, duplex, tid;
+    tid = aggregator_get_id(port_index);
+    speed = lac_get_port_oper_speed(port_index);
+    duplex = lac_get_port_oper_duplex(port_index);
+
+    return (tid+speed+duplex);
+
 
 }
 
@@ -220,27 +220,27 @@ int lac_out_init_sem()
     //hMutex = CreateMutex(NULL,FALSE,NULL);
 
     //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
-        return 0;
-        
+    return 0;
+
 }
 int lac_out_sem_take()
 {
     //WaitForSingleObject(hMutex,INFINITE);
     printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     return 0;
-    
+
 }
 
 int lac_out_sem_give()
 {
     printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     return 0;
-    
+
 }
 
 void lac_trace (const char *format, ...)
 {
-  #define MAX_MSG_LEN  128
+#define MAX_MSG_LEN  128
     char msg[MAX_MSG_LEN];
     va_list args;
 

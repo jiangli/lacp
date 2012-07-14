@@ -70,7 +70,7 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->agg_id = 0;
     this->speed = lac_get_port_oper_speed(this->port_index);
     this->duplex = lac_get_port_oper_duplex(this->port_index);
-    
+
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
@@ -146,7 +146,7 @@ int lac_set_port_reselect(LAC_PORT_T *port)
 {
     LAC_PORT_T  *p;
     LAC_SYS_T *lac_sys;
-        lac_sys = lac_get_sys_inst();
+    lac_sys = lac_get_sys_inst();
     if (!port)
     {
 
@@ -160,11 +160,11 @@ int lac_set_port_reselect(LAC_PORT_T *port)
         return 0;
     }
     else
-    {        
+    {
 
         if (port->static_agg && port->agg_id)
         {
-                for (p = port->system->ports; p; p=p->next)
+            for (p = port->system->ports; p; p=p->next)
             {
                 if (p->agg_id == port->agg_id)
                 {
