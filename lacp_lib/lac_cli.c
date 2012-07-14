@@ -1132,6 +1132,15 @@ int cli_pr_get_attr(int argc, char **argv)
     return 0;
 }
 
+int cli_pr_set_link(int argc, char **argv)
+{
+        int port_index = atoi(argv[1]);
+        int link_status = atoi(argv[2]);
+        lac_in_link_change(port_index, link_status);
+        return 0;
+        
+}
+
 static CMD_DSCR_T lang[] = {
     THE_COMMAND("enable ", "enable lacp")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
@@ -1161,6 +1170,12 @@ static CMD_DSCR_T lang[] = {
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
     PARAM_NUMBER("duplex", 0, 10000, "all")
     THE_FUNC(cli_pr_set_duplex)
+
+    THE_COMMAND("set link ", "set port speed")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    PARAM_NUMBER("status", 0, 1, "1")
+    THE_FUNC(cli_pr_set_link)
+
 
     THE_COMMAND("show attr ", "show port speed")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")

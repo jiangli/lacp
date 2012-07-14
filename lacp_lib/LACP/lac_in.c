@@ -25,7 +25,7 @@ int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
     register LAC_SYS_T *this;
     int iret;
     LAC_CRITICAL_PATH_START;
-    lac_trace("\r\n port %d rx lacpdu", port_index);
+    lac_trace(" port %d rx lacpdu", port_index);
 
     this = lac_get_sys_inst();
     if (!this) {
