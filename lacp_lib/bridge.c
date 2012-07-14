@@ -38,8 +38,9 @@
 
 #include "lac_base.h"
 #include "lac_port.h"
+#include "bitmap.h"
+#include "lac_sys.h"
 #include "lac_pdu.h"
-#include "lac_bitmap.h"
 #include "uid_lac.h"
 #include "lac_in.h"
 
@@ -47,7 +48,7 @@
 long my_pid = 0;
 BITMAP_T enabled_ports;
 IPC_SOCKET_T ipc_socket;
-
+extern void setuptrap();
 int
 bridge_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 {
@@ -71,7 +72,6 @@ bridge_start ()
 
     int number_of_ports = 4;
     UID_LAC_CFG_T uid_cfg;
-    BITMAP_T Ports;
     int max_valid_port = 144;
     int i = 0;
 
@@ -114,7 +114,7 @@ bridge_start ()
 
     iii = lac_sys_set_cfg(&uid_cfg);
     if (0 != iii) {
-        printf ("FATAL: can't enable:%iii\n");
+            printf ("FATAL: can't enable:%iii\n", iii);
 
         return (-1);
     }
@@ -179,7 +179,6 @@ bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
 int
 bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
-    register int port_index;
 
     lac_in_rx (msg->header.destination_port,
                (LACPDU_T *) (msg->body.bpdu),

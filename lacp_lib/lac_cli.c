@@ -32,11 +32,16 @@
 
 #include "cli.h"
 #include "lac_cli.h"
-#include "lac_bitmap.h"
+#include "bitmap.h"
 #include "uid_lac.h"
 #include "lac_base.h"
 #include "lac_port.h"
+#include "lac_sys.h"
 #include "lac_in.h"
+#include "lac_out.h"
+
+
+extern  int aggregator_init();
 
 #if 0
 static void
@@ -830,59 +835,86 @@ static CMD_DSCR_T lang[] = {
 #endif
         
 extern LINK_GROUP_T g_link_groups[32];
-int aggregator_init()
-{
-        int i; 
-        memset(g_link_groups, 0xff, sizeof(g_link_groups));
-        for (i = 0; i < 32; i++)
-                g_link_groups[i].cnt = 0;
-        
-}
+extern int max_port;
 
 static int cli_enable (int argc, char** argv)
 {
-    int port_index = atoi(argv[1]);
+        int port_loop;
+        
+        int port_start = 0;
+        int port_end = max_port;
+        
+    int port_index = 0xFFFFFFFF;
     int agg_id = atoi(argv[2]);
-    
     UID_LAC_PORT_CFG_T uid_cfg;
+
+    if ('a' != argv[1][0])
+    {
+            port_index = atoi(argv[1]);
+            port_start = port_end = port_index;
+            
+    }
+    
     if (!agg_id || agg_id >32)
     {
             printf("aggid error. r\n");
             return -1;
     }
-    
-    aggregator_add_member(agg_id, port_index);
+
+    for (port_loop  = port_start; port_loop <= port_end; port_loop++)
+    {
+            
+    aggregator_add_member(agg_id, port_loop);
     
     uid_cfg.field_mask = PT_CFG_STATE;
     uid_cfg.lacp_enabled = 1;
     uid_cfg.agg_id = agg_id;
 
-    BitmapSetBit(&uid_cfg.port_bmp, port_index);
+    BitmapSetBit(&uid_cfg.port_bmp, port_loop);
     lac_port_set_cfg(&uid_cfg);
+    }
+    
     return 0;
 
 }
 
 static int cli_disable (int argc, char** argv)
 {
-    int port_index = atoi(argv[1]);
+        int port_loop;
+        
+        int port_start = 0;
+        int port_end = max_port;
+    int port_index;
     int agg_id = atoi(argv[2]);
     
     UID_LAC_PORT_CFG_T uid_cfg;
+
+    if ('a' != argv[1][0])
+    {
+            port_index = atoi(argv[1]);
+            port_start = port_end = port_index;
+            
+    }
+    
     if (!agg_id || agg_id >32)
     {
             printf("aggid error. r\n");
             return -1;
     }
-    
-    aggregator_add_member(agg_id, port_index);
+
+    for (port_loop  = port_start; port_loop <= port_end; port_loop++)
+    {
+            
+    aggregator_del_member(agg_id, port_index);
     
     uid_cfg.field_mask = PT_CFG_STATE;
     uid_cfg.lacp_enabled = 0;
     uid_cfg.agg_id = 0;
-    
-    BitmapSetBit(&uid_cfg.port_bmp, port_index);
+
+    BitmapSetBit(&uid_cfg.port_bmp, port_loop);
     lac_port_set_cfg(&uid_cfg);
+    }
+
     return 0;
 
 }
@@ -893,13 +925,13 @@ static int cli_br_get_cfg (int argc, char** argv)
         int i, j;
         UID_LAC_PORT_CFG_T uid_cfg;
         
-        printf("\r\n agg_id \t ports list");
+        printf("\r\n agg_id  ports list");
         
         for (i = 0; i < 32; i++)
         {
                 if (g_link_groups[i].cnt)
                 {
-                        printf("\r\n %d \t", i+1);
+                        printf("\r\n %4d      ", i+1);
                         
                         for (j = 0; j < 8; j++)
                         {
@@ -926,14 +958,14 @@ static int cli_br_get_cfg (int argc, char** argv)
 static void
 get_sysid_str (int prio, unsigned char *addr, unsigned char *str)
 {
-    sprintf(str, "%u-%02x:%02x:%02x:%02x:%02x:%02x", prio,
+        sprintf((char *)str, "%u-%02x:%02x:%02x:%02x:%02x:%02x", prio,
             (unsigned char) addr[0],
             (unsigned char) addr[1],
             (unsigned char) addr[2],
             (unsigned char) addr[3],
             (unsigned char) addr[4],
             (unsigned char) addr[5]);
-    return 0;
+    return;
 
 }
 
@@ -951,7 +983,6 @@ _lac_in_display_bit (unsigned char bitmask,
 static void print_info(LAC_PORT_INFO *lac_info)
 {
     unsigned char sysid_str[40] = {0};
-    unsigned char flag_str[200] = {0};
 
     get_sysid_str(lac_info->system_priority, lac_info->system_id, sysid_str);
 
@@ -969,7 +1000,7 @@ static void print_info(LAC_PORT_INFO *lac_info)
     _lac_in_display_bit(LAC_STATE_DEF, "Defaulted", "......%d.", lac_info->state);
     _lac_in_display_bit(LAC_STATE_EXP, "Expired", ".......%d", lac_info->state);
 
-    return 0;
+    return ;
 
 }
 
@@ -1045,12 +1076,12 @@ static int cli_pr_get_cfg (int argc, char** argv)
     print_info(&port.actor);
     printf("\r\n parttor: " );
     print_info(&port.partner);
-
+#if 0
     printf("\r\n msg actor: " );
     print_info(&port.msg_actor);
     printf("\r\n msg parttor: " );
     print_info(&port.msg_partner);
-
+#endif
     return 0;
 
 }
@@ -1061,6 +1092,7 @@ int cli_pr_set_speed(int argc, char **argv)
         int port_index = atoi(argv[1]);
         int speed = atoi(argv[2]);
         lac_set_port_speed(port_index, speed);
+        return 0;
         
 }
 
@@ -1070,30 +1102,45 @@ int cli_pr_set_duplex(int argc, char **argv)
         int port_index = atoi(argv[1]);
         int speed = atoi(argv[2]);
         lac_set_port_duplex(port_index, speed);
+        return 0;
+        
         
 }
 extern port_attr g_port_list[100];
 
 int cli_pr_get_attr(int argc, char **argv)
 {
-        int port_index = atoi(argv[1]);
-
-        printf("speed \t duplex \t rx&tx \t chip_tgid");
+        int port_loop;
+        int port_index;
         
-        printf("\r\n %d \t %d \t %d \t %d", g_port_list[port_index].speed, g_port_list[port_index].duplex,  g_port_list[port_index].cd, g_port_list[port_index].tid);
-
+        int port_start = 0;
+        int port_end = max_port;
+        if ('a' != argv[1][0])
+        {
+                 port_index = atoi(argv[1]);
+                 port_start = port_end = port_index;
+                 
+        }
+        
+        printf("port    speed    duplex    rx&tx    chip_tgid");
+        for (port_loop = port_start; port_loop < port_end; port_loop++)
+        {
+                printf("\r\n%-4d     %-4d     %-4d     %-4d     %-4d", port_loop, g_port_list[port_loop].speed, g_port_list[port_loop].duplex,  g_port_list[port_loop].cd, g_port_list[port_loop].tid);
+        }
+        
+        printf("\r\n");
         return 0;                
 }
 
 static CMD_DSCR_T lang[] = {
     THE_COMMAND("enable ", "enable lacp")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
-    PARAM_NUMBER("agg group on bridge", 1, 32, 1)
+    PARAM_NUMBER("agg group on bridge", 1, 32,"1")
     THE_FUNC(cli_enable)
 
     THE_COMMAND("disable", "disable lacp")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
-    PARAM_NUMBER("agg group on bridge", 1, 32, 1)
+    PARAM_NUMBER("agg group on bridge", 1, 32, "1")
     THE_FUNC(cli_disable)
 
     THE_COMMAND("show bridge", "get bridge config")

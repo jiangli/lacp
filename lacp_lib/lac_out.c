@@ -1,10 +1,35 @@
 #include "lac_base.h"
 #include "stdarg.h"
 #include "lac_port.h"
+#include "lac_sys.h"
 #include "lac_in.h"
 
-port_attr g_port_list[100];
+port_attr g_port_list[144];
 LINK_GROUP_T g_link_groups[32];
+int
+bridge_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len);
+char *
+UT_sprint_time_stamp (char ticks_accuracy);
+
+        
+int aggregator_init()
+{
+        int i; 
+        memset(g_link_groups, 0xff, sizeof(g_link_groups));
+        for (i = 0; i < 32; i++)
+                g_link_groups[i].cnt = 0;
+
+        for (i = 0; i < sizeof(g_port_list)/sizeof(g_port_list[0]); i++)
+        {
+                g_port_list[i].speed = 1000;
+                g_port_list[i].duplex = 1;
+                g_port_list[i].cd = 1;
+        }
+        
+        return 0;
+        
+}
+
 int aggregator_add_member(int agg_id, int port_index)
 {
         int i;
@@ -29,7 +54,7 @@ int aggregator_del_member(int agg_id, int port_index)
         int i;
         for (i=0;i<8;i++)
         {
-                if (g_link_groups[agg_id - 1].ports == port_index)
+                if (g_link_groups[agg_id - 1].ports[i] == port_index)
                 {
                         g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
                         g_link_groups[agg_id - 1].cnt --;
@@ -114,18 +139,22 @@ UID_LAC_PORT_CFG_T uid_cfg;
         
 }
 
-int lac_set_port_attach_to_tid(int port_index, int attach, int tid)
+int lac_set_port_attach_to_tid(int port_index, Bool attach, int tid)
 {
         if(attach)
-                g_port_list[port_index].tid = tid;
-        else if (tid != g_port_list[port_index].tid)
         {
-                printf("\r\n !!!!!!!!! detach from error tid:%d, actually in:%d", tid, g_port_list[port_index].tid);
-                return -1;
+                g_port_list[port_index].tid = tid;
+                printf("\r\n attach %d --> %d!!",  port_index, tid);
                 
         }
-        else
+        
+        else //if (tid != g_port_list[port_index].tid)
+        {
+//                printf("\r\n !!!!!!!!! detach from error tid:%d, actually in:%d", tid, g_port_list[port_index].tid);
+                
                 g_port_list[port_index].tid = 0;
+        }
+        
 
         return 0;
 }
@@ -169,7 +198,8 @@ int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
     //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
 //	memdump(bpdu, bpdu_len);
     bridge_tx_bpdu(port_index, bpdu, bpdu_len);
-
+    return 0;
+    
 }
 
 //HANDLE hMutex;
@@ -190,17 +220,22 @@ int lac_out_init_sem()
     //hMutex = CreateMutex(NULL,FALSE,NULL);
 
     //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+        return 0;
+        
 }
 int lac_out_sem_take()
 {
     //WaitForSingleObject(hMutex,INFINITE);
-    //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+    printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+    return 0;
+    
 }
 
 int lac_out_sem_give()
 {
-    //ReleaseMutex(hMutex);
-    //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+    printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+    return 0;
+    
 }
 
 void lac_trace (const char *format, ...)
@@ -212,7 +247,7 @@ void lac_trace (const char *format, ...)
     va_start (args, format);
     vsprintf (msg, format, args);
 
-    printf("\r\n %s", msg);
+    printf("\r\n[%s]%s", UT_sprint_time_stamp (0), msg);
     va_end (args);
 }
 

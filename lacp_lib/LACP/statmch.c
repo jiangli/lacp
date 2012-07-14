@@ -25,7 +25,7 @@
 #include "lac_base.h"
 #include "lac_port.h"
 #include "statmch.h"
-
+#include "../lac_out.h"
 #if LAC_DBG
 #  include "lac_base.h"
 #endif

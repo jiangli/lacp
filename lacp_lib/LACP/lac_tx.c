@@ -2,6 +2,7 @@
 #include "statmch.h"
 #include "lac_sys.h"
 #include "lac_pdu.h"
+#include "../lac_out.h"
 
 #define STATES {        \
   CHOOSE(NO_PERIODIC),    \
@@ -21,14 +22,13 @@ static LACPDU_T lacpdu_packet;
 static int
 tx_lacpdu(LAC_STATE_MACH_T * this)
 {   /* 17.19.15 (page 67) & 9.3.1 (page 23) */
-    register size_t pkt_len;
     register int port_index;
     register LAC_PORT_T *port = this->owner.port;
     const unsigned char slow_protocols_address[] = {0x01, 0x80, 0xc2, 0x00, 0x00, 0x02};
 
     if (!port->lacp_enabled)
     {
-        printf("\r\n not enable tx");
+        lac_trace("\r\n not enable tx");
         return 1;
     }
 
@@ -88,7 +88,7 @@ void lac_tx_enter_state (LAC_STATE_MACH_T * this)
         break;
 
     case PERIODIC_TX:
-        port->hold_count = 0;
+
         port->ntt = True;
 
         if (LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_TMT) == LONG_TIMEOUT)
@@ -117,10 +117,10 @@ Bool lac_tx_check_conditions (LAC_STATE_MACH_T * this)
             || ((LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT) == LAC_PASSIVE )
                 && (LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_ACT) == LAC_PASSIVE)))
     {
-//          printf("\r\n GET:%d, %d",LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT), LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_ACT));
+//          lac_trace("\r\n GET:%d, %d",LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT), LAC_STATE_GET_BIT(port->partner.state, LAC_STATE_ACT));
 
 
-        /*printf("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d",
+        /*lac_trace("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d",
         port->port_index, this->State, port->port_enabled, port->lacp_enabled);*/
         if (NO_PERIODIC == this->State)
         {
@@ -140,7 +140,7 @@ Bool lac_tx_check_conditions (LAC_STATE_MACH_T * this)
         return lac_hop_2_state (this, IDLE);
 
     case IDLE:
-        //printf("\r\n IDEL:port:%d, periodic_timer:%d", port->port_index, port->periodic_timer);
+        //lac_trace("\r\n IDEL:port:%d, periodic_timer:%d", port->port_index, port->periodic_timer);
 
         if (!port->periodic_timer)
         {

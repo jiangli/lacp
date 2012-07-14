@@ -33,7 +33,7 @@
 #include <readline/readline.h>
 
 #include "cli.h"
-#include "lac_bitmap.h"
+#include "bitmap.h"
 #include "br_ipc.h"
 
 IPC_SOCKET_T main_sock;

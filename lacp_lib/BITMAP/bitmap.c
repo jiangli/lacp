@@ -1,5 +1,5 @@
 #include <string.h>
-#include "lac_bitmap.h"
+#include "bitmap.h"
 
 void BitmapClear(BITMAP_T *BitmapPtr) 
 {

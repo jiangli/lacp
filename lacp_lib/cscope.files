@@ -1,5 +1,5 @@
 BITMAP/bitmap.c
-BITMAP/lac_bitmap.h
+BITMAP/bitmap.h
 bridge.c
 br_ipc.h
 CLI/cli.c
@@ -9,6 +9,7 @@ IPC/ipc.h
 lac_cli.c
 lac_cli.h
 lac_out.c
+lac_out.h
 LACP/choose.h
 LACP/lac_base.h
 LACP/lac_default.h

@@ -2,7 +2,7 @@
 #include "statmch.h"
 #include "lac_sys.h"
 #include "lac_pdu.h"
-
+#include "../lac_out.h"
 #define STATES {        \
   CHOOSE(INIT),    \
   CHOOSE(SELECTION),    \
@@ -67,7 +67,7 @@ LAC_PORT_T get_dyn_agg_aggregator_port(LAC_PORT_T *port)
 
 }
 #endif
-int select_master_port(LAC_SYS_T *this, int agg_id)
+LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
 {
 
     LAC_PORT_T *best = NULL;
@@ -89,45 +89,73 @@ int select_master_port(LAC_SYS_T *this, int agg_id)
     for (p = this->ports; p; p = p->next)
     {
         /* reduce the search range */
-        if (agg_id != p->agg_id || !p->port_enabled || !p->lacp_enabled || !p->duplex)
+            if (agg_id != p->agg_id || !p->port_enabled || !p->lacp_enabled || !p->duplex)
         {
+                printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
         }
 
         if (!best)
         {
+                printf("<%s.%d>", __FUNCTION__, __LINE__);
+                
             best = p;
+            continue;
         }
 
         if( p->speed > best->speed)
         {
+                printf("<%s.%d>", __FUNCTION__, __LINE__);
             best = p;
             continue;
 
         }
         else if ( p->speed < best->speed)
         {
+                printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
         }
         else if (p->actor.port_priority < best->actor.port_priority)
         {
+                printf("<%s.%d>", __FUNCTION__, __LINE__);
             best = p;
             continue;
 
         }
         else if     (p->actor.port_priority > best->actor.port_priority)
         {
+                printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
 
         }
+        else if ( (!LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) &&  LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
+        {
+//                printf("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
+                best = p;
+                continue;
+                
+        }        
+        else if ( (LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) &&  !LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
+        {
+                continue;
+                                
+        }        
         else if (p->actor.port_index < best->actor.port_index)
         {
+//                lac_trace("<%s.%d>", __FUNCTION__, __LINE__);
+                //              lac_trace("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
+
             best = p;
             continue;
 
         }
     }
-
+    if (best)
+            lac_trace("\r\n agg %d get best port: %d", agg_id, best->port_index);
+    else
+            lac_trace("\r\n agg %d NO best port.", agg_id);
+    
+    
     return best;
 
 }
@@ -158,34 +186,34 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
                 && !partners_aport(p))
         {
             p->selected = True;
-            printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
+//            lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
             p->standby = False;
 
             p->aport = best;
 //                    p->reselect = False;
-            printf("\r\n <%s.%d> %d Selected",  __FUNCTION__, __LINE__, p->port_index);
+            lac_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, p->port_index);
         } else {
-            printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
+//            lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
             p->selected = True;
 //                    p->reselect = False;
             p->standby = True;
 
-            printf("\r\n <%s.%d> %d NOT Selected",  __FUNCTION__, __LINE__, p->port_index);
+            lac_trace("\r\n <%s.%d> port  %d ---> Standby ",  __FUNCTION__, __LINE__, p->port_index);
         }
     }
+    return 0;
+    
 }
 
 
 int selection_logic(LAC_PORT_T *port)
 {
     LAC_SYS_T *this = port->system;
-    LAC_PORT_T *p;
-    LAC_PORT_T *best = NULL;
 
     /* maybe port delete from agg */
     if (!port->lacp_enabled)
     {
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, True);
+//        lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, True);
         port->selected = True;
         port->standby = True;
         return 0;
@@ -193,7 +221,7 @@ int selection_logic(LAC_PORT_T *port)
 
     if (!port->agg_id)
     {
-//            printf("\r\n warning:port:%d agg error.", port->port_index);
+//            lac_trace("\r\n warning:port:%d agg error.", port->port_index);
 
         return 1;
 
@@ -206,7 +234,7 @@ int selection_logic(LAC_PORT_T *port)
 
 int lac_select(LAC_PORT_T *port)
 {
-    selection_logic(port);
+    return selection_logic(port);
 }
 
 void lac_sel_enter_state (LAC_STATE_MACH_T * this)
@@ -217,7 +245,7 @@ void lac_sel_enter_state (LAC_STATE_MACH_T * this)
     case BEGIN:
     case INIT:
 //        port->reselect = True;
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+//        lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
         break;
 
@@ -227,6 +255,9 @@ void lac_sel_enter_state (LAC_STATE_MACH_T * this)
 
 
     };
+
+    return ;
+    
 }
 
 Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
@@ -241,7 +272,7 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
     case SELECTION:
         if (!port->selected)
         {
-//            printf("port %d select begin. \r\n", port->port_index);
+//            lac_trace("port %d select begin. \r\n", port->port_index);
 
             return lac_hop_2_state (this, SELECTION);
         }

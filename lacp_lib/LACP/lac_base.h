@@ -14,7 +14,7 @@
 #  define LAC_DBG 1
 #endif
 //#include "suma_os_support.h"
-#include "lac_type.h"
+
 
 #ifdef __VXWORKS__
 #  include <stddef.h>
@@ -31,7 +31,7 @@
 #  include <stdio.h>
 #  include <netinet/in.h>
 #include <arpa/inet.h>
-#  include "lac_bitmap.h"
+#  include "bitmap.h"
 #  define Print printf
 #endif
 
@@ -146,6 +146,6 @@ typedef enum {
     M_RSTP_NOT_ENABLE,
 } LAC_ERROR_E;
 
-
+#include "lac_type.h"
 #endif /*  _LAC_BASE_H__ */
 

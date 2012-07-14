@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <execinfo.h>
@@ -46,6 +47,7 @@ void fault_trap(int n,struct siginfo *siginfo,void *myact)
     printf("\r\nlog:%s \r\n", log);
     exit(1);
 }
+
 void setuptrap()
 {
     struct sigaction act;

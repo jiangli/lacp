@@ -1,7 +1,9 @@
 #include "lac_base.h"
 #include "statmch.h"
+#include "lac_port.h"
 #include "lac_sys.h"
 #include "lac_pdu.h"
+#include "../lac_out.h"
 
 /* The Port Information State Machine : 17.21 */
 
@@ -82,7 +84,7 @@ lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
 
         if (same_port(&p->partner, &port->msg_partner))
         {
-            printf("port %d moved to port %d \r\n", port->port_index, p->port_index);
+            lac_trace("port %d moved to port %d \r\n", port->port_index, p->port_index);
 
             p->port_moved = True;
             break;
@@ -91,7 +93,7 @@ lac_rx_bpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
 
     }
 
-    return 0;
+    return ;
 }
 static void actor_default(LAC_PORT_T *port)
 {
@@ -102,24 +104,23 @@ int record_default(LAC_PORT_T *port)
 {
     copy_info(&port->partner_admin, &port->partner);
     LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF , True);
+
+    return 0;
+    
 }
 static void update_partner_syn(LAC_PORT_T *port)
 {
     Bool partner_sync = False;
     Bool partner_matched = False;
 
-    if (  (  (lac_same_partner(&port->msg_partner, &port->actor)
-              && LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_AGG) == LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG))
-             || (  !LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG))
-             && (  (    LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT)
-                   )
-                   || (   LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)
-                          &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))
-                )))
+    if ( (  (lac_same_partner(&port->msg_partner, &port->actor) && (LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_AGG) == LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_AGG)))
+           || (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)))
+         && ((LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT))
+             || (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)     &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))))
         partner_matched = True;
     else
     {
-        printf("\r\n port:%d partner changed  ! ", port->port_index);
+        lac_trace("\r\n port:%d partner changed  ! ", port->port_index);
 
         port->ntt = True;
         partner_matched = False;
@@ -134,7 +135,7 @@ int update_selected(LAC_PORT_T *port)
 {
     if (!lac_same_partner(&port->msg_actor, &port->partner))
     {
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+        lac_trace("\r\n<%s.%d> port:%d not same partner", __FUNCTION__, __LINE__, port->port_index);
         port->selected					= False;
 //        port->reselect					= True;
         lac_set_port_reselect(port);
@@ -142,6 +143,8 @@ int update_selected(LAC_PORT_T *port)
 //        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
     }
+    return 0;
+    
 }
 static void update_ntt(LAC_PORT_T *port)
 {
@@ -157,16 +160,22 @@ int record_pdu(LAC_PORT_T *port)
 {
     copy_info(&port->msg_actor, &port->partner);
     LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_DEF, False);
+
+    return 0;
+    
 }
 int update_default_selected(LAC_PORT_T *port)
 {
     if (!lac_same_partner(&port->partner_admin, &port->partner))
     {
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+//        lac_trace("\r\n<%s.%d> port:%d , selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected					= False;
 //        port->standby 					= False;
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
     }
+
+    return 0;
+    
 }
 static void start_current_while_timer(LAC_PORT_T *port, Bool timeout)
 {
@@ -183,7 +192,6 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
     case RXM_INITIALIZE:
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
 //        port->standby  = False;
         actor_default(port);
@@ -196,12 +204,12 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         port->rcvdLacpdu = False;
         port->current_while = 0;
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+//        lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
         break;
 
     case RXM_LACP_DISABLED:
-        printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
+            //lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected 				 = False;
 //        port->standby					 = False;
         record_default(port);
@@ -246,7 +254,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
 
     if (port->port_enabled == False && port->port_moved == False
             && BEGIN != this->State) {
-        /*            if (this->debug)                    printf("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d",
+        /*            if (this->debug)                    lac_trace("\r\n port:%d state:%d, port_enable:%d, lacp_enabled:%d",
                               port->port_index, this->State, port->port_enabled, port->lacp_enabled);*/
 
         if (this->State == RXM_PORT_DISABLED)
@@ -295,9 +303,8 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_CURRENT:
-//             printf("\r\n current_while:%d, rcvdLacpdu:%d", port->current_while, port->rcvdLacpdu);
-
-        if (!port->current_while && !port->rcvdLacpdu) {
+            if (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)
+                || (!port->current_while && !port->rcvdLacpdu)) {
             return lac_hop_2_state (this, RXM_EXPIRED);
         }
         if (port->rcvdLacpdu) {

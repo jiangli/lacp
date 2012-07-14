@@ -9,13 +9,14 @@
 #include "lac_mux.h"
 #include "lac_sel.h"
 #include "lac_pdu.h"
+#include "../lac_out.h"
 
 LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 {
     LAC_PORT_T *this;
     register unsigned int iii;
-    unsigned short port_prio;
-    printf("\r\n create portIndex:%d", port_index);
+
+    lac_trace("\r\n create portIndex:%d", port_index);
 
     /* check, if the port has just been added */
     for (this = lac_sys->ports; this; this = this->next) {
@@ -62,13 +63,15 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 
     this->aport = this;
     this->selected = False;
-    printf("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
+    lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
 
     this->lacp_enabled = False;
     this->port_moved = False;
     this->static_agg = False;
     this->agg_id = 0;
-
+    this->speed = lac_get_port_oper_speed(this->port_index);
+    this->duplex = lac_get_port_oper_duplex(this->port_index);
+    
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
@@ -77,9 +80,8 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 
     /* create and bind port state machines */
     LAC_STATE_MACH_IN_LIST (tx);
-    LAC_STATE_MACH_IN_LIST (mux);
     LAC_STATE_MACH_IN_LIST (sel);
-    //LAC_STATE_MACH_IN_LIST (periodic);
+    LAC_STATE_MACH_IN_LIST (mux);
     LAC_STATE_MACH_IN_LIST (rx);
 
     this->mux->debug = 1;
@@ -143,17 +145,15 @@ unsigned int lac_port_rx (LAC_PORT_T * this, LACPDU_T * bpdu, size_t len)
 
 int lac_set_port_reselect(LAC_PORT_T *port)
 {
-    LAC_PORT_T  *p, *p0;
+    LAC_PORT_T  *p;
     LAC_SYS_T *lac_sys;
-
+        lac_sys = lac_get_sys_inst();
     if (!port)
     {
-        lac_sys = lac_get_sys_inst();
-        p = p0 = lac_sys->ports;
 
-        while (p = p->next)
+        for (p = lac_sys->ports; p; p=p->next)
         {
-            printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
+            lac_trace("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
             p->selected = False;
         }
 
@@ -161,17 +161,16 @@ int lac_set_port_reselect(LAC_PORT_T *port)
         return 0;
     }
     else
-    {
-        p = p0 = port->system->ports;
+    {        
 
         if (port->static_agg && port->agg_id)
         {
-            while (p = p->next)
+                for (p = port->system->ports; p; p=p->next)
             {
                 if (p->agg_id == port->agg_id)
                 {
 //                    p->reselect = True;
-                    printf("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
+                    lac_trace("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
                     p->selected = False;
                 }
             }
@@ -181,6 +180,7 @@ int lac_set_port_reselect(LAC_PORT_T *port)
             //TODO::
         }
     }
+    return 0;
 }
 
 

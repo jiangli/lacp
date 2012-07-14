@@ -3,6 +3,8 @@
 #include "lac_sys.h"
 #include "lac_default.h"
 #include "lac_in.h"
+#include "../lac_out.h"
+
 
 extern int max_port;
 static LAC_SYS_T *g_lac_sys_inst = NULL;
@@ -46,52 +48,7 @@ LAC_SYS_T *lac_sys_init ()
 
     return this;
 }
-LAC_PORT_T *lac_port_find (LAC_SYS_T * this, int port_index)
-{
-    register LAC_PORT_T *port;
 
-    for (port = this->ports; port; port = port->next)
-        if (port_index == port->port_index) {
-            return port;
-        }
-
-    return NULL;
-}
-
-int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
-{
-    LAC_SYS_T *this = lac_get_sys_inst();
-    int port_loop = 0;
-    LAC_PORT_T *p;
-
-    LAC_CRITICAL_PATH_START;
-    if (uid_cfg->field_mask & BR_CFG_PBMP_ADD)
-    {
-        for (port_loop = 0; port_loop < max_port; port_loop++)
-            if (BitmapGetBit(&uid_cfg->ports, port_loop))
-                lac_port_create(this, port_loop);
-    }
-
-    if (uid_cfg->field_mask & BR_CFG_PBMP_DEL)
-    {
-        for (port_loop = 0; port_loop < max_port; port_loop++)
-            if (BitmapGetBit(&uid_cfg->ports, port_loop))
-            {
-                p = lac_port_find(this, port_loop);
-                lac_port_delete(p);
-            }
-    }
-    else if (uid_cfg->field_mask & BR_CFG_PRIO)
-    {
-
-    }
-
-    //lac_set_port_reselect(NULL);
-    lac_sys_update (this, LAC_SYS_UPDATE_READON_SYS_CFG);
-
-    LAC_CRITICAL_PATH_END;
-    return 0;
-}
 static int
 lac_iterate_machines (LAC_SYS_T * this,
                       int (*iter_callb) (LAC_STATE_MACH_T *),
