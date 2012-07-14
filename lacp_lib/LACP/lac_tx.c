@@ -1,7 +1,6 @@
 #include "lac_base.h"
 #include "statmch.h"
 #include "lac_sys.h"
-#include "lac_pdu.h"
 #include "../lac_out.h"
 
 #define STATES {        \

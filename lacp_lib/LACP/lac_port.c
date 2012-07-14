@@ -8,7 +8,6 @@
 #include "lac_tx.h"
 #include "lac_mux.h"
 #include "lac_sel.h"
-#include "lac_pdu.h"
 #include "../lac_out.h"
 
 LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)

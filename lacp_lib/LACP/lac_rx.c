@@ -2,7 +2,6 @@
 #include "statmch.h"
 #include "lac_port.h"
 #include "lac_sys.h"
-#include "lac_pdu.h"
 #include "../lac_out.h"
 
 /* The Port Information State Machine : 17.21 */
