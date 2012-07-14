@@ -133,7 +133,7 @@ Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
         return lac_hop_2_state (this, DETACHED);
 
     case DISABLE:
-        if (port->port_enabled && port->lacp_enabled)
+        if (port->lacp_enabled)
             return lac_hop_2_state (this, DETACHED);
 
     case DETACHED:

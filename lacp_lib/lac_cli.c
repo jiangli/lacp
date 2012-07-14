@@ -867,7 +867,7 @@ static int cli_enable (int argc, char** argv)
         aggregator_add_member(agg_id, port_loop);
 
         uid_cfg.field_mask = PT_CFG_STATE;
-        uid_cfg.lacp_enabled = 1;
+        uid_cfg.lacp_enabled = True;
         uid_cfg.agg_id = agg_id;
 
         BitmapSetBit(&uid_cfg.port_bmp, port_loop);
@@ -908,7 +908,7 @@ static int cli_disable (int argc, char** argv)
         aggregator_del_member(agg_id, port_index);
 
         uid_cfg.field_mask = PT_CFG_STATE;
-        uid_cfg.lacp_enabled = 0;
+        uid_cfg.lacp_enabled = False;
         uid_cfg.agg_id = 0;
 
         BitmapSetBit(&uid_cfg.port_bmp, port_loop);

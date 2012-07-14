@@ -88,23 +88,25 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
 
         if (uid_cfg->field_mask & PT_CFG_STATE)
         {
-            /* maybe delete from agg. so update selected first */
-            if (port->agg_id && !uid_cfg->lacp_enabled)
+            if (uid_cfg->lacp_enabled)
             {
+                /* add to agg */
+                LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, True);
+                port->static_agg = True;
+                port->agg_id = uid_cfg->agg_id;
+                lac_port_set_reselect(port);
+            } else {            /* delete from agg. */
+                /* notify to partner*/
                 port->ntt = True;
                 LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, False);
                 lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
-            } else {
-                LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, True);
-            }
 
-            lac_port_set_reselect(port);
-            port->lacp_enabled = uid_cfg->lacp_enabled;
-            port->static_agg = True;
-            port->agg_id = uid_cfg->agg_id;
-
-            if (port->agg_id)
+                /* set agg member reselect */
                 lac_port_set_reselect(port);
+                port->static_agg = False;
+                port->agg_id = 0;
+            }
+            port->lacp_enabled = uid_cfg->lacp_enabled;
         }
         else if (uid_cfg->field_mask & PT_CFG_COST)
         {

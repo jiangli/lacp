@@ -115,7 +115,7 @@ static void update_partner_syn(LAC_PORT_T *port)
     }
     else
     {
-        lac_trace("\r\n port:%d partner don't know him  ! ", port->port_index);
+        lac_trace("\r\n port:%d 's partner didn't catch up with him  ! ", port->port_index);
         port->ntt = True;
         partner_matched = False;
     }
@@ -140,9 +140,9 @@ static void update_ntt(LAC_PORT_T *port)
 {
     if ( !(_lac_rxm_same_partner(&port->msg_partner, &port->actor))
          || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_ACT))
-         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_AGG))
+         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_TMT))
          || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_SYN))
-         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_COL))
+         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_AGG))
        )
         port->ntt = True;
 }
@@ -261,8 +261,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_LACP_DISABLED:
-        if (port->port_enabled 
-                && port->lacp_enabled )
+        if (port->port_enabled && port->lacp_enabled )
         {
             return lac_hop_2_state (this, RXM_EXPIRED);
         }
@@ -280,8 +279,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_CURRENT:
-        if (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)
-                || (!port->current_while && !port->rcvdLacpdu)) {
+            if (!port->current_while && !port->rcvdLacpdu) {
             return lac_hop_2_state (this, RXM_EXPIRED);
         }
         if (port->rcvdLacpdu) {

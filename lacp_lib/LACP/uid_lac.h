@@ -11,7 +11,7 @@ typedef struct {
     BITMAP_T      port_bmp;
 
     /* protocol data */
-    Key key;
+    LAC_KEY key;
     unsigned short port_priority;
     Bool			  lacp_enabled;
         LAC_STATE 	  state;/* readonly */

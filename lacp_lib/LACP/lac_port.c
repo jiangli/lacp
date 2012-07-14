@@ -68,6 +68,8 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->agg_id = 0;
     this->speed = lac_get_port_oper_speed(this->port_index);
     this->duplex = lac_get_port_oper_duplex(this->port_index);
+    this->rx_lacpdu_cnt = 0;
+    this->tx_lacpdu_cnt = 0;
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
