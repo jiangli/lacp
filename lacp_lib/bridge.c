@@ -40,7 +40,6 @@
 #include "lac_port.h"
 #include "bitmap.h"
 #include "lac_sys.h"
-#include "lac_pdu.h"
 #include "uid_lac.h"
 #include "lac_in.h"
 
