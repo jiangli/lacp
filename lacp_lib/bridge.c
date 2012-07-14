@@ -41,6 +41,7 @@
 #include "bitmap.h"
 #include "lac_sys.h"
 #include "uid_lac.h"
+#include "uid_lac.h"
 #include "lac_in.h"
 
 
@@ -179,7 +180,7 @@ int
 bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
 
-    lac_in_rx (msg->header.destination_port,
+    lac_rx_lacpdu (msg->header.destination_port,
                (LACPDU_T *) (msg->body.bpdu),
                msg->header.body_len);
 

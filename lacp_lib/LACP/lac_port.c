@@ -1,9 +1,9 @@
 #include "lac_base.h"
 #include "statmch.h"
 #include "lac_sys.h"
+#include "uid_lac.h"
 #include "lac_in.h"
 #include "lac_default.h"
-//#include "statmch.h"
 #include "lac_rx.h"
 #include "lac_tx.h"
 #include "lac_mux.h"
@@ -15,7 +15,7 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     LAC_PORT_T *this;
     register unsigned int iii;
 
-    lac_trace("\r\n create portIndex:%d", port_index);
+    lac_trace("create portIndex:%d", port_index);
 
     /* check, if the port has just been added */
     for (this = lac_sys->ports; this; this = this->next) {
@@ -25,7 +25,6 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     }
 
     /* add port to system */
-
     LAC_NEW_IN_LIST (this, LAC_PORT_T, lac_sys->ports, "port create");
     this->system = lac_sys;
     this->port_index = port_index;
@@ -33,13 +32,12 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->machines = NULL;
 
     this->actor_admin.port_priority		   = Default_port_priority;
-    this->actor_admin.port_index			   = port_index;
+    this->actor_admin.port_index		   = port_index;
     this->actor_admin.system_priority	   = Default_system_priority;
-    memcpy(this->actor_admin.system_id, this->system->id, 6);
+    memcpy(this->actor_admin.system_mac, this->system->id, 6);
     this->actor_admin.key				   = Default_key;
 
     LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_ACT, Default_lacp_activity);
-
     LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_TMT, Default_lacp_timeout);
     LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_AGG, Default_aggregation);
     LAC_STATE_SET_BIT(this->actor_admin.state, LAC_STATE_SYN, False);
@@ -49,8 +47,9 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->partner_admin.port_priority		 = Default_port_priority;
     this->partner_admin.port_index				 = port_index;/* TODO:: */
     this->partner_admin.system_priority		 = Default_system_priority;
-    memset(this->partner_admin.system_id, 0, 6);
+    memset(this->partner_admin.system_mac, 0, 6);
     this->partner_admin.key					 = this->port_index;
+
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_ACT, False); /* Passive	  */
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_TMT, False); /* Long timeout */
     LAC_STATE_SET_BIT(this->partner_admin.state, LAC_STATE_AGG, False); /* Individual   */
@@ -62,7 +61,6 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 
     this->aport = this;
     this->selected = False;
-//    lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
 
     this->lacp_enabled = False;
     this->port_moved = False;
@@ -70,7 +68,6 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->agg_id = 0;
     this->speed = lac_get_port_oper_speed(this->port_index);
     this->duplex = lac_get_port_oper_duplex(this->port_index);
-
 
     iii = 0;
     this->timers[iii++] = &this->current_while;
@@ -92,7 +89,6 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
     this->current_while =
         this->periodic_timer =
             this->wait_while = 0;
-
 
     return this;
 }
@@ -135,40 +131,42 @@ lac_port_delete (LAC_PORT_T * this)
     }
 }
 
-unsigned int lac_port_rx (LAC_PORT_T * this, LACPDU_T * bpdu, size_t len)
+unsigned int lac_port_rx_lacpdu (LAC_PORT_T * this, LACPDU_T * bpdu, size_t len)
 {
-    lac_rx_bpdu (this, bpdu, len);
+        int ret = 0;
+        
 
+    ret = lac_rxm_rx_lacpdu (this, bpdu, len);
+    if (ret)
+    {
+            return ret;
+    }
+    
     return 0;
 }
 
-int lac_set_port_reselect(LAC_PORT_T *port)
+int lac_port_set_reselect(LAC_PORT_T *port)
 {
     LAC_PORT_T  *p;
     LAC_SYS_T *lac_sys;
     lac_sys = lac_get_sys_inst();
     if (!port)
     {
-
         for (p = lac_sys->ports; p; p=p->next)
         {
             lac_trace("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
             p->selected = False;
         }
-
-
         return 0;
     }
     else
     {
-
         if (port->static_agg && port->agg_id)
         {
             for (p = port->system->ports; p; p=p->next)
             {
                 if (p->agg_id == port->agg_id)
                 {
-//                    p->reselect = True;
                     lac_trace("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
                     p->selected = False;
                 }

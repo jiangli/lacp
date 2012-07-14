@@ -20,7 +20,7 @@ static Bool partners_aport(LAC_PORT_T *port)
             continue;
 
         if(  (p->actor.system_priority   == port->partner.system_priority     )
-                && (!memcmp(p->actor.system_id, port->partner.system_id, 6)           )
+                && (!memcmp(p->actor.system_mac, port->partner.system_mac, 6)           )
                 && (p->actor.key               == port->partner.key                 )
                 && (p->actor.port_index           == port->partner.port_index             )
                 &&((p->actor.port_priority     <  port->actor.port_priority )
@@ -46,10 +46,10 @@ LAC_PORT_T get_dyn_agg_aggregator_port(LAC_PORT_T *port)
     while ((ap = ap->next) != ap0)
     {
         if(  (ap->actor.system_priority	  == port->actor.system_priority	)
-                && (!memcmp(p->actor.system_id, port->actor.system_id))
+                && (!memcmp(p->actor.system_mac, port->actor.system_mac))
                 && (ap->actor.key				  == port->actor.key				)
                 && (ap->partner.system_priority   == port->partner.system_priority	)
-                && (!memcmp(p->partner.system_id, port->partner.system_id))
+                && (!memcmp(p->partner.system_mac, port->partner.system_mac))
                 && (ap->partner.key 			  == port->partner.key				)
                 && (ap->actor.state.aggregation   &&   ap->partner.state.aggregation)
                 && (port->actor.state.aggregation && port->partner.state.aggregation)
@@ -81,7 +81,6 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
         p->speed = lac_get_port_oper_speed(p->port_index);
         p->duplex = lac_get_port_oper_duplex(p->port_index);
         p->actor.key = lac_get_port_oper_key(p->port_index);
-
     }
 
     /* select best port(master port) */
@@ -90,60 +89,52 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
         /* reduce the search range */
         if (agg_id != p->agg_id || !p->port_enabled || !p->lacp_enabled || !p->duplex)
         {
-            printf("<%s.%d>", __FUNCTION__, __LINE__);
+            lac_trace("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
         }
 
         if (!best)
         {
-            printf("<%s.%d>", __FUNCTION__, __LINE__);
-
             best = p;
             continue;
         }
 
         if( p->speed > best->speed)
         {
-            printf("<%s.%d>", __FUNCTION__, __LINE__);
             best = p;
             continue;
 
         }
         else if ( p->speed < best->speed)
         {
-            printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
         }
         else if (p->actor.port_priority < best->actor.port_priority)
         {
-            printf("<%s.%d>", __FUNCTION__, __LINE__);
             best = p;
             continue;
 
         }
         else if     (p->actor.port_priority > best->actor.port_priority)
         {
-            printf("<%s.%d>", __FUNCTION__, __LINE__);
             continue;
 
         }
-        else if ( (!LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) &&  LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
+        else if ( (!LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) 
+                  &&  LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
         {
-//                printf("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
             best = p;
             continue;
 
         }
-        else if ( (LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) &&  !LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
+        else if ( (LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) 
+                  &&  !LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
         {
             continue;
 
         }
         else if (p->actor.port_index < best->actor.port_index)
         {
-//                lac_trace("<%s.%d>", __FUNCTION__, __LINE__);
-            //              lac_trace("<%s.%d>port:%d,%d default:%d, %d", __FUNCTION__, __LINE__, p->port_index, best->port_index, LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF), LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF));
-
             best = p;
             continue;
 
@@ -153,7 +144,6 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
         lac_trace("\r\n agg %d get best port: %d", agg_id, best->port_index);
     else
         lac_trace("\r\n agg %d NO best port.", agg_id);
-
 
     return best;
 
@@ -176,7 +166,7 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
                 && p->lacp_enabled
                 && p->actor.key == best->actor.key
                 && p->partner.system_priority == best->partner.system_priority
-                && (!memcmp(p->partner.system_id, best->partner.system_id, 6))
+                && (!memcmp(p->partner.system_mac, best->partner.system_mac, 6))
                 && (p->partner.key == best->partner.key)
                 && LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_AGG)
                 && LAC_STATE_GET_BIT(p->partner.state, LAC_STATE_AGG)
@@ -185,19 +175,13 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
                 && !partners_aport(p))
         {
             p->selected = True;
-//            lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
             p->standby = False;
-
             p->aport = best;
-//                    p->reselect = False;
             lac_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, p->port_index);
         } else {
-//            lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, p->port_index, True);
             p->selected = True;
-//                    p->reselect = False;
             p->standby = True;
-
-            lac_trace("\r\n <%s.%d> port  %d ---> Standby ",  __FUNCTION__, __LINE__, p->port_index);
+            lac_trace("\r\n <%s.%d> port %d ---> Standby ",  __FUNCTION__, __LINE__, p->port_index);
         }
     }
     return 0;
@@ -212,7 +196,6 @@ int selection_logic(LAC_PORT_T *port)
     /* maybe port delete from agg */
     if (!port->lacp_enabled)
     {
-//        lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, True);
         port->selected = True;
         port->standby = True;
         return 0;
@@ -220,10 +203,7 @@ int selection_logic(LAC_PORT_T *port)
 
     if (!port->agg_id)
     {
-//            lac_trace("\r\n warning:port:%d agg error.", port->port_index);
-
         return 1;
-
     }
 
     update_agg_ports_select(this, port->agg_id);
@@ -243,16 +223,12 @@ void lac_sel_enter_state (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
     case INIT:
-//        port->reselect = True;
-//        lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, port->port_index, False);
         port->selected = False;
         break;
 
     case SELECTION:
         lac_select(port);
         break;
-
-
     };
 
     return ;
@@ -271,12 +247,8 @@ Bool lac_sel_check_conditions (LAC_STATE_MACH_T * this)
     case SELECTION:
         if (!port->selected)
         {
-//            lac_trace("port %d select begin. \r\n", port->port_index);
-
             return lac_hop_2_state (this, SELECTION);
         }
-
-
         break;
 
     default:

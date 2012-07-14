@@ -2,9 +2,9 @@
 #include "statmch.h"
 #include "lac_sys.h"
 #include "lac_default.h"
+#include "uid_lac.h"
 #include "lac_in.h"
 #include "../lac_out.h"
-
 
 extern int max_port;
 static LAC_SYS_T *g_lac_sys_inst = NULL;
@@ -13,6 +13,7 @@ LAC_SYS_T *lac_get_sys_inst (void)
 {
     return g_lac_sys_inst;
 }
+
 LAC_SYS_T *lac_sys_create ()
 {
     LAC_MALLOC(g_lac_sys_inst, LAC_SYS_T, "Can't alloc for lac system");
@@ -37,13 +38,13 @@ LAC_SYS_T *lac_sys_init ()
     this->priority = Default_system_priority;
     LAC_OUT_get_port_mac(sys_mac);
     memcpy(this->id, sys_mac, 6);
-    this->short_timeout_time = 3;
-    this->long_timeout_time = 90;
+    this->short_timeout_time = Short_timeout_ticks;
+    this->long_timeout_time = Long_timeout_ticks;
     this->admin_state = LACP_ENABLED;
     this->tx_hold_count = Max_tx_per_interval;
-    this->slow_periodic_time = 30;
-    this->fast_periodic_time = 1;
-
+    this->slow_periodic_time = Slow_periodic_ticks;
+    this->fast_periodic_time = Fast_periodic_ticks;
+    this->aggregate_wait_time = Aggregate_wait_ticks;
     LAC_INIT_CRITICAL_PATH_PROTECTIO;
 
     return this;

@@ -372,6 +372,42 @@ link_ring (int argc, char **argv)
 
     return 0;
 }
+static int
+link_each (int argc, char **argv)
+{
+    BRIDGE_T *br1;
+    BRIDGE_T *br2;
+    PORT_T *port1;
+    PORT_T *port2;
+    register int indx;
+
+    /* unlink all */
+    for (br1 = br_lst; br1; br1 = br1->next) {
+        /* disconnect all its connceted ports */
+        for (indx = 0; indx < br1->number_of_ports; indx++) {
+            port1 = br1->ports + indx;
+            if (port1->bridge_partner) {
+                printf ("disconnect B%ld ", br1->pid);
+                printf ("port p%02d (with B%ld-p%02d)\n",
+                        indx + 1, port1->bridge_partner->pid, port1->port_partner);
+                br2 = port1->bridge_partner;
+                port2 = br2->ports + port1->port_partner - 1;
+                disconnect_port (port1, 1);
+                disconnect_port (port2, 1);
+            }
+        }
+    }
+
+    /* buid ring */
+    for (br1 = br_lst; br1; br1 = br1->next) {
+        br2 = br1->next;
+        if (!br2)
+            br2 = br_lst;
+        _link_two_ports (br1, br1->ports + 1, 2, br2, br2->ports + 0, 1);
+    }
+
+    return 0;
+}
 
 static CMD_DSCR_T lang[] = {
     THE_COMMAND ("show", "get bridge[s] connuctivity")

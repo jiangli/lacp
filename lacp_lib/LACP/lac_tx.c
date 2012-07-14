@@ -46,7 +46,7 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
     lacpdu_packet.type_actor = 1;
     lacpdu_packet.len_actor = 20;
     lacpdu_packet.actor.system_priority = htons(port->actor.system_priority);
-    memcpy(lacpdu_packet.actor.system_id, port->actor.system_id, 6);
+    memcpy(lacpdu_packet.actor.system_mac, port->actor.system_mac, 6);
     lacpdu_packet.actor.key = htons(port->actor.key);
     lacpdu_packet.actor.port_priority = htons(port->actor.port_priority);
     lacpdu_packet.actor.port_index = htons(port->actor.port_index);
@@ -56,7 +56,7 @@ tx_lacpdu(LAC_STATE_MACH_T * this)
     lacpdu_packet.type_partner = 2;
     lacpdu_packet.len_partner = 20;
     lacpdu_packet.partner.system_priority = htons(port->partner.system_priority);
-    memcpy(lacpdu_packet.partner.system_id, port->partner.system_id, 6);
+    memcpy(lacpdu_packet.partner.system_mac, port->partner.system_mac, 6);
     lacpdu_packet.partner.key = htons(port->partner.key);
     lacpdu_packet.partner.port_priority = htons(port->partner.port_priority);
     lacpdu_packet.partner.port_index = htons(port->partner.port_index);

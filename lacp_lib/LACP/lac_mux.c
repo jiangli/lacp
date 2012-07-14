@@ -8,7 +8,7 @@
   CHOOSE(DETACHED),    \
   CHOOSE(DISABLE),    \
   CHOOSE(WAITING),    \
-CHOOSE(READY_N),         \
+  CHOOSE(READY_N),         \
   CHOOSE(ATTACHED),         \
   CHOOSE(RX_TX),  \
 }
@@ -16,7 +16,7 @@ CHOOSE(READY_N),         \
 #define GET_STATE_NAME lac_mux_get_state_name
 #include "choose.h"
 
-int sys_is_ready(LAC_PORT_T *port)
+static int sys_is_ready(LAC_PORT_T *port)
 {
     LAC_PORT_T *p = NULL;
     LAC_SYS_T *this = lac_get_sys_inst();
@@ -32,35 +32,33 @@ int sys_is_ready(LAC_PORT_T *port)
     }
 
     return True;
-
 }
-int disable_collecting_distributing(LAC_PORT_T  *port)
+static int disable_collecting_distributing(LAC_PORT_T  *port)
 {
     lac_trace("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     lac_set_port_cd(port->port_index, False);
     return 0;
-
 }
-int enable_collecting_distributing(LAC_PORT_T  *port)
+
+static int enable_collecting_distributing(LAC_PORT_T  *port)
 {
     lac_trace("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     lac_set_port_cd(port->port_index, True);
     return 0;
 }
 
-int detach_mux_from_aggregator(LAC_PORT_T  *port)
+static int detach_mux_from_aggregator(LAC_PORT_T  *port)
 {
     lac_trace("\r\n <%s.%d>, port:%d, agg:%d",  __FUNCTION__, __LINE__, port->port_index, port->agg_id);
     lac_set_port_attach_to_tid(port->port_index, False, port->agg_id);
     return 0;
-
 }
-int attach_mux_to_aggregator(LAC_PORT_T  *port)
+
+static int attach_mux_to_aggregator(LAC_PORT_T  *port)
 {
     lac_trace("\r\n <%s.%d>, port:%d, agg:%d",  __FUNCTION__, __LINE__, port->port_index, port->agg_id);
     lac_set_port_attach_to_tid(port->port_index, True, port->agg_id);
     return 0;
-
 }
 
 void lac_mux_enter_state (LAC_STATE_MACH_T * this)
@@ -71,6 +69,7 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
     case BEGIN:
     case DISABLE:
         detach_mux_from_aggregator(port);
+        lac_trace("mux to disable state. port %d actor syn ---> False", port->port_index);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, True);
         enable_collecting_distributing(port);
@@ -80,6 +79,7 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 
     case DETACHED:
         detach_mux_from_aggregator(port);
+        lac_trace("mux to detached state.port %d actor syn ---> False", port->port_index);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, False);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, False);
         disable_collecting_distributing(port);
@@ -99,6 +99,7 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 
     case ATTACHED:
         attach_mux_to_aggregator(port);
+        lac_trace("mux to ATTACHED state. port %d actor syn ---> True", port->port_index);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_SYN, True);
         LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_COL, False);
         disable_collecting_distributing(port);
@@ -119,7 +120,7 @@ void lac_mux_enter_state (LAC_STATE_MACH_T * this)
 Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
 {
     register LAC_PORT_T *port = this->owner.port;
-    if (!port->port_enabled || !port->lacp_enabled)
+    if (!port->lacp_enabled)
     {
         if (this->State == DISABLE)
             return False;
@@ -130,6 +131,7 @@ Bool lac_mux_check_conditions (LAC_STATE_MACH_T * this)
     switch (this->State) {
     case BEGIN:
         return lac_hop_2_state (this, DETACHED);
+
     case DISABLE:
         if (port->port_enabled && port->lacp_enabled)
             return lac_hop_2_state (this, DETACHED);

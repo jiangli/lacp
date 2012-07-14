@@ -1,3 +1,7 @@
+#ifndef __LAC_TYPE_H
+#define __LAC_TYPE_H
+
+
 typedef unsigned short	LAC_PORT_ID;
 typedef unsigned short	LAC_KEY;
 typedef int Time;
@@ -46,7 +50,7 @@ typedef struct /* LAC_PORT_INFO */
 {
     SYSTEM_PRIORITY system_priority;
 
-    SYSTEM_MAC       system_id;
+    SYSTEM_MAC       system_mac;
 
     Key             key;
 
@@ -194,3 +198,6 @@ typedef struct {
     int tid;
 
 } port_attr;
+
+
+#endif

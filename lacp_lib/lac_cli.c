@@ -33,10 +33,10 @@
 #include "cli.h"
 #include "lac_cli.h"
 #include "bitmap.h"
-#include "uid_lac.h"
 #include "lac_base.h"
 #include "lac_port.h"
 #include "lac_sys.h"
+#include "uid_lac.h"
 #include "lac_in.h"
 #include "lac_out.h"
 
@@ -984,7 +984,7 @@ static void print_info(LAC_PORT_INFO *lac_info)
 {
     unsigned char sysid_str[40] = {0};
 
-    get_sysid_str(lac_info->system_priority, lac_info->system_id, sysid_str);
+    get_sysid_str(lac_info->system_priority, lac_info->system_mac, sysid_str);
 
     printf("\r\n System ID:%s", sysid_str);
     printf("\r\n port     :%d", lac_info->port_index);
@@ -1076,7 +1076,7 @@ static int cli_pr_get_cfg (int argc, char** argv)
     print_info(&port.actor);
     printf("\r\n parttor: " );
     print_info(&port.partner);
-#if 0
+#if 1
     printf("\r\n msg actor: " );
     print_info(&port.msg_actor);
     printf("\r\n msg parttor: " );
@@ -1136,7 +1136,7 @@ int cli_pr_set_link(int argc, char **argv)
 {
         int port_index = atoi(argv[1]);
         int link_status = atoi(argv[2]);
-        lac_in_link_change(port_index, link_status);
+        lac_port_link_change(port_index, link_status);
         return 0;
         
 }

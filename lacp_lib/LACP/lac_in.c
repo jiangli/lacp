@@ -2,6 +2,7 @@
 #include "statmch.h"
 #include "lac_port.h"
 #include "lac_sys.h"
+#include "uid_lac.h"
 #include "lac_in.h"
 #include "../lac_out.h"
 
@@ -19,7 +20,7 @@ LAC_PORT_T *lac_port_find (LAC_SYS_T * this, int port_index)
     return NULL;
 }
 
-int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
+int lac_rx_lacpdu(int port_index, LACPDU_T * bpdu, int len)
 {
     register LAC_PORT_T *port;
     register LAC_SYS_T *this;
@@ -53,10 +54,14 @@ int lac_in_rx(int port_index, LACPDU_T * bpdu, int len)
         return M_RSTP_NOT_ENABLE;
     }
 
-    iret = lac_port_rx (port, bpdu, len);
-//	  lac_set_port_reselect(port);
-
-
+    iret = lac_port_rx_lacpdu (port, bpdu, len);
+    if (iret)
+    {
+            lac_trace("rx process error");
+            return -1;
+            
+    }
+    
     lac_sys_update (this, LAC_SYS_UPDATE_READON_RX);
     LAC_CRITICAL_PATH_END;
 
@@ -68,8 +73,6 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
     register LAC_SYS_T *this;
     register LAC_PORT_T *port;
     int port_no;
-
-
 
     LAC_CRITICAL_PATH_START;
     this = lac_get_sys_inst();
@@ -89,33 +92,24 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
             if (port->agg_id && !uid_cfg->lacp_enabled)
             {
                 port->ntt = True;
-//                        LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_TMT, SHORT_TIMEOUT);
                 LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, False);
                 lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
-
             } else {
                 LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_AGG, True);
             }
 
-
-            lac_set_port_reselect(port);
+            lac_port_set_reselect(port);
             port->lacp_enabled = uid_cfg->lacp_enabled;
             port->static_agg = True;
             port->agg_id = uid_cfg->agg_id;
 
             if (port->agg_id)
-                lac_set_port_reselect(port);
-
-
+                lac_port_set_reselect(port);
         }
         else if (uid_cfg->field_mask & PT_CFG_COST)
         {
-            lac_set_port_reselect(port);
-
+            lac_port_set_reselect(port);
         }
-
-
-
     }
 
     lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
@@ -206,12 +200,13 @@ int lac_in_remove_port()
 
 }
 
-int lac_in_link_change(int port_index, int link_status)
+int lac_port_link_change(int port_index, int link_status)
 {
     LAC_SYS_T *this;
     LAC_PORT_T *p;
 
-    lac_trace("\r\n %s.%d",  __FUNCTION__, __LINE__);
+    lac_trace("<%s.%d>",  __FUNCTION__, __LINE__);
+
     LAC_CRITICAL_PATH_START;
     this = lac_get_sys_inst();
     p = lac_port_find (this, port_index);
@@ -231,7 +226,7 @@ int lac_in_link_change(int port_index, int link_status)
         p->port_enabled = False;
     }
 
-    lac_set_port_reselect(p);
+    lac_port_set_reselect(p);
 
     lac_sys_update(this, LAC_SYS_UPDATE_READON_LINK);
 
@@ -239,11 +234,12 @@ int lac_in_link_change(int port_index, int link_status)
     return 0;
 
 }
+
 int lac_in_enable_port(int port_index, Bool enable)
 {
     lac_trace ("port p%02d => %sABLE", (int) port_index, enable ? "EN" : "DIS");
 
-    lac_in_link_change(port_index, enable);
+    lac_port_link_change(port_index, enable);
 
     return 0;
 
@@ -277,7 +273,6 @@ int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
 
     }
 
-    //lac_set_port_reselect(NULL);
     lac_sys_update (this, LAC_SYS_UPDATE_READON_SYS_CFG);
 
     LAC_CRITICAL_PATH_END;

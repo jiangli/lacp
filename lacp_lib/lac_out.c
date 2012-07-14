@@ -2,6 +2,7 @@
 #include "stdarg.h"
 #include "lac_port.h"
 #include "lac_sys.h"
+#include "uid_lac.h"
 #include "lac_in.h"
 
 port_attr g_port_list[144];
