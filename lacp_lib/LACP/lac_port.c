@@ -63,7 +63,7 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 
     this->aport = this;
     this->selected = False;
-    lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
+//    lac_trace("\r\n<%s.%d> port:%d, selected:%d", __FUNCTION__, __LINE__, this->port_index, False);
 
     this->lacp_enabled = False;
     this->port_moved = False;
@@ -80,8 +80,8 @@ LAC_PORT_T *lac_port_create (LAC_SYS_T * lac_sys, int port_index)
 
     /* create and bind port state machines */
     LAC_STATE_MACH_IN_LIST (tx);
-    LAC_STATE_MACH_IN_LIST (sel);
     LAC_STATE_MACH_IN_LIST (mux);
+    LAC_STATE_MACH_IN_LIST (sel);
     LAC_STATE_MACH_IN_LIST (rx);
 
     this->mux->debug = 1;
