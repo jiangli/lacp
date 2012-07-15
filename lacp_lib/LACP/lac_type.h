@@ -147,8 +147,8 @@ enum    {Null_system = 0};
 
 typedef struct lac_sys_t /* Lac_system */
 {
-    LAC_PORT_T * ports;
-    BITMAP_T * portmap;
+        LAC_PORT_T * ports;  /* all lacp port link list */
+    BITMAP_T * portmap;      
     int number_of_ports;
     int admin_state;
 

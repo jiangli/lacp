@@ -11,5 +11,5 @@ void
 lac_one_second ();
 int lac_in_enable_port(int port_index, Bool enable);
 int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg);
-
+int lac_sys_get_cfg(UID_LAC_CFG_T * uid_cf);
 #endif

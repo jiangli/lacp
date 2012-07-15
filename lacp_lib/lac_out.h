@@ -1,6 +1,6 @@
 void lac_trace (const char *format, ...);
 int aggregator_add_member(int agg_id, int port_index);
-int aggregator_del_member(int agg_id, int port_index);
+int aggregator_del_member(int port_index);
 int aggregator_get_id(int port_index);
 
 int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len);

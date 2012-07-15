@@ -50,21 +50,25 @@ int aggregator_add_member(int agg_id, int port_index)
 
 
 }
-int aggregator_del_member(int agg_id, int port_index)
+int aggregator_del_member(int port_index)
 {
     int i;
+    int j;
+    for (j=0;j<32;j++)
+    {
     for (i=0; i<8; i++)
     {
-        if (g_link_groups[agg_id - 1].ports[i] == port_index)
+        if (g_link_groups[j].ports[i] == port_index)
         {
-            g_link_groups[agg_id - 1].ports[i] = 0xffffffff;
-            g_link_groups[agg_id - 1].cnt --;
+            g_link_groups[j].ports[i] = 0xffffffff;
+            g_link_groups[j].cnt --;
             return 0;
 
         }
 
     }
-    printf("\r\n agg %d not found port:%d !", agg_id, port_index);
+    }
+    printf("\r\n not found port:%d in all agg!",  port_index);
     return -1 ;
 
 

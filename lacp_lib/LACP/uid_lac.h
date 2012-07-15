@@ -17,7 +17,17 @@ typedef struct {
         LAC_STATE 	  state;/* readonly */
         int sel_state;  /* selected or standby. readonly */
     int agg_id;
+    LAC_PORT_INFO        partner;
+
 } UID_LAC_PORT_CFG_T;
+typedef struct {
+        int port_index;
+    LAC_KEY key;
+    int sel_state;  /* selected or standby. readonly */
+    LAC_PORT_INFO        actor;
+    LAC_PORT_INFO        partner;
+
+} UID_LAC_PORT_STATE_T;
 
 #define BR_CFG_PBMP_ADD         (1L << 0)
 #define BR_CFG_PBMP_DEL         (1L << 1)
@@ -40,7 +50,9 @@ typedef struct {
 
     /* protocol data */
     SYSTEM_PRIORITY priority;
-
+        SYSTEM_MAC sys_mac;
+        unsigned int short_period;
+        unsigned int long_period;
 } UID_LAC_CFG_T;
 
 #ifdef __LINUX__

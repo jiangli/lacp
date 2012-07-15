@@ -134,15 +134,78 @@ int lac_port_get_cfg(int port_index, UID_LAC_PORT_CFG_T * uid_cfg)
     }
 
     uid_cfg->lacp_enabled = port->lacp_enabled;
-    if (port->selected && !port->standby)
-        uid_cfg->sel_state = True;
-    else
-        uid_cfg->sel_state = False;
 
 
     return 0;
 
 }
+
+int _lac_copy_port_state(UID_LAC_PORT_STATE_T * uid_cfg, LAC_PORT_T *port)
+{
+        uid_cfg->port_index = port->port_index;
+        if (port->selected && !port->standby)                                                                    
+                uid_cfg->sel_state = True;                                                                       
+        else                                                                                                     
+                uid_cfg->sel_state = False;                                                                      
+                                                                                                           
+        memcpy(&uid_cfg->actor, &port->actor, sizeof(LAC_PORT_INFO));
+        memcpy(&uid_cfg->partner, &port->partner, sizeof(LAC_PORT_INFO)); 
+        return 0;
+}
+int lac_agg_get_port_state(int agg_id, UID_LAC_PORT_STATE_T * uid_cfg, int *master_index)
+{
+    register LAC_SYS_T *lac_sys;
+    register LAC_PORT_T *port;
+    int cnt = 0;
+
+    lac_sys = lac_get_sys_inst();
+    for (port = lac_sys->ports; port; port = port->next)
+    {
+            if (port->agg_id != agg_id)
+            {
+                    continue;
+            }
+            if (cnt >= 8)
+            {
+                    break;
+            }
+
+            _lac_copy_port_state(&uid_cfg[cnt], port);      
+            if (port->selected && !port->standby && (port->aport == port))
+            {
+                    *master_index = cnt;                    
+            }
+            cnt++;
+    }
+
+    return 0;
+ }
+#if 0
+int lac_agg_get_master_port(int agg_id, UID_LAC_PORT_CFG_T * uid_cfg)
+{
+    register LAC_SYS_T *lac_sys;
+    register LAC_PORT_T *port;
+
+    lac_sys = lac_get_sys_inst();
+    for (port = lac_sys->ports; port; port = port->next)
+    {
+            if (port->agg_id != agg_id)
+            {
+                    continue;
+            }
+            
+            uid_cfg->key = port->aport->key;
+            uid_cfg->agg_id = port->aport->agg_id;
+            uid_cfg->lacp_enabled = port->aport->lacp_enabled;
+            BitmapSetBit(uid_cfg->port_bmp, port->aport->port_index);
+            uid_cfg->sel_state = !port->aport->standby;
+            memcpy(&uid_cfg->partner, port->aport->partner, sizeof(LAC_PORT_INFO);)
+            memcpy(&uid_cfg->partner, port->aport->partner, sizeof(LAC_PORT_INFO));
+            
+    }
+    return 0;
+}
+#endif
 
 int lac_port_get_dbg_cfg(int port_index, LAC_PORT_T * port)
 {
@@ -280,4 +343,21 @@ int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
     LAC_CRITICAL_PATH_END;
     return 0;
 }
+int lac_sys_get_cfg(UID_LAC_CFG_T * uid_cfg)
+{
+    LAC_SYS_T *this = lac_get_sys_inst();
+    int port_loop = 0;
+    LAC_PORT_T *p;
+    
+    uid_cfg->number_of_ports = max_port;
+    for (p = this->ports; p; p = p->next)
+    {
+            BitmapSetBit(&uid_cfg->ports, p->port_index);
+    }
+    uid_cfg->priority = this->priority;
+    memcpy(uid_cfg->sys_mac, this->id, 6);
+    uid_cfg->short_period = this->fast_periodic_time;
+    uid_cfg->long_period = this->slow_periodic_time;
+    return 0;
+}    
 
