@@ -78,8 +78,6 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
         if (agg_id != p->agg_id )
             continue;
 
-        p->speed = lac_get_port_oper_speed(p->port_index);
-        p->duplex = lac_get_port_oper_duplex(p->port_index);
         p->actor.key = lac_get_port_oper_key(p->port_index);
     }
 

@@ -207,6 +207,27 @@ int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 
 }
 
+int get_index(int speed, int duplex)
+{
+        int speed_duplex[] = {1,10,100,1000,10000};
+            
+    int i;
+    if (!duplex)
+            return 0;
+    switch(speed)
+    {
+    case 10:
+            return 1;
+    case 100:
+            return 2;
+    case 1000:
+            return 3;
+    case 10000:
+            return 4;
+    default:
+            return 0;
+    }
+}
 //HANDLE hMutex;
 int lac_get_port_oper_key(int port_index)
 {
@@ -215,7 +236,7 @@ int lac_get_port_oper_key(int port_index)
     speed = lac_get_port_oper_speed(port_index);
     duplex = lac_get_port_oper_duplex(port_index);
 
-    return (tid+speed+duplex);
+    return (tid << 8 | get_index(speed,duplex));
 
 
 }

@@ -442,8 +442,8 @@ void cli_print_port_info(UID_LAC_PORT_STATE_T *uid_port_state)
                         
         printf("\r\n Actor    Port Number     : %d", 
                uid_port_state->actor.port_index);
-        printf("\r\n          Oper-key        : %-8d      Port Priority: %-4d", 
-               uid_port_state->actor.key, uid_port_state->actor.port_priority);
+        printf("\r\n          Oper-key        : %-4d(0x%-4x)  Port Priority: %-4d", 
+               uid_port_state->actor.key,uid_port_state->actor.key, uid_port_state->actor.port_priority);
         printf("\r\n          Port Role       : %-8s      Port Status  : %d", 
                role_str[uid_port_state->sel_state], uid_port_state->actor.state);
 

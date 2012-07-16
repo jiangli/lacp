@@ -325,6 +325,12 @@ int lac_port_link_change(int port_index, int link_status)
     {
         p->port_enabled = False;
     }
+        p->speed = lac_get_port_oper_speed(p->port_index);
+        p->duplex = lac_get_port_oper_duplex(p->port_index);
+        if (!p->duplex)
+        {
+                LAC_STATE_SET_BIT(p->actor.state, LAC_STATE_AGG, False);
+        }
 
     lac_port_set_reselect(p);
 
