@@ -161,8 +161,17 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
             continue;
         }
 
-        if(best
-                && p->port_enabled
+        if (!best)
+        {
+            p->selected = True;
+            p->standby = True;
+            p->aport = p;
+            continue;
+        }
+
+        p->aport = best;
+
+        if(p->port_enabled
                 && p->lacp_enabled
                 && p->actor.key == best->actor.key
                 && p->partner.system_priority == best->partner.system_priority
@@ -176,12 +185,10 @@ int update_agg_ports_select(LAC_SYS_T *this, int agg_id)
         {
             p->selected = True;
             p->standby = False;
-            p->aport = best;
             lac_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, p->port_index);
         } else {
             p->selected = True;
             p->standby = True;
-            p->aport = p;
             lac_trace("\r\n <%s.%d> port %d ---> Standby ",  __FUNCTION__, __LINE__, p->port_index);
         }
     }

@@ -159,8 +159,9 @@ typedef struct lac_sys_t /* Lac_system */
     LAC_TIME slow_periodic_time;
     LAC_TIME short_timeout_time;
     LAC_TIME long_timeout_time;
-    LAC_TIME aggregate_wait_time;
+    LAC_TIME aggregate_wait_tim;
 
+    Bool lacp_timeout;
     int tx_hold_count;
 } LAC_SYS_T;
 

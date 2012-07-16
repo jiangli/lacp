@@ -73,6 +73,7 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
     register LAC_SYS_T *this;
     register LAC_PORT_T *port;
     int port_no;
+    Bool update_fsm = True;
 
     LAC_CRITICAL_PATH_START;
     this = lac_get_sys_inst();
@@ -112,9 +113,18 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
         {
             lac_port_set_reselect(port);
         }
+
+        else if (uid_cfg->field_mask & PT_CFG_STAT)
+        {
+                port->rx_lacpdu_cnt = 0;
+                port->tx_lacpdu_cnt = 0;
+                update_fsm = False;
+        }
+
     }
 
-    lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
+    if (update_fsm)
+            lac_sys_update (this, LAC_SYS_UPDATE_READON_PORT_CFG);
 
     LAC_CRITICAL_PATH_END;
     return 0;
@@ -143,11 +153,19 @@ int lac_port_get_cfg(int port_index, UID_LAC_PORT_CFG_T * uid_cfg)
 int _lac_copy_port_state(UID_LAC_PORT_STATE_T * uid_cfg, LAC_PORT_T *port)
 {
         uid_cfg->port_index = port->port_index;
+        uid_cfg->agg_id = port->agg_id;
+        uid_cfg->rx_cnt = port->rx_lacpdu_cnt;
+        uid_cfg->tx_cnt = port->tx_lacpdu_cnt;
+        uid_cfg->master_port = port->aport->port_index;
+
         if (port->selected && !port->standby)                                                                    
-                uid_cfg->sel_state = True;                                                                       
+        {
+
+                uid_cfg->sel_state = True;                     
+        }                                                  
         else                                                                                                     
                 uid_cfg->sel_state = False;                                                                      
-                                                                                                           
+        
         memcpy(&uid_cfg->actor, &port->actor, sizeof(LAC_PORT_INFO));
         memcpy(&uid_cfg->partner, &port->partner, sizeof(LAC_PORT_INFO)); 
         return 0;
@@ -180,6 +198,23 @@ int lac_agg_get_port_state(int agg_id, UID_LAC_PORT_STATE_T * uid_cfg, int *mast
 
     return 0;
  }
+int lac_port_get_port_state(int port_index, UID_LAC_PORT_STATE_T * uid_cfg)
+{
+    register LAC_SYS_T *lac_sys;
+    register LAC_PORT_T *port;
+    int cnt = 0;
+
+    lac_sys = lac_get_sys_inst();
+    port = lac_port_find (lac_sys, port_index);
+    if (!port) {		  /* port is absent in the stpm :( */
+        return -1;
+    }
+
+    _lac_copy_port_state(uid_cfg, port);      
+
+    return 0;
+ }
+
 #if 0
 int lac_agg_get_master_port(int agg_id, UID_LAC_PORT_CFG_T * uid_cfg)
 {
@@ -309,7 +344,21 @@ int lac_in_enable_port(int port_index, Bool enable)
     return 0;
 
 }
+int     lac_update_port_info()
+{
+    register LAC_SYS_T *lac_sys;
+    register LAC_PORT_T *port;
 
+    lac_sys = lac_get_sys_inst();
+    for (port = lac_sys->ports; port; port = port->next)
+    {
+            port->actor.system_priority = lac_sys->priority;
+            LAC_STATE_SET_BIT(port->actor.state, LAC_STATE_TMT, lac_sys->lacp_timeout);
+            port->ntt = True;
+    }
+
+    return 0;
+}
 int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
 {
     LAC_SYS_T *this = lac_get_sys_inst();
@@ -335,9 +384,23 @@ int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg)
     }
     else if (uid_cfg->field_mask & BR_CFG_PRIO)
     {
-
+            this->priority = uid_cfg->priority;
     }
 
+    else if (uid_cfg->field_mask & BR_CFG_LONG_PERIOD)
+    {
+            this->slow_periodic_time = uid_cfg->long_period;
+    }
+    else if (uid_cfg->field_mask & BR_CFG_SHORT_PERIOD)
+    {
+            this->fast_periodic_time = uid_cfg->short_period;
+    }
+    else if (uid_cfg->field_mask & BR_CFG_PERIOD)
+    {
+            this->lacp_timeout = uid_cfg->period;
+    }
+
+    lac_update_port_info();
     lac_sys_update (this, LAC_SYS_UPDATE_READON_SYS_CFG);
 
     LAC_CRITICAL_PATH_END;
