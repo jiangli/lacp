@@ -135,15 +135,15 @@ lac_port_delete (LAC_PORT_T * this)
 
 unsigned int lac_port_rx_lacpdu (LAC_PORT_T * this, LACPDU_T * bpdu, size_t len)
 {
-        int ret = 0;
-        
+    int ret = 0;
+
 
     ret = lac_rxm_rx_lacpdu (this, bpdu, len);
     if (ret)
     {
-            return ret;
+        return ret;
     }
-    
+
     return 0;
 }
 

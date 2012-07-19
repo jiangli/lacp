@@ -14,20 +14,20 @@ typedef struct {
     LAC_KEY key;
     unsigned short port_priority;
     Bool			  lacp_enabled;
-        LAC_STATE 	  state;/* readonly */
-        int sel_state;  /* selected or standby. readonly */
+    LAC_STATE 	  state;/* readonly */
+    int sel_state;  /* selected or standby. readonly */
     int agg_id;
     LAC_PORT_INFO        partner;
 
 } UID_LAC_PORT_CFG_T;
 typedef struct {
-        int port_index;
+    int port_index;
     LAC_KEY key;
-        int agg_id;
-        int master_port;
+    int agg_id;
+    int master_port;
     int sel_state;  /* selected or standby. readonly */
-        int rx_cnt;
-        int tx_cnt;
+    int rx_cnt;
+    int tx_cnt;
     LAC_PORT_INFO        actor;
     LAC_PORT_INFO        partner;
 
@@ -54,12 +54,12 @@ typedef struct {
     unsigned long	  field_mask; /* which fields to change */
     unsigned int			   number_of_ports;
     BITMAP_T		  ports;
-        int period;
+    int period;
     /* protocol data */
     SYSTEM_PRIORITY priority;
-        SYSTEM_MAC sys_mac;
-        unsigned int short_period;
-        unsigned int long_period;
+    SYSTEM_MAC sys_mac;
+    unsigned int short_period;
+    unsigned int long_period;
 } UID_LAC_CFG_T;
 
 #ifdef __LINUX__

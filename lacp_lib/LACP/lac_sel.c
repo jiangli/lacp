@@ -118,14 +118,14 @@ LAC_PORT_T *select_master_port(LAC_SYS_T *this, int agg_id)
             continue;
 
         }
-        else if ( (!LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) 
+        else if ( (!LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF))
                   &&  LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
         {
             best = p;
             continue;
 
         }
-        else if ( (LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF)) 
+        else if ( (LAC_STATE_GET_BIT(p->actor.state, LAC_STATE_DEF))
                   &&  !LAC_STATE_GET_BIT(best->actor.state, LAC_STATE_DEF))
         {
             continue;

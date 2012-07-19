@@ -146,8 +146,8 @@ enum    {Null_system = 0};
 
 typedef struct lac_sys_t /* Lac_system */
 {
-        LAC_PORT_T * ports;  /* all lacp port link list */
-    BITMAP_T * portmap;      
+    LAC_PORT_T * ports;  /* all lacp port link list */
+    BITMAP_T * portmap;
     int number_of_ports;
     int admin_state;
 
@@ -158,7 +158,7 @@ typedef struct lac_sys_t /* Lac_system */
     LAC_TIME slow_periodic_time;
     LAC_TIME short_timeout_time;
     LAC_TIME long_timeout_time;
-        LAC_TIME aggregate_wait_time;
+    LAC_TIME aggregate_wait_time;
 
     Bool lacp_timeout;
     int tx_hold_count;
@@ -169,7 +169,7 @@ typedef struct {
     int duplex;
     int cd;
     int tid;
-        int link_status;
+    int link_status;
 } port_attr;
 
 

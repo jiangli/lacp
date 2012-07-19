@@ -74,7 +74,7 @@ static int lac_port_lacp_enable (int argc, char** argv)
 
     for (port_loop  = port_start; port_loop <= port_end; port_loop++)
     {
-             BitmapSetBit(&ports, port_loop);
+        BitmapSetBit(&ports, port_loop);
     }
 
     lac_in_create_port(&ports);
@@ -97,9 +97,9 @@ static int lac_port_lacp_enable (int argc, char** argv)
         lac_port_set_cfg(&uid_cfg);
 
         if (lac_get_port_link_status(port_loop))
-                lac_port_link_change(port_index, 1);
+            lac_port_link_change(port_index, 1);
         else
-                lac_port_link_change(port_index, 0);
+            lac_port_link_change(port_index, 0);
 
     }
 
@@ -368,48 +368,48 @@ int cli_pr_get_attr(int argc, char **argv)
 
 int cli_pr_set_link(int argc, char **argv)
 {
-        int port_index = atoi(argv[1]);
-        int link_status = atoi(argv[2]);
-        lac_port_link_change(port_index, link_status);
-        return 0;
-        
+    int port_index = atoi(argv[1]);
+    int link_status = atoi(argv[2]);
+    lac_port_link_change(port_index, link_status);
+    return 0;
+
 }
 
 int lac_agg_delete(int argc, char **argv)
 {
-        int agg_id = atoi(argv[1]);
-        _lac_port_lacp_delete_range(0, max_port - 1);
-        return 0;
+    int agg_id = atoi(argv[1]);
+    _lac_port_lacp_delete_range(0, max_port - 1);
+    return 0;
 }
 
 int cli_sysget_lac_brief(int argc, char **argv)
 {
-        int i;
-        UID_LAC_CFG_T  uid_cfg;
-        int master_index = -1;
-        unsigned char actor_sys_id_str[40];
-        unsigned char partner_sys_id_str[40];
-        unsigned char partner_sys_prio_str[20];
-        UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
-        unsigned char master_str[10] = {0};
-        unsigned char oper_key_str[10] = {0};
-        int m_index = -1;
-        int sel_cnt = 0 ;
-        int standby_cnt = 0;
-        
-        lac_sys_get_cfg(&uid_cfg);
-        
-        memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
+    int i;
+    UID_LAC_CFG_T  uid_cfg;
+    int master_index = -1;
+    unsigned char actor_sys_id_str[40];
+    unsigned char partner_sys_id_str[40];
+    unsigned char partner_sys_prio_str[20];
+    UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
+    unsigned char master_str[10] = {0};
+    unsigned char oper_key_str[10] = {0};
+    int m_index = -1;
+    int sel_cnt = 0 ;
+    int standby_cnt = 0;
 
-        get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
+    lac_sys_get_cfg(&uid_cfg);
 
-        printf("\r\n Actor");
-        printf("\r\n  Priority     : %d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
-        printf("\r\n  Short Period : %d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
-        printf("\r\n ----------------------------------------------------------------------");
-        printf("\r\n Agg  Partner  Parnter            Master   Selected   Standby   Oper ");
-        printf("\r\n ID   Pri      MAC                Port     PortNum    PortNum   Key  ");
-        printf("\r\n ----------------------------------------------------------------------");
+    memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
+
+    get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
+
+    printf("\r\n Actor");
+    printf("\r\n  Priority     : %d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
+    printf("\r\n  Short Period : %d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
+    printf("\r\n ----------------------------------------------------------------------");
+    printf("\r\n Agg  Partner  Parnter            Master   Selected   Standby   Oper ");
+    printf("\r\n ID   Pri      MAC                Port     PortNum    PortNum   Key  ");
+    printf("\r\n ----------------------------------------------------------------------");
     for (i = 0; i < 32; i++)
     {
         sel_cnt = standby_cnt = 0;
@@ -420,183 +420,184 @@ int cli_sysget_lac_brief(int argc, char **argv)
         sprintf(oper_key_str, "-");
 
         if (g_link_groups[i].cnt)
-        {   
-                lac_agg_get_port_state(i+1, uid_port_state, &master_index);
+        {
+            lac_agg_get_port_state(i+1, uid_port_state, &master_index);
 
-                for (m_index = 0; m_index < g_link_groups[i].cnt; m_index++)
+            for (m_index = 0; m_index < g_link_groups[i].cnt; m_index++)
+            {
+                if (uid_port_state[m_index].sel_state)
                 {
-                        if (uid_port_state[m_index].sel_state)
-                        {
-                                sel_cnt++;
-                        }
-                        else
-                        {
-                                standby_cnt++;
-                        }
+                    sel_cnt++;
                 }
-                
-                if (master_index != -1)
+                else
                 {
-                        sprintf(master_str, "%d", uid_port_state[master_index].port_index);
-                        sprintf(partner_sys_prio_str, "%d", uid_port_state[master_index].partner.port_priority);
-                        get_mac_str(uid_port_state[master_index].partner.system_mac, partner_sys_id_str);        
-                        sprintf(oper_key_str, "%d", uid_port_state[master_index].actor.key);
+                    standby_cnt++;
                 }
-                
-                printf("\r\n %-5d%-9s%-19s%-9s%-11d%-10d%-3s", 
-                       (i+1), partner_sys_prio_str, partner_sys_id_str, master_str, sel_cnt, standby_cnt, oper_key_str);             }
+            }
+
+            if (master_index != -1)
+            {
+                sprintf(master_str, "%d", uid_port_state[master_index].port_index);
+                sprintf(partner_sys_prio_str, "%d", uid_port_state[master_index].partner.port_priority);
+                get_mac_str(uid_port_state[master_index].partner.system_mac, partner_sys_id_str);
+                sprintf(oper_key_str, "%d", uid_port_state[master_index].actor.key);
+            }
+
+            printf("\r\n %-5d%-9s%-19s%-9s%-11d%-10d%-3s",
+                   (i+1), partner_sys_prio_str, partner_sys_id_str, master_str, sel_cnt, standby_cnt, oper_key_str);
+        }
 
     }
-        printf("\r\n ----------------------------------------------------------------------\r\n");        
-        return 0;
+    printf("\r\n ----------------------------------------------------------------------\r\n");
+    return 0;
 }
 
 void cli_print_port_info(UID_LAC_PORT_STATE_T *uid_port_state)
 {
-        unsigned char partner_sys_id_str[40];
-        unsigned char *role_str[] = {"STANDBY", "SELECTED"};
+    unsigned char partner_sys_id_str[40];
+    unsigned char *role_str[] = {"STANDBY", "SELECTED"};
 
-        sprintf(partner_sys_id_str, "-");
+    sprintf(partner_sys_id_str, "-");
 
-        get_mac_str(uid_port_state->partner.system_mac, partner_sys_id_str);        
-                        
-        printf("\r\n Actor    Port Number     : %d", 
-               uid_port_state->actor.port_index);
-        printf("\r\n          Oper-key        : %-4d(0x%-4x)  Port Priority: %-4d", 
-               uid_port_state->actor.key,uid_port_state->actor.key, uid_port_state->actor.port_priority);
-        printf("\r\n          Port Role       : %-8s      Port Status  : %d", 
-               role_str[uid_port_state->sel_state], uid_port_state->actor.state);
+    get_mac_str(uid_port_state->partner.system_mac, partner_sys_id_str);
 
-        printf("\r\n Parnter  System Priority : %-8d      MAC Address  : %s", 
-               uid_port_state->partner.system_priority, partner_sys_id_str);
-        printf("\r\n          Port Priority   : %-8d      Port Number  : %d",
-               uid_port_state->partner.port_priority, uid_port_state->partner.port_index);
-        printf("\r\n          Oper-key        : %-8d      Port Status  : %d",
-               uid_port_state->partner.key, uid_port_state->partner.state);
-        printf("\r\n");
-        
-        return;
+    printf("\r\n Actor    Port Number     : %d",
+           uid_port_state->actor.port_index);
+    printf("\r\n          Oper-key        : %-4d(0x%-4x)  Port Priority: %-4d",
+           uid_port_state->actor.key,uid_port_state->actor.key, uid_port_state->actor.port_priority);
+    printf("\r\n          Port Role       : %-8s      Port Status  : %d",
+           role_str[uid_port_state->sel_state], uid_port_state->actor.state);
+
+    printf("\r\n Parnter  System Priority : %-8d      MAC Address  : %s",
+           uid_port_state->partner.system_priority, partner_sys_id_str);
+    printf("\r\n          Port Priority   : %-8d      Port Number  : %d",
+           uid_port_state->partner.port_priority, uid_port_state->partner.port_index);
+    printf("\r\n          Oper-key        : %-8d      Port Status  : %d",
+           uid_port_state->partner.key, uid_port_state->partner.state);
+    printf("\r\n");
+
+    return;
 }
 int cli_sysget_lac_verbose(int argc, char **argv)
 {
-        int i;
-        UID_LAC_CFG_T  uid_cfg;
-        int master_index = -1;
-        unsigned char actor_sys_id_str[40];
-        UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
-        unsigned char master_str[10] = {0};
-        int agg_id = atoi(argv[1]);
-        lac_sys_get_cfg(&uid_cfg);
-        
-        memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
+    int i;
+    UID_LAC_CFG_T  uid_cfg;
+    int master_index = -1;
+    unsigned char actor_sys_id_str[40];
+    UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
+    unsigned char master_str[10] = {0};
+    int agg_id = atoi(argv[1]);
+    lac_sys_get_cfg(&uid_cfg);
 
-        get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
+    memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
 
-        printf("\r\n Priority     : %d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
-        printf("\r\n Short Period : %d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
-        
-        sprintf(master_str, "-");
+    get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
 
-        if (g_link_groups[agg_id-1].cnt)
-        {   
-                lac_agg_get_port_state(agg_id, uid_port_state, &master_index);
+    printf("\r\n Priority     : %d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
+    printf("\r\n Short Period : %d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
 
-                if (master_index != -1)
-                {
-                        sprintf(master_str, "%d", uid_port_state[master_index].port_index);
-                }
-                
-                printf("\r\n Master Port  : %s", master_str);
-                printf("\r\n");
+    sprintf(master_str, "-");
 
-                for (i = 0; i < 8; i++)
-                {
-                        if (uid_port_state[i].port_index == 0xffffffff)
-                                continue;
-                        cli_print_port_info(&uid_port_state[i]);
-                }
+    if (g_link_groups[agg_id-1].cnt)
+    {
+        lac_agg_get_port_state(agg_id, uid_port_state, &master_index);
+
+        if (master_index != -1)
+        {
+            sprintf(master_str, "%d", uid_port_state[master_index].port_index);
+        }
+
+        printf("\r\n Master Port  : %s", master_str);
+        printf("\r\n");
+
+        for (i = 0; i < 8; i++)
+        {
+            if (uid_port_state[i].port_index == 0xffffffff)
+                continue;
+            cli_print_port_info(&uid_port_state[i]);
+        }
 
     }
     return 0;
 }
 int cli_sysget_lac_portinfo(int argc, char **argv)
 {
-        int ret = 0;
-        int i;
-        UID_LAC_CFG_T  uid_cfg;
-        int master_index = -1;
-        unsigned char actor_sys_id_str[40];
-        UID_LAC_PORT_STATE_T uid_port_state;
-        unsigned char master_str[10] = {0};
-        int port_index = atoi(argv[1]);
+    int ret = 0;
+    int i;
+    UID_LAC_CFG_T  uid_cfg;
+    int master_index = -1;
+    unsigned char actor_sys_id_str[40];
+    UID_LAC_PORT_STATE_T uid_port_state;
+    unsigned char master_str[10] = {0};
+    int port_index = atoi(argv[1]);
 
-        memset(&uid_port_state, 0, sizeof(UID_LAC_PORT_STATE_T));
-        ret = lac_port_get_port_state(port_index, &uid_port_state);
-        if ( 0 != ret || 0 == uid_port_state.agg_id)
-        {
-                printf("\r\n port is not in lacp aggregation gruop.");
-                return 0;
-        }
-
-        get_mac_str(uid_port_state.actor.system_mac, actor_sys_id_str);
-
-        sprintf(master_str, "%d", uid_port_state.master_port);
-
-        printf("\r\n Selected AggID  : %d    Master Port : %s", uid_port_state.agg_id, master_str);
-        printf("\r\n System Priority : %d    MAC Address : %s", uid_port_state.actor.system_priority, actor_sys_id_str);
-        printf("\r\n Received LACPDU : %d    Sent LACPDU : %d", uid_port_state.rx_cnt, uid_port_state.tx_cnt);
-        printf("\r\n");     
-        cli_print_port_info(&uid_port_state);
+    memset(&uid_port_state, 0, sizeof(UID_LAC_PORT_STATE_T));
+    ret = lac_port_get_port_state(port_index, &uid_port_state);
+    if ( 0 != ret || 0 == uid_port_state.agg_id)
+    {
+        printf("\r\n port is not in lacp aggregation gruop.");
         return 0;
+    }
+
+    get_mac_str(uid_port_state.actor.system_mac, actor_sys_id_str);
+
+    sprintf(master_str, "%d", uid_port_state.master_port);
+
+    printf("\r\n Selected AggID  : %d    Master Port : %s", uid_port_state.agg_id, master_str);
+    printf("\r\n System Priority : %d    MAC Address : %s", uid_port_state.actor.system_priority, actor_sys_id_str);
+    printf("\r\n Received LACPDU : %d    Sent LACPDU : %d", uid_port_state.rx_cnt, uid_port_state.tx_cnt);
+    printf("\r\n");
+    cli_print_port_info(&uid_port_state);
+    return 0;
 }
 int cli_port_clear_stat(int argc, char **argv)
 {
-        UID_LAC_PORT_CFG_T uid_cfg;
-        int port_index = atoi(argv[1]);
-        memset(&uid_cfg, 0, sizeof(uid_cfg));
-        uid_cfg.field_mask = PT_CFG_STAT;
-        BitmapSetBit(&uid_cfg.port_bmp, port_index);
-        lac_port_set_cfg(&uid_cfg);
-        return 0;
+    UID_LAC_PORT_CFG_T uid_cfg;
+    int port_index = atoi(argv[1]);
+    memset(&uid_cfg, 0, sizeof(uid_cfg));
+    uid_cfg.field_mask = PT_CFG_STAT;
+    BitmapSetBit(&uid_cfg.port_bmp, port_index);
+    lac_port_set_cfg(&uid_cfg);
+    return 0;
 }
 int cli_sys_set_prio(int argc, char **argv)
 {
-        int prio = atoi(argv[1]);
-        UID_LAC_CFG_T uid_cfg;
-        memset(&uid_cfg, 0, sizeof(uid_cfg));
-        uid_cfg.field_mask = BR_CFG_PRIO;
-        uid_cfg.priority = prio;
-        lac_sys_set_cfg(&uid_cfg);
+    int prio = atoi(argv[1]);
+    UID_LAC_CFG_T uid_cfg;
+    memset(&uid_cfg, 0, sizeof(uid_cfg));
+    uid_cfg.field_mask = BR_CFG_PRIO;
+    uid_cfg.priority = prio;
+    lac_sys_set_cfg(&uid_cfg);
 }
 int cli_sys_set_long_period(int argc, char **argv)
 {
-        int prio = atoi(argv[1]);
-        UID_LAC_CFG_T uid_cfg;
-        memset(&uid_cfg, 0, sizeof(uid_cfg));
-        uid_cfg.field_mask = BR_CFG_LONG_PERIOD;
-        uid_cfg.long_period = prio;
-        lac_sys_set_cfg(&uid_cfg);
-        return 0;
+    int prio = atoi(argv[1]);
+    UID_LAC_CFG_T uid_cfg;
+    memset(&uid_cfg, 0, sizeof(uid_cfg));
+    uid_cfg.field_mask = BR_CFG_LONG_PERIOD;
+    uid_cfg.long_period = prio;
+    lac_sys_set_cfg(&uid_cfg);
+    return 0;
 }
 int cli_sys_set_short_period(int argc, char **argv)
 {
-        int prio = atoi(argv[1]);
-        UID_LAC_CFG_T uid_cfg;
-        memset(&uid_cfg, 0, sizeof(uid_cfg));
-        uid_cfg.field_mask = BR_CFG_SHORT_PERIOD;
-        uid_cfg.short_period = prio;
-        lac_sys_set_cfg(&uid_cfg);
-        return 0;
+    int prio = atoi(argv[1]);
+    UID_LAC_CFG_T uid_cfg;
+    memset(&uid_cfg, 0, sizeof(uid_cfg));
+    uid_cfg.field_mask = BR_CFG_SHORT_PERIOD;
+    uid_cfg.short_period = prio;
+    lac_sys_set_cfg(&uid_cfg);
+    return 0;
 }
 int cli_sys_set_period(int argc, char **argv)
 {
-        int prio = atoi(argv[1]);
-        UID_LAC_CFG_T uid_cfg;
-        memset(&uid_cfg, 0, sizeof(uid_cfg));
-        uid_cfg.field_mask = BR_CFG_PERIOD;
-        uid_cfg.period = prio;
-        lac_sys_set_cfg(&uid_cfg);
-        return 0;
+    int prio = atoi(argv[1]);
+    UID_LAC_CFG_T uid_cfg;
+    memset(&uid_cfg, 0, sizeof(uid_cfg));
+    uid_cfg.field_mask = BR_CFG_PERIOD;
+    uid_cfg.period = prio;
+    lac_sys_set_cfg(&uid_cfg);
+    return 0;
 }
 
 static CMD_DSCR_T lang[] = {
@@ -604,7 +605,7 @@ static CMD_DSCR_T lang[] = {
     THE_COMMAND("no link-group", "delete the link group")
     PARAM_NUMBER("agg group on bridge", 1, 32, "1")
     THE_FUNC(lac_agg_delete)
-        
+
     THE_COMMAND("port link-group", "add port to static lacp")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
     PARAM_NUMBER("agg group on bridge", 1, 32, "1")
@@ -654,7 +655,7 @@ static CMD_DSCR_T lang[] = {
 
 
 
-     
+
     THE_COMMAND("show port", "get port config")
     PARAM_NUMBER("port number on bridge", 1, 4, "all")
     THE_FUNC(cli_pr_get_cfg)

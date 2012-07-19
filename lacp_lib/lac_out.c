@@ -54,19 +54,19 @@ int aggregator_del_member(int port_index)
 {
     int i;
     int j;
-    for (j=0;j<32;j++)
+    for (j=0; j<32; j++)
     {
-    for (i=0; i<8; i++)
-    {
-        if (g_link_groups[j].ports[i] == port_index)
+        for (i=0; i<8; i++)
         {
-            g_link_groups[j].ports[i] = 0xffffffff;
-            g_link_groups[j].cnt --;
-            return 0;
+            if (g_link_groups[j].ports[i] == port_index)
+            {
+                g_link_groups[j].ports[i] = 0xffffffff;
+                g_link_groups[j].cnt --;
+                return 0;
+
+            }
 
         }
-
-    }
     }
     printf("\r\n not found port:%d in all agg!",  port_index);
     return -1 ;
@@ -123,11 +123,11 @@ int lac_get_port_oper_duplex(int port_index)
 
 int lac_set_port_link_status(int port_index, int link_status)
 {
-        g_port_list[port_index].link_status  = link_status;
+    g_port_list[port_index].link_status  = link_status;
 }
 int lac_get_port_link_status(int port_index)
 {
-        return g_port_list[port_index].link_status;
+    return g_port_list[port_index].link_status;
 }
 int lac_set_port_speed(int port_index, int speed)
 {
@@ -219,23 +219,23 @@ int LAC_OUT_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 
 int get_index(int speed, int duplex)
 {
-        int speed_duplex[] = {1,10,100,1000,10000};
-            
+    int speed_duplex[] = {1,10,100,1000,10000};
+
     int i;
     if (!duplex)
-            return 0;
+        return 0;
     switch(speed)
     {
     case 10:
-            return 1;
+        return 1;
     case 100:
-            return 2;
+        return 2;
     case 1000:
-            return 3;
+        return 3;
     case 10000:
-            return 4;
+        return 4;
     default:
-            return 0;
+        return 0;
     }
 }
 //HANDLE hMutex;

@@ -46,7 +46,7 @@ static Bool _lac_rxm_same_port(LAC_PORT_INFO *a, LAC_PORT_INFO *b)
            );
 }
 static Bool _lac_rxm_same_partner(LAC_PORT_INFO *a, LAC_PORT_INFO *b)
-{   
+{
     return (  (a->port_priority == b->port_priority)
               && (a->port_index == b->port_index)
               && (a->system_priority == b->system_priority)
@@ -78,7 +78,7 @@ int lac_rxm_rx_lacpdu (LAC_PORT_T * port, LACPDU_T *Lacpdu, int len)
         if (p == port) continue;
 
         if (p->rx->State == RXM_PORT_DISABLED
-            && _lac_rxm_same_port(&p->partner, &port->msg_actor))
+                && _lac_rxm_same_port(&p->partner, &port->msg_actor))
         {
             lac_trace("port %d ' partner  moved to port %d \r\n", p->port_index, port->port_index);
             p->port_moved = True;
@@ -106,12 +106,12 @@ static void update_partner_syn(LAC_PORT_T *port)
     Bool partner_matched = False;
 
     if ((_lac_rxm_same_partner(&port->msg_partner, &port->actor)
-        || (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)))
-        && ((LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT))
-            || (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)
-                &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))))
+            || (!LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_AGG)))
+            && ((LAC_STATE_GET_BIT(port->msg_actor.state, LAC_STATE_ACT))
+                || (LAC_STATE_GET_BIT(port->actor.state, LAC_STATE_ACT)
+                    &&  LAC_STATE_GET_BIT(port->msg_partner.state, LAC_STATE_ACT))))
     {
-            partner_matched = True;     
+        partner_matched = True;
     }
     else
     {
@@ -139,10 +139,10 @@ static void update_selected(LAC_PORT_T *port)
 static void update_ntt(LAC_PORT_T *port)
 {
     if ( !(_lac_rxm_same_partner(&port->msg_partner, &port->actor))
-         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_ACT))
-         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_TMT))
-         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_SYN))
-         || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_AGG))
+            || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_ACT))
+            || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_TMT))
+            || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_SYN))
+            || (LAC_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LAC_STATE_AGG))
        )
         port->ntt = True;
 }
@@ -187,7 +187,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_PORT_DISABLED:
-            lac_trace("rx fsm to disabled. port %d partner  syn ---> False", port->port_index);
+        lac_trace("rx fsm to disabled. port %d partner  syn ---> False", port->port_index);
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         port->rcvdLacpdu = False;
         port->current_while = 0;
@@ -201,7 +201,7 @@ void lac_rx_enter_state (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_EXPIRED:
-            lac_trace("rx fsm to expired. port %d partner syn ---> False", port->port_index);
+        lac_trace("rx fsm to expired. port %d partner syn ---> False", port->port_index);
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_SYN, False);
         LAC_STATE_SET_BIT(port->partner.state, LAC_STATE_TMT, SHORT_TIMEOUT);
         start_current_while_timer(port, SHORT_TIMEOUT);
@@ -230,7 +230,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
 {
     register LAC_PORT_T *port = this->owner.port;
 
-    if (!port->port_enabled && !port->port_moved && BEGIN != this->State) 
+    if (!port->port_enabled && !port->port_moved && BEGIN != this->State)
     {
         if (this->State == RXM_PORT_DISABLED)
             return False;
@@ -246,8 +246,8 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         return lac_hop_2_state (this, RXM_PORT_DISABLED);
 
     case RXM_PORT_DISABLED:
-            if (port->port_moved)
-                    return lac_hop_2_state (this, RXM_INITIALIZE);
+        if (port->port_moved)
+            return lac_hop_2_state (this, RXM_INITIALIZE);
 
         if (port->port_enabled && port->lacp_enabled)
         {
@@ -279,7 +279,7 @@ Bool lac_rx_check_conditions (LAC_STATE_MACH_T * this)
         break;
 
     case RXM_CURRENT:
-            if (!port->current_while && !port->rcvdLacpdu) {
+        if (!port->current_while && !port->rcvdLacpdu) {
             return lac_hop_2_state (this, RXM_EXPIRED);
         }
         if (port->rcvdLacpdu) {

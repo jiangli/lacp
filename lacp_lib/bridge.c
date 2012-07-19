@@ -103,7 +103,7 @@ bridge_start ()
     BitmapClear (&uid_cfg.ports);
 
     /* 协议栈默认没有端口，需要初始化端口 */
-    #if 0
+#if 0
     uid_cfg.field_mask = BR_CFG_PBMP_ADD;
     uid_cfg.number_of_ports = max_valid_port;
     for (i=0; i<max_valid_port; i++)
@@ -112,7 +112,7 @@ bridge_start ()
         if (i < 4)
             BitmapSetBit(&uid_cfg.ports, i);
     }
-    #endif
+#endif
 
     iii = lac_sys_set_cfg(&uid_cfg);
     if (0 != iii) {
@@ -185,8 +185,8 @@ bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
 
     lac_rx_lacpdu (msg->header.destination_port,
-               (LACPDU_T *) (msg->body.bpdu),
-               msg->header.body_len);
+                   (LACPDU_T *) (msg->body.bpdu),
+                   msg->header.body_len);
 
     return 0;
 }
