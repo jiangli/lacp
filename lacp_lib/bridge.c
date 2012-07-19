@@ -1,24 +1,3 @@
-/************************************************************************
- * RSTP library - Rapid Spanning Tree (802.1t, 802.1w)
- * Copyright (C) 2001-2003 Optical Access
- * Author: Alex Rozin
- *
- * This file is part of RSTP library.
- *
- * RSTP library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation; version 2.1
- *
- * RSTP library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
- * General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with RSTP library; see the file COPYING.  If not, write to the Free
- * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- **********************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +13,6 @@
 
 #include "cli.h"
 #include "br_ipc.h"
-#include "lacp_cli.h"
 
 #include "lacp_base.h"
 #include "lacp_port.h"
@@ -92,7 +70,7 @@ bridge_start ()
         return (-4);
     }
 
-    stp_cli_init ();
+    lacp_cli_init ();
 
 
     /* 初始化lac系统 */
@@ -183,8 +161,8 @@ bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
 
     lacp_rx_lacpdu (msg->header.destination_port,
-                   (lacp_pdu_t *) (msg->body.bpdu),
-                   msg->header.body_len);
+                    (lacp_pdu_t *) (msg->body.bpdu),
+                    msg->header.body_len);
 
     return 0;
 }

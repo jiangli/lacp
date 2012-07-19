@@ -9,13 +9,13 @@
 #include <unistd.h>
 
 #include "cli.h"
-#include "lacp_cli.h"
 #include "bitmap.h"
 #include "lacp_base.h"
 #include "lacp_port.h"
 #include "lacp_sys.h"
 #include "lacp_api.h"
-#include "../lacp_ssp.h"
+#include "lacp_ssp.h"
+#include "lacp_stub.h"
 
 extern  uint32_t aggregator_init();
 
@@ -72,7 +72,7 @@ static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
 
         lacp_port_set_cfg(&uid_cfg);
 
-        if (lacp_get_port_link_status(port_loop))
+        if (lacp_ssp_get_port_link_status(port_loop))
             lacp_port_link_change(port_index, 1);
         else
             lacp_port_link_change(port_index, 0);
@@ -119,7 +119,7 @@ static uint32_t lacp_port_lacp_disable (uint32_t argc, char** argv)
 
 static uint32_t cli_br_get_cfg (uint32_t argc, char** argv)
 {
-	#if 0
+#if 0
     uint32_t i, j;
     lacp_port_cfg_t uid_cfg;
 
@@ -148,7 +148,7 @@ static uint32_t cli_br_get_cfg (uint32_t argc, char** argv)
     }
 
     printf("\r\n");
-	#endif
+#endif
     return 0;
 
 
@@ -183,7 +183,7 @@ get_mac_str (unsigned char *addr, unsigned char *str)
 
 static void
 _lacp_in_display_bit (unsigned char bitmask,
-                     char *bit_name, char *bit_fmt, unsigned char flags)
+                      char *bit_name, char *bit_fmt, unsigned char flags)
 {
     uint32_t the_bit = (flags & bitmask) ? 1 : 0;
 
@@ -231,9 +231,14 @@ static uint32_t cli_pr_get_cfg (uint32_t argc, char** argv)
     uint32_t port_index = atoi(argv[1]);
     lacp_port_t port;
     uint32_t i = 0;
+    uint32_t ret = 0;
 
-    lacp_port_get_dbg_cfg(port_index, &port);
-
+    ret = lacp_port_get_dbg_cfg(port_index, &port);
+    if (ret != 0)
+    {
+        printf("can't display port %d.\r\n", port_index);
+        return 0;
+    }
     print_sep(&i);
     printf(" port_index      : %d", port.port_index);
     print_sep(&i);
@@ -257,7 +262,7 @@ static uint32_t cli_pr_get_cfg (uint32_t argc, char** argv)
     print_sep(&i);
     printf(" standby         : %d", port.standby);
     print_sep(&i);
-    printf(" aport           : %d", port.master_port->port_index);
+//    printf(" aport           : %d", port.master_port->port_index);
     print_sep(&i);
     printf(" ntt             : %d", port.ntt);
     print_sep(&i);
@@ -301,7 +306,7 @@ uint32_t cli_pr_set_speed(uint32_t argc, char **argv)
 
     uint32_t port_index = atoi(argv[1]);
     uint32_t speed = atoi(argv[2]);
-    lacp_set_port_speed(port_index, speed);
+    lacp_ssp_set_port_speed(port_index, speed);
     return 0;
 
 }
@@ -324,7 +329,7 @@ uint32_t cli_pr_get_attr(uint32_t argc, char **argv)
 
     uint32_t port_start = 0;
     uint32_t port_end = max_port;
-	port_attr attr;
+    port_attr_t attr;
     if ('a' != argv[1][0])
     {
         port_index = atoi(argv[1]);
@@ -335,10 +340,10 @@ uint32_t cli_pr_get_attr(uint32_t argc, char **argv)
     printf("port    speed    duplex    rx&tx    chip_tgid");
     for (port_loop = port_start; port_loop < port_end; port_loop++)
     {
-		
-		stub_get_port_attr(port_loop, &attr);
-        printf("\r\n%-4d     %-4d     %-4d     %-4d     %-4d", port_loop, attr.speed, 
-			attr.duplex,  attr.cd, attr.tid);
+
+        stub_get_port_attr(port_loop, &attr);
+        printf("\r\n%-4d     %-4d     %-4d     %-4d     %-4d", port_loop, attr.speed,
+               attr.duplex,  attr.cd, attr.tid);
     }
 
     printf("\r\n");
@@ -398,15 +403,15 @@ uint32_t cli_sysget_lacp_brief(uint32_t argc, char **argv)
         sprintf(partner_sys_prio_str, "-");
         sprintf(oper_key_str, "-");
 
-		if (aggregator_has_member(i+1))
+        if (aggregator_has_member(i+1))
         {
             lacp_agg_get_port_state(i+1, uid_port_state, &master_index);
 
             for (m_index = 0; m_index < 8; m_index++)
             {
-				if (!uid_port_state[m_index].valid)
-					continue;
-				
+                if (!uid_port_state[m_index].valid)
+                    continue;
+
                 if (uid_port_state[m_index].sel_state)
                 {
                     sel_cnt++;

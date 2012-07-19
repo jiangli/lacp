@@ -2,7 +2,7 @@
 #include "lacp_statmch.h"
 #include "lacp_sys.h"
 #include "lacp_api.h"
-#include "../lacp_out.h"
+#include "lacp_ssp.h"
 
 extern uint32_t max_port;
 static lacp_sys_t *g_lacp_sys_inst = NULL;
@@ -34,7 +34,7 @@ lacp_sys_t *lacp_sys_init ()
     LACP_MALLOC (sys->portmap, lacp_bitmap_t, "Can't alloc for ports");
     sys->number_of_ports = 0;
     sys->priority = Default_system_priority;
-    lacp_ssp_get_port_mac(sys_mac);
+    lacp_ssp_get_mac(sys_mac);
     memcpy(sys->mac, sys_mac, 6);
     sys->short_timeout_time = Short_timeout_ticks;
     sys->long_timeout_time = Long_timeout_ticks;
@@ -50,8 +50,8 @@ lacp_sys_t *lacp_sys_init ()
 
 static uint32_t
 lacp_iterate_machines (lacp_sys_t * sys,
-                      uint32_t (*iter_callb) (lacp_state_mach_t *),
-                      Bool exit_on_non_zero_ret)
+                       uint32_t (*iter_callb) (lacp_state_mach_t *),
+                       Bool exit_on_non_zero_ret)
 {
     register lacp_state_mach_t *stater;
     register lacp_port_t *port;

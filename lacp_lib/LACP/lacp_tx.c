@@ -34,7 +34,7 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     memset(&lacpdu_packet, 0, sizeof(lacp_pdu_t));
 
     memcpy(lacpdu_packet.slow_protocols_address, slow_protocols_address, 6);
-    lacp_ssp_get_port_mac (lacpdu_packet.src_address);
+    lacp_ssp_get_mac (lacpdu_packet.src_address);
     lacpdu_packet.ethertype = htons (0x8809);
 
     lacpdu_packet.protocol_subtype = 1;
@@ -140,7 +140,7 @@ Bool lacp_tx_check_conditions (lacp_state_mach_t * fsm)
             return lacp_hop_2_state (fsm, TXM_TX);
         }
         break;
-		
+
     case TXM_TX:
         return lacp_hop_2_state (fsm, TXM_IDLE);
 

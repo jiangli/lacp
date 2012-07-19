@@ -57,7 +57,7 @@ typedef unsigned short USHORT;
 typedef unsigned long ULONG;
 
 #ifndef uint16_t
-typedef unsigned int uint16_t;
+typedef unsigned short uint16_t;
 #endif
 
 #ifndef uint32_t

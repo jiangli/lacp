@@ -29,9 +29,9 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     LACP_STRDUP (port->port_name, lacp_ssp_get_port_name (port_index), "port_name");
     port->machines = NULL;
 
-	lacp_port_get_actor_admin(port_index, &port->actor_admin);
-	lacp_port_get_partner_admin(port_index, &port->partner_admin);
-	
+    lacp_port_get_actor_admin(port_index, &port->actor_admin);
+    lacp_port_get_partner_admin(port_index, &port->partner_admin);
+
     port->master_port = port;
     port->selected = False;
 
@@ -168,10 +168,10 @@ LAC_LAC_PORT_Trace_state_machine (lacp_port_t * this, char *mach_name, unsigned 
             /* if (stater->debug != enadis) */
             {
                 lacp_trace ("port %s on %s trace %-8s (was %s) now %s",
-                           this->port_name, this->owner->name,
-                           stater->name,
-                           stater->debug ? " enabled" : "disabled",
-                           enadis ? " enabled" : "disabled");
+                            this->port_name, this->owner->name,
+                            stater->name,
+                            stater->debug ? " enabled" : "disabled",
+                            enadis ? " enabled" : "disabled");
             }
             stater->debug = enadis;
         }

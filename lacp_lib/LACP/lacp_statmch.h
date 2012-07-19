@@ -20,7 +20,7 @@ typedef struct lacp_state_mach_s {
     Bool          (* concreteCheckCondition) (struct lacp_state_mach_s * );
     char*         (* concreteGetStatName) (uint32_t);
     union {
-        struct lacp_port_t* port;
+        struct lacp_port_s* port;
         void         * owner;
     } owner;
 
@@ -30,9 +30,9 @@ typedef struct lacp_state_mach_s {
   {                                                               \
     lacp_state_mach_t* abstr;                                          \
                                                                   \
-    abstr = lacp_state_mach_create (lac_##WHAT##_enter_state,      \
-                                  lac_##WHAT##_check_conditions,  \
-                                  lac_##WHAT##_get_state_name,    \
+    abstr = lacp_state_mach_create (lacp_##WHAT##_enter_state,      \
+                                  lacp_##WHAT##_check_conditions,  \
+                                  lacp_##WHAT##_get_state_name,    \
                                   port,                           \
                                   #WHAT);                         \
     abstr->next = port->machines;                                 \
@@ -43,9 +43,9 @@ typedef struct lacp_state_mach_s {
 
 lacp_state_mach_t *
 lacp_state_mach_create (void (* concreteEnterState) (lacp_state_mach_t*),
-                       Bool (* concreteCheckCondition) (lacp_state_mach_t*),
-                       char * (* concreteGetStatName) (uint32_t),
-                       void* owner, char* name);
+                        Bool (* concreteCheckCondition) (lacp_state_mach_t*),
+                        char * (* concreteGetStatName) (uint32_t),
+                        void* owner, char* name);
 
 void
 lacp_state_mach_delete (lacp_state_mach_t* fsm);

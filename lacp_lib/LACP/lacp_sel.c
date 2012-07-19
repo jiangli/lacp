@@ -1,7 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_statmch.h"
-#include "lac_sys.h"
-#include "../lacp_ssp.h"
+#include "lacp_sys.h"
+#include "lacp_ssp.h"
 #define STATES {        \
   CHOOSE(SEL_INIT),    \
   CHOOSE(SEL_SELECTION),    \
@@ -45,7 +45,7 @@ static lacp_port_t *select_master_port(lacp_sys_t *lac_sys, uint32_t agg_id)
         if (agg_id != p->agg_id )
             continue;
 
-        p->actor.key = lac_get_port_oper_key(p->port_index);
+        p->actor.key = lacp_ssp_get_port_oper_key(p->port_index);
     }
 
     /* select best port(master port) */

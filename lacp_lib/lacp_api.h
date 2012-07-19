@@ -23,7 +23,7 @@ enum {/*
     Default_key             = 0,
     Default_lacp_activity   = True,
     Default_lacp_timeout    = LACP_LONG_TIMEOUT,
-    Default_aggregation     = True
+    Default_aggregation     = False
 };
 
 
@@ -43,7 +43,7 @@ typedef struct {
 } lacp_port_cfg_t;
 
 typedef struct {
-	uint32_t valid;
+    uint32_t valid;
     uint32_t port_index;
     lacp_key_t key;
     uint32_t agg_id;
@@ -79,7 +79,8 @@ typedef struct {
     lacp_bitmap_t	ports;
     uint32_t        period;
     /* protocol data */
-    lacp_sys_prio_t priority;
+    //lacp_sys_prio_t priority;
+    uint32_t priority;
     lacp_mac_t 		sys_mac;
     uint32_t 	short_period;
     uint32_t 	long_period;
@@ -106,6 +107,7 @@ typedef enum {
 
 typedef enum {
     M_LACP_INTERNEL,
+    M_LACP_NOT_CREATED,
     M_RSTP_PORT_IS_ABSENT,
     M_RSTP_NOT_ENABLE,
 } LACP_ERROR_E;
@@ -124,4 +126,4 @@ uint32_t lac_in_enable_port(uint32_t port_index, Bool enable);
 uint32_t lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg);
 uint32_t lac_sys_get_cfg(UID_LAC_CFG_T * uid_cf);
 
-#endif 
+#endif

@@ -1,3 +1,4 @@
+#include "lacp_base.h"
 #include "lacp_stub.h"
 port_attr_t g_port_list[144];
 LINK_GROUP_T g_link_groups[32];
@@ -22,10 +23,10 @@ uint32_t aggregator_init()
 
 Bool aggregator_has_member(uint32_t agg_id)
 {
-	if (g_link_groups[agg_id - 1].cnt)
-		return True;
-	else
-		return False;
+    if (g_link_groups[agg_id - 1].cnt)
+        return True;
+    else
+        return False;
 }
 
 uint32_t aggregator_add_member(uint32_t agg_id, uint32_t port_index)
@@ -89,13 +90,13 @@ uint32_t aggregator_get_id(uint32_t port_index)
 
 uint32_t stub_get_port_attr(uint32_t port_index, port_attr_t *attr)
 {
-	memcpy(attr, g_port_list[port_index], sizeof(port_attr_t));
-	return 0;
+    memcpy(attr, &g_port_list[port_index], sizeof(port_attr_t));
+    return 0;
 }
 
 uint32_t stub_set_port_attr(uint32_t port_index, port_attr_t *attr)
 {
-	memcpy(attr, g_port_list[port_index], sizeof(port_attr_t));
-	return 0;
+    memcpy(&g_port_list[port_index], attr, sizeof(port_attr_t));
+    return 0;
 }
-	
+

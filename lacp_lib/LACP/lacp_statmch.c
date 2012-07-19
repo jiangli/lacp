@@ -8,9 +8,9 @@
 
 lacp_state_mach_t *
 lacp_state_mach_create (void (*concreteEnterState) (lacp_state_mach_t *),
-                       Bool (*concreteCheckCondition) (lacp_state_mach_t *),
-                       char *(*concreteGetStatName) (uint32_t),
-                       void *owner, char *name)
+                        Bool (*concreteCheckCondition) (lacp_state_mach_t *),
+                        char *(*concreteGetStatName) (uint32_t),
+                        void *owner, char *name)
 {
     lacp_state_mach_t *fsm;
 
@@ -78,17 +78,17 @@ lacp_hop_2_state (lacp_state_mach_t * fsm, uint32_t new_state)
         if (new_state == fsm->state || new_state == fsm->ignoreHop2State)
             break;
         lacp_trace ("%-8s(%s): %s=>%s",
-                   fsm->name, fsm->owner.port->port_name,
-                   (*(fsm->concreteGetStatName)) (fsm->state),
-                   (*(fsm->concreteGetStatName)) (new_state));
+                    fsm->name, fsm->owner.port->port_name,
+                    (*(fsm->concreteGetStatName)) (fsm->state),
+                    (*(fsm->concreteGetStatName)) (new_state));
         break;
     case 2:
         if (new_state == fsm->state)
             break;
         lacp_trace ("%s: %s=>%s",
-                   fsm->name,
-                   (*(fsm->concreteGetStatName)) (fsm->state),
-                   (*(fsm->concreteGetStatName)) (new_state));
+                    fsm->name,
+                    (*(fsm->concreteGetStatName)) (fsm->state),
+                    (*(fsm->concreteGetStatName)) (new_state));
         break;
     }
 #endif

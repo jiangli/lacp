@@ -47,8 +47,8 @@ typedef unsigned char lacp_state_t;
 
 #define LACP_STATE_SET_BIT(flag,mask,value) ((value) ? (flag |= mask) : (flag &= ~mask))
 #define LACP_STATE_GET_BIT(flag,mask) ((flag & mask) ? 1 : 0)
-/*#define LAC_STATE_COPY_BIT(flag_to, flag_from, mask) ((flag_from & mask) ?  (flag_to |= mask) : 
-(flag_to &= 
+/*#define LAC_STATE_COPY_BIT(flag_to, flag_from, mask) ((flag_from & mask) ?  (flag_to |= mask) :
+(flag_to &=
 ~mask))*/
 
 /* return zero if equal */
@@ -69,8 +69,8 @@ typedef struct lacp_port_info_s /* lacp_port_info_t */
 
 typedef struct lacp_port_s /* Lac_port */
 {
-    struct lacp_port_t  *next;
-    struct lacp_sys_t   *system;
+    struct lacp_port_s  *next;
+    struct lacp_sys_s   *system;
     uint32_t            port_index; /* 端口索引,从0开始 */
     char*         	port_name;
 
@@ -95,24 +95,24 @@ typedef struct lacp_port_s /* Lac_port */
 
     lacp_timer_t*   timers[TIMERS_NUMBER]; /*list of timers */
 
-    struct lacp_port_t  *master_port;    /* 指向聚合组主端口,无主端口时，指向自己 */
+    struct lacp_port_s  *master_port;    /* 指向聚合组主端口,无主端口时，指向自己 */
 
     Bool        	port_enabled;		/* 端口是否up */
     Bool          	port_moved;		/* 端口物理连接是否移动 */
     Bool          	lacp_enabled;		/* 端口lacp是否开启 */
     Bool          	selected;		/* 端口是否已完成聚合选择 */
     Bool            standby;			/* 端口的选中状态是否为备用 */
-	
-	uint32_t       	 	speed;			/* 速率,100/1000/10000 */
+
+    uint32_t       	 	speed;			/* 速率,100/1000/10000 */
     uint32_t        	duplex;			/* 双工，1:全双工，0:半双工 */
     uint32_t        	agg_id;			/* 聚合组id,从1开始 */
 
     Bool        	rcvd_lacpdu;		/* 端口是否接收到协议报文并且未处理 */
     Bool            ntt;				/* need to transmit */
-    
+
     Bool        	ready_n;			/* 端口是否已准备好加入聚合组 */
 
-	uint32_t			hold_count;		/* 端口1s内已发送的协议报文数 */
+    uint32_t			hold_count;		/* 端口1s内已发送的协议报文数 */
     uint32_t        	tx_lacpdu_cnt;	/* 端口开启LACP后的发送协议报文数 */
     uint32_t        	rx_lacpdu_cnt;	/* 端口开启LACP后的接收协议报文数 */
 } lacp_port_t;
@@ -150,7 +150,7 @@ typedef struct lacpdu_t
 #define slow_protocols_ethertype (USHORT)0x4242};
 #define lacp_subtype  (Octet)1};
 
-typedef struct lacp_sys_t /* Lac_system */
+typedef struct lacp_sys_s /* Lac_system */
 {
     lacp_port_t * ports;  /* all lacp port link list */
     lacp_bitmap_t * portmap;
