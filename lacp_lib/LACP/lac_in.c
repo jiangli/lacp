@@ -109,16 +109,21 @@ int lac_port_set_cfg(UID_LAC_PORT_CFG_T * uid_cfg)
             }
             port->lacp_enabled = uid_cfg->lacp_enabled;
         }
-        else if (uid_cfg->field_mask & PT_CFG_COST)
+        if (uid_cfg->field_mask & PT_CFG_COST)
         {
             lac_port_set_reselect(port);
         }
 
-        else if (uid_cfg->field_mask & PT_CFG_STAT)
+        if (uid_cfg->field_mask & PT_CFG_STAT)
         {
                 port->rx_lacpdu_cnt = 0;
-                port->tx_lacpdu_cnt = 0;
-                update_fsm = False;
+                port->tx_lacpdu_cnt = 0;        
+        }
+        if (uid_cfg->field_mask & PT_CFG_PRIO)
+        {
+                printf("\r\n priority:%d!!!", uid_cfg->port_priority);
+                port->actor.port_priority = uid_cfg->port_priority;
+                lac_port_set_reselect(port);
         }
 
     }
@@ -287,17 +292,50 @@ lac_one_second ()
 
     LAC_CRITICAL_PATH_END;
 }
-int lac_in_create_port()
+int lac_in_create_port(BITMAP_T *ports)
 {
     //TODO:: create port
+        int port_index;
+        LAC_SYS_T *lac_sys;
+        lac_sys = lac_get_sys_inst();
+        for (port_index = 0; port_index < max_port; port_index++)
+        {
+                if (BitmapGetBit(ports, port_index))
+                {
+                        if (lac_port_create(lac_sys, port_index))
+                        {
+                                lac_sys->number_of_ports ++;
+                                BitmapSetBit(lac_sys->portmap, port_index);
+                        }
+                        else
+                        {
+                                printf("\r\n create port fail");
+                                continue;
+                        }
+                }
+        }
+    lac_sys_update (lac_sys, LAC_SYS_UPDATE_READON_PORT_CREATE);
     return 0;
 
 }
-int lac_in_remove_port()
+int lac_in_remove_port(BITMAP_T *ports)
 {
-//TODO:: remove port
-    return 0;
+        int port_index;
+        LAC_SYS_T *lac_sys;
+        LAC_PORT_T *port;
+        lac_sys = lac_get_sys_inst();
+        for (port_index = 0; port_index < max_port; port_index++)
+        {
+                if (BitmapGetBit(ports, port_index))
+                {
+                        port = lac_port_find(lac_sys, port_index);
+                        lac_port_delete(port);
+                                lac_sys->number_of_ports --;
+                                BitmapClearBit(lac_sys->portmap, port_index);
 
+                }
+        }
+    return 0;
 }
 
 int lac_port_link_change(int port_index, int link_status)

@@ -29,7 +29,6 @@ typedef struct /* LAC_STATE */
 } LAC_STATE;
 #endif
 typedef unsigned char LAC_STATE;
-
 #define LAC_STATE_ACT 0x1
 #define LAC_STATE_TMT 0X2
 #define LAC_STATE_AGG 0X4
@@ -159,7 +158,7 @@ typedef struct lac_sys_t /* Lac_system */
     LAC_TIME slow_periodic_time;
     LAC_TIME short_timeout_time;
     LAC_TIME long_timeout_time;
-    LAC_TIME aggregate_wait_tim;
+        LAC_TIME aggregate_wait_time;
 
     Bool lacp_timeout;
     int tx_hold_count;
@@ -170,7 +169,7 @@ typedef struct {
     int duplex;
     int cd;
     int tid;
-
+        int link_status;
 } port_attr;
 
 

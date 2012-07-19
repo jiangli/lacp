@@ -55,6 +55,7 @@ static int lac_port_lacp_enable (int argc, char** argv)
     int port_index = 0xFFFFFFFF;
     int agg_id = atoi(argv[2]);
     UID_LAC_PORT_CFG_T uid_cfg;
+    BITMAP_T ports;
 
     memset(&uid_cfg, 0, sizeof(uid_cfg));
 
@@ -73,7 +74,13 @@ static int lac_port_lacp_enable (int argc, char** argv)
 
     for (port_loop  = port_start; port_loop <= port_end; port_loop++)
     {
+             BitmapSetBit(&ports, port_loop);
+    }
 
+    lac_in_create_port(&ports);
+
+    for (port_loop  = port_start; port_loop <= port_end; port_loop++)
+    {
         aggregator_add_member(agg_id, port_loop);
 
         uid_cfg.field_mask = PT_CFG_STATE;
@@ -81,8 +88,21 @@ static int lac_port_lacp_enable (int argc, char** argv)
         uid_cfg.agg_id = agg_id;
 
         BitmapSetBit(&uid_cfg.port_bmp, port_loop);
+
+        uid_cfg.field_mask |= PT_CFG_COST;
+        uid_cfg.field_mask |= PT_CFG_PRIO;
+        uid_cfg.port_priority = 2;
+        uid_cfg.field_mask |= PT_CFG_STAT;
+
         lac_port_set_cfg(&uid_cfg);
+
+        if (lac_get_port_link_status(port_loop))
+                lac_port_link_change(port_index, 1);
+        else
+                lac_port_link_change(port_index, 0);
+
     }
+
 
     return 0;
 
@@ -103,7 +123,7 @@ static int _lac_port_lacp_delete_range(int port_start, int port_end)
     uid_cfg.lacp_enabled = False;
     uid_cfg.agg_id = 0;
     lac_port_set_cfg(&uid_cfg);
- 
+    lac_in_remove_port(&uid_cfg.port_bmp);
 }
 static int lac_port_lacp_disable (int argc, char** argv)
 {

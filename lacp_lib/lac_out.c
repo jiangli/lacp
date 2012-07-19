@@ -119,6 +119,16 @@ int lac_get_port_oper_duplex(int port_index)
 {
     return g_port_list[port_index].duplex;
 }
+
+
+int lac_set_port_link_status(int port_index, int link_status)
+{
+        g_port_list[port_index].link_status  = link_status;
+}
+int lac_get_port_link_status(int port_index)
+{
+        return g_port_list[port_index].link_status;
+}
 int lac_set_port_speed(int port_index, int speed)
 {
     UID_LAC_PORT_CFG_T uid_cfg;
