@@ -32,7 +32,7 @@ void lacp_get_sysid_str (uint32_t prio, unsigned char *addr, unsigned char *str)
 }
 
 void _lacp_display_bit (unsigned char bitmask,
-                      char *bit_name, char *bit_fmt, unsigned char flags)
+                        char *bit_name, char *bit_fmt, unsigned char flags)
 {
     uint32_t the_bit = (flags & bitmask) ? 1 : 0;
 
@@ -87,13 +87,13 @@ void lacp_print_port_info(lacp_port_info_t *lacp_info)
 
 void lacp_dump_pkt(lacp_pdu_t *pkt, int len)
 {
-        lacp_port_info_t actor, partner;
+    lacp_port_info_t actor, partner;
 
-        memdump(pkt, len);
-        
-        lacp_copy_info_from_net(&pkt->actor, &actor);
-        lacp_copy_info_from_net(&pkt->partner, &partner);
-        lacp_print_port_info(&actor);
-        lacp_print_port_info(&partner);
+    memdump(pkt, len);
+
+    lacp_copy_info_from_net(&pkt->actor, &actor);
+    lacp_copy_info_from_net(&pkt->partner, &partner);
+    lacp_print_port_info(&actor);
+    lacp_print_port_info(&partner);
 }
 

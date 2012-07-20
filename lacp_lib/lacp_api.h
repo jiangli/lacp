@@ -2,6 +2,7 @@
 #define   __LACP_API_H__
 
 #define LACP_UINT_INVALID 0xffffffff
+
 enum {
     Slow_periodic_ticks   =   30,/* should be 30, faster for simulation */
     Fast_periodic_ticks   =   1,
@@ -18,8 +19,8 @@ enum {
 enum {/*
        * Default settings for system characteristics.
        */
-    Default_system_priority = 1,
-    Default_port_priority   = 1,
+    Default_system_priority = 32768,
+    Default_port_priority   = 16384,
     Default_key             = 0,
     Default_lacp_activity   = True,
     Default_lacp_timeout    = LACP_LONG_TIMEOUT,
@@ -44,7 +45,8 @@ typedef struct {
 
 typedef struct {
     uint32_t valid;
-    uint32_t port_index;
+    uint32_t slot;
+        uint32_t port;
     lacp_key_t key;
     uint32_t agg_id;
     uint32_t master_port;
@@ -107,6 +109,8 @@ typedef enum {
 
 typedef enum {
     M_LACP_INTERNEL = 1,
+    M_LACP_NOT_ENABLE,
+    M_LACP_NOT_FOUND,
     M_LACP_NOT_CREATED,
     M_RSTP_PORT_IS_ABSENT,
     M_RSTP_NOT_ENABLE,

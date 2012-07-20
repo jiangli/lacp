@@ -60,7 +60,7 @@ disconnect_port (PORT_T * port, char reset_myself)
     if (reset_myself)
         port->bridge_partner = NULL;
     else {
-        port = port->bridge_partner->ports + port->port_partner - 1;
+        port = port->bridge_partner->ports + port->port_partner;
         port->bridge_partner = NULL;
     }
 
@@ -250,8 +250,8 @@ link_bridges (int argc, char **argv)
         return 0;
     }
 
-    port1 = br1->ports + indx1 - 1;
-    port2 = br2->ports + indx2 - 1;
+    port1 = br1->ports + indx1 ;
+    port2 = br2->ports + indx2 ;
 
     if (port1->bridge_partner)
         printf ("port p%02d is connected\n", indx1);
@@ -300,7 +300,7 @@ unlink_port (int argc, char **argv)
         return 0;
     }
 
-    port1 = br1->ports + indx1 - 1;
+    port1 = br1->ports + indx1;
 
     if (!port1->bridge_partner) {
         printf ("port p%02d is disconnected\n", indx1);
@@ -308,7 +308,7 @@ unlink_port (int argc, char **argv)
     }
 
     br2 = port1->bridge_partner;
-    port2 = br2->ports + port1->port_partner - 1;
+    port2 = br2->ports + port1->port_partner;
     disconnect_port (port1, 1);
     disconnect_port (port2, 1);
 
@@ -334,7 +334,7 @@ link_ring (int argc, char **argv)
                 printf ("port p%02d (with B%ld-p%02d)\n",
                         indx + 1, port1->bridge_partner->pid, port1->port_partner);
                 br2 = port1->bridge_partner;
-                port2 = br2->ports + port1->port_partner - 1;
+                port2 = br2->ports + port1->port_partner;
                 disconnect_port (port1, 1);
                 disconnect_port (port2, 1);
             }
@@ -370,7 +370,7 @@ link_each (int argc, char **argv)
                 printf ("port p%02d (with B%ld-p%02d)\n",
                         indx + 1, port1->bridge_partner->pid, port1->port_partner);
                 br2 = port1->bridge_partner;
-                port2 = br2->ports + port1->port_partner - 1;
+                port2 = br2->ports + port1->port_partner;
                 disconnect_port (port1, 1);
                 disconnect_port (port2, 1);
             }
@@ -485,7 +485,7 @@ mngr_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize)
         return 0;
     }
 
-    port = br->ports + msg->header.source_port - 1;
+    port = br->ports + msg->header.source_port;
     if (!port->bridge_partner) {
 #if 0
         printf ("RX BPDU from unlinked port p%02d of bridge B%ld ?\n",

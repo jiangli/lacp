@@ -10,4 +10,13 @@ cli api to api
     uint32_t slot, port;
 
         DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+
+        uint32_t ret = 0;
+        uint32_t slot, port;
+
+        ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+        if (ret !=0 )
+        {
+                return ret;
+        }
         lacp_ssp_get_global_index(slot, port, &port_index);

@@ -64,15 +64,15 @@ void setuptrap()
 
 typedef struct tag_log_record
 {
-        int tick;
-        char filename[LOG_FILENAME_LEN + 1];
-        short line_no;
-        int ret;
-        int para1;
-        int para2;
-        int para3;
-        int count;
-}_LOG_RECORD;
+    int tick;
+    char filename[LOG_FILENAME_LEN + 1];
+    short line_no;
+    int ret;
+    int para1;
+    int para2;
+    int para3;
+    int count;
+} _LOG_RECORD;
 
 _LOG_RECORD g_lastword[LOG_MAX_NUM];
 
@@ -80,84 +80,82 @@ static int cur_i = 0;
 
 void str_trip(char *src, char *dst, int len)
 {
-        if (strlen(src) <= len)
-        {
-                strncpy(dst, src, len);
-        }
-        else
-        {
-                strncpy(dst, src + (strlen(src) - len), len);
-        }
+    if (strlen(src) <= len)
+    {
+        strncpy(dst, src, len);
+    }
+    else
+    {
+        strncpy(dst, src + (strlen(src) - len), len);
+    }
 }
 
 int get_log_index(char *filename, int line)
 {
-        int i;
-        for(i=0;i<cur_i;i++)
+    int i;
+    for(i=0; i<cur_i; i++)
+    {
+        if(strncmp(filename,g_lastword[i].filename, LOG_FILENAME_LEN)== 0
+                && g_lastword[i].line_no == line)
         {
-                if(strncmp(filename,g_lastword[i].filename, LOG_FILENAME_LEN)== 0 
-                   && g_lastword[i].line_no == line)
-                {
-                        return i;
-                }
+            return i;
         }
-        return -1;
+    }
+    return -1;
 }
 
 
-void write_log(char *filename, int line, int ret, 
+void write_log(char *filename, int line, int ret,
                int para1, int para2, int para3)
 {
-        int index = cur_i;
-        char fileshort[LOG_FILENAME_LEN + 1]  = {0};
-        str_trip(filename, fileshort, LOG_FILENAME_LEN);
+    int index = cur_i;
+    char fileshort[LOG_FILENAME_LEN + 1]  = {0};
+    str_trip(filename, fileshort, LOG_FILENAME_LEN);
 
-        index = get_log_index(fileshort, line);
-        if (index == -1)
-        {
-                index = cur_i;
-                cur_i = (cur_i + 1) % LOG_MAX_NUM;
-                g_lastword[index].count = 1;
-        }
-        else
-        {
-                g_lastword[index].count++;
-        }
-        g_lastword[index].tick = 1;//(int)tickGet();
-        strncpy(g_lastword[index].filename, fileshort, LOG_FILENAME_LEN);
-        g_lastword[index].line_no = line;
-        g_lastword[index].ret = ret;
-        g_lastword[index].para1 = para1;
-        g_lastword[index].para2 = para2;
-        g_lastword[index].para3 = para3;
+    index = get_log_index(fileshort, line);
+    if (index == -1)
+    {
+        index = cur_i;
+        cur_i = (cur_i + 1) % LOG_MAX_NUM;
+        g_lastword[index].count = 1;
+    }
+    else
+    {
+        g_lastword[index].count++;
+    }
+    g_lastword[index].tick = 1;//(int)tickGet();
+    strncpy(g_lastword[index].filename, fileshort, LOG_FILENAME_LEN);
+    g_lastword[index].line_no = line;
+    g_lastword[index].ret = ret;
+    g_lastword[index].para1 = para1;
+    g_lastword[index].para2 = para2;
+    g_lastword[index].para3 = para3;
 
 }
 
 
 void show_log()
 {
-        int i;
-        printf("tick     file            line      ret     para1     para2     para3 count\r\n");
-        for(i=0;i<LOG_MAX_NUM;i++)
-        {
-                if (g_lastword[i].tick != 0)
-                        printf("%8u %15s %4d %8x %8x %8x %8x %4u\r\n",
-                               g_lastword[i].tick, 
-                               g_lastword[i].filename,
-                               g_lastword[i].line_no,
-                               g_lastword[i].ret,
-                               g_lastword[i].para1,
-                               g_lastword[i].para2,
-                               g_lastword[i].para3,
-                               g_lastword[i].count);
-        }
+    int i;
+    printf("tick     file            line      ret     para1     para2     para3 count\r\n");
+    for(i=0; i<LOG_MAX_NUM; i++)
+    {
+        if (g_lastword[i].tick != 0)
+            printf("%8u %15s %4d %8x %8x %8x %8x %4u\r\n",
+                   g_lastword[i].tick,
+                   g_lastword[i].filename,
+                   g_lastword[i].line_no,
+                   g_lastword[i].ret,
+                   g_lastword[i].para1,
+                   g_lastword[i].para2,
+                   g_lastword[i].para3,
+                   g_lastword[i].count);
+    }
 }
 
 void clear_log()
 {
-        cur_i = 0;
-        memset(g_lastword, 0, sizeof(g_lastword));
+    cur_i = 0;
+    memset(g_lastword, 0, sizeof(g_lastword));
 }
 
-#define ERR_LOG(ret,para1,para2,para3) \
-        write_log(__FILE__, __LINE__, ret, para1, para2, para3);

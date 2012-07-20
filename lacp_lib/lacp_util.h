@@ -14,4 +14,7 @@ void lacp_copy_info_from_net(lacp_port_info_t *from, lacp_port_info_t *to);
 void lacp_print_port_info(lacp_port_info_t *lacp_info);
 void lacp_dump_pkt(lacp_pdu_t *pkt, int len);
 
+#define ERR_LOG(ret,para1,para2,para3) \
+        write_log(__FILE__, __LINE__, ret, para1, para2, para3);
+
 #endif

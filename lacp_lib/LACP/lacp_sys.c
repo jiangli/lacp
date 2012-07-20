@@ -4,7 +4,6 @@
 #include "lacp_api.h"
 #include "lacp_ssp.h"
 
-extern uint32_t max_port;
 static lacp_sys_t *g_lacp_sys_inst = NULL;
 
 lacp_sys_t *lacp_get_sys_inst (void)

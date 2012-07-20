@@ -71,12 +71,12 @@ uint32_t lacp_rxm_rx_lacpdu (lacp_port_t * port, lacp_pdu_t *Lacpdu, uint32_t le
 
 static void actor_default(lacp_port_t *port)
 {
-   lacp_copy_info(&port->actor_admin, &port->actor);
+    lacp_copy_info(&port->actor_admin, &port->actor);
 }
 
 static void record_default(lacp_port_t *port)
 {
-   lacp_copy_info(&port->partner_admin, &port->partner);
+    lacp_copy_info(&port->partner_admin, &port->partner);
     LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_DEF, True);
 }
 
@@ -129,7 +129,7 @@ static void update_ntt(lacp_port_t *port)
 
 static void record_pdu(lacp_port_t *port)
 {
-   lacp_copy_info(&port->msg_actor, &port->partner);
+    lacp_copy_info(&port->msg_actor, &port->partner);
     LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_DEF, False);
 }
 
@@ -167,8 +167,8 @@ void lacp_rx_enter_state (lacp_state_mach_t * fsm)
         break;
 
     case RXM_PORT_DISABLED:
-            if (fsm->debug)
-                    lacp_trace("rx fsm to disabled. port %d partner  syn ---> False", port->port_index);
+        if (fsm->debug)
+            lacp_trace("rx fsm to disabled. port %d partner  syn ---> False", port->port_index);
         LACP_STATE_SET_BIT(port->partner.state, LACP_STATE_SYN, False);
         port->rcvd_lacpdu = False;
         port->current_while = 0;

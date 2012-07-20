@@ -3,7 +3,7 @@
 #include "lacp_sys.h"
 #include "lacp_api.h"
 #include "lacp_stub.h"
-
+#include "lacp_util.h"
 uint32_t
 bridge_tx_bpdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len);
 char *
@@ -11,12 +11,12 @@ UT_sprint_time_stamp (char ticks_accuracy);
 
 static uint32_t g_lacp_debug_rx_tx[18][8][2];
 void lacp_dbg_pkt(int slot, int port, int direction, int en)
-{        
-        g_lacp_debug_rx_tx[slot][port-1][direction] = en;
+{
+    g_lacp_debug_rx_tx[slot][port-1][direction] = en;
 }
 int lacp_dbg_get_switch(int slot, int port,int direction)
 {
-        return g_lacp_debug_rx_tx[slot][port-1][direction];
+    return g_lacp_debug_rx_tx[slot][port-1][direction];
 }
 
 
@@ -28,10 +28,11 @@ uint32_t lacp_ssp_change_to_slot_port(uint32_t port_index, uint32_t *slot, uint3
 }
 uint32_t lacp_ssp_get_global_index( uint32_t slot, uint32_t port, uint32_t *port_index)
 {
+    uint32_t ret = 0;
     if (port == 0)
     {
-                     ERR_LOG(ret, slot, port, 0);
-                     return M_LACP_INTERNEL;
+        ERR_LOG(ret, slot, port, 0);
+        return M_LACP_INTERNEL;
     }
 
     *port_index = slot * 8 + (port - 1) ;
@@ -236,7 +237,13 @@ uint32_t lacp_ssp_get_speed_index(uint32_t speed, uint32_t duplex)
 uint32_t lacp_ssp_get_port_oper_key(uint32_t port_index)
 {
     uint32_t speed, duplex, tid;
-    tid = aggregator_get_id(port_index);
+    uint32_t slot, port;
+
+    lacp_ssp_change_to_slot_port(port_index, &slot, &port);
+
+    tid = stub_db_agg_get_port_tid(slot, port);
+    if (tid == -1)
+        return 0;
     speed = lacp_ssp_get_port_oper_speed(port_index);
     duplex = lacp_ssp_get_port_oper_duplex(port_index);
 
@@ -316,10 +323,10 @@ uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len)
         return M_RSTP_NOT_ENABLE;
     }
 
-    
+
     iret = lacp_port_rx_lacpdu (port, bpdu, len);
     if (lacp_dbg_get_switch(port_index,1,0))
-            lacp_dump_pkt(bpdu, len);
+        lacp_dump_pkt(bpdu, len);
     if (iret)
     {
         lacp_trace("rx process error");
