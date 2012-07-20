@@ -9,6 +9,17 @@ bridge_tx_bpdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len);
 char *
 UT_sprint_time_stamp (char ticks_accuracy);
 
+static uint32_t g_lacp_debug_rx_tx[18][8][2];
+void lacp_dbg_pkt(int slot, int port, int direction, int en)
+{        
+        g_lacp_debug_rx_tx[slot][port-1][direction] = en;
+}
+int lacp_dbg_get_switch(int slot, int port,int direction)
+{
+        return g_lacp_debug_rx_tx[slot][port-1][direction];
+}
+
+
 uint32_t lacp_ssp_change_to_slot_port(uint32_t port_index, uint32_t *slot, uint32_t *port)
 {
     *slot = port_index / 8;
@@ -33,7 +44,7 @@ const char * lacp_ssp_get_port_name (uint32_t port_index)
     ret = lacp_ssp_change_to_slot_port(port_index, &slot, &port);
     if (ret == 0)
     {
-        sprintf (tmp, "port-%2d/%2d", slot, port);
+        sprintf (tmp, "port-%2d/%-2d", slot, port);
     }
     else
     {
@@ -268,3 +279,53 @@ void lacp_trace (const char *format, ...)
 }
 
 
+uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len)
+{
+    register lacp_port_t *port;
+    register lacp_sys_t *sys;
+    uint32_t iret;
+    LAC_CRITICAL_PATH_START;
+    lacp_trace(" port %d rx lacpdu", port_index);
+
+    sys = lacp_get_sys_inst();
+    if (!sys) {
+        lacp_trace("the instance had not yet been created");
+
+        LAC_CRITICAL_PATH_END;
+        return M_LACP_NOT_CREATED;
+    }
+
+    port = _lacp_port_find (port_index);
+    if (!port) {			/* port is absent in the stpm :( */
+        lacp_trace ("RX lacpdu port=%d port is absent :(", (uint32_t) port_index);
+        LAC_CRITICAL_PATH_END;
+        return M_RSTP_PORT_IS_ABSENT;
+    }
+
+    if (!port->port_enabled) { /* port link change indication will come later :( */
+        lacp_trace ("disable port receive lacpdu port=%d :(", (uint32_t) port_index);
+        LAC_CRITICAL_PATH_END;
+        return M_RSTP_NOT_ENABLE;
+    }
+
+    if (LAC_ENABLED != sys->admin_state) { /* the stpm had not yet been enabled :( */
+        LAC_CRITICAL_PATH_END;
+        return M_RSTP_NOT_ENABLE;
+    }
+
+    
+    iret = lacp_port_rx_lacpdu (port, bpdu, len);
+    if (lacp_dbg_get_switch(port_index,1,0))
+            lacp_dump_pkt(bpdu, len);
+    if (iret)
+    {
+        lacp_trace("rx process error");
+        return -1;
+
+    }
+
+    lacp_sys_update (sys, LACP_SYS_UPDATE_READON_RX);
+    LAC_CRITICAL_PATH_END;
+
+    return iret;
+}

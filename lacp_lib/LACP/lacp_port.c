@@ -53,12 +53,12 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     LACP_STATE_MACH_IN_LIST (mux);
     LACP_STATE_MACH_IN_LIST (sel);
     LACP_STATE_MACH_IN_LIST (rx);
-
+#if 0
     port->mux->debug = 1;
     port->sel->debug = 1;
     port->rx->debug = 1;
     port->tx->debug = 1;
-
+#endif
     /* reset timers */
     port->current_while =
         port->periodic_timer =
@@ -108,7 +108,6 @@ lacp_port_delete (lacp_port_t * port)
 uint32_t lacp_port_rx_lacpdu (lacp_port_t * port, lacp_pdu_t * bpdu, size_t len)
 {
     uint32_t ret = 0;
-
 
     ret = lacp_rxm_rx_lacpdu (port, bpdu, len);
     if (ret)

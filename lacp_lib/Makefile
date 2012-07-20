@@ -24,7 +24,7 @@ BITMAPLIBF  = $(BITMAPDIR)/lib$(BITMAPLIBS).a
 
 MNGRCFILES = mngr.c trace.c
 MNGROFILES = mngr.o trace.o
-BRIDGECFILES = bridge.c lacp_cli.c lacp_api.c lacp_ssp.c lacp_stub.c trace.c
+BRIDGECFILES = bridge.c lacp_cli.c lacp_api.c lacp_ssp.c lacp_util.c lacp_stub.c trace.c
 BRIDGEOFILES = $(BRIDGECFILES:.c=.o)
 
 CFILES= $(MNGRCFILES) $(BRIDGECFILES)

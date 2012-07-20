@@ -15,29 +15,59 @@
 #include "lacp_sys.h"
 #include "lacp_api.h"
 #include "lacp_ssp.h"
+#include "lacp_util.h"
 #include "lacp_stub.h"
 
 extern  uint32_t aggregator_init();
 
 extern uint32_t max_port;
+int DEV_GetIfPonFromIfnet(char * sIfnet, int * pSlot, int * pPort)
+{
+        int rc;
+        int ulSlot, ulPort;    
+    
+        if (sIfnet == NULL)
+        {
+                return -1;
+        }
 
+        rc = sscanf(sIfnet, "%u/%u", &ulSlot, &ulPort);
+        if (rc!=2)
+        {
+                return -1;
+        }
+    
+        /* BEGIN: Modified by liuwei, 2012/5/4   问题单号:OLT-773 主备支持 SLOT_0 */
+        if (ulSlot < 0 || ulPort<= 0 || ulPort > 8)
+        {
+                return -1;
+        }
+        /* END:   Modified by liuwei, 2012/5/4 */
+    
+        *pSlot = ulSlot;
+        *pPort = ulPort;
+    
+        return 0;
+}
 static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
 {
     uint32_t port_loop;
 
     uint32_t port_start = 0;
     uint32_t port_end = max_port - 1;
-
+    uint32_t slot, port;
     uint32_t port_index = 0xFFFFFFFF;
     uint32_t agg_id = atoi(argv[2]);
     lacp_port_cfg_t uid_cfg;
     lacp_bitmap_t ports;
 
+
     memset(&uid_cfg, 0, sizeof(uid_cfg));
 
     if ('a' != argv[1][0])
     {
-        port_index = atoi(argv[1]);
+        DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+        lacp_ssp_get_global_index(slot, port, &port_index);
         port_start = port_end = port_index;
 
     }
@@ -154,68 +184,6 @@ static uint32_t cli_br_get_cfg (uint32_t argc, char** argv)
 
 }
 
-static void
-get_sysid_str (uint32_t prio, unsigned char *addr, unsigned char *str)
-{
-    sprintf((char *)str, "%u-%02x:%02x:%02x:%02x:%02x:%02x", prio,
-            (unsigned char) addr[0],
-            (unsigned char) addr[1],
-            (unsigned char) addr[2],
-            (unsigned char) addr[3],
-            (unsigned char) addr[4],
-            (unsigned char) addr[5]);
-    return;
-
-}
-static void
-get_mac_str (unsigned char *addr, unsigned char *str)
-{
-    sprintf((char *)str, "%02x:%02x:%02x:%02x:%02x:%02x",
-            (unsigned char) addr[0],
-            (unsigned char) addr[1],
-            (unsigned char) addr[2],
-            (unsigned char) addr[3],
-            (unsigned char) addr[4],
-            (unsigned char) addr[5]);
-    return;
-
-}
-
-static void
-_lacp_in_display_bit (unsigned char bitmask,
-                      char *bit_name, char *bit_fmt, unsigned char flags)
-{
-    uint32_t the_bit = (flags & bitmask) ? 1 : 0;
-
-    printf ("    ");
-    printf (bit_fmt, the_bit);
-    printf (" %-20s  %s\n", bit_name, the_bit ? "- yes" : "");
-}
-
-static void print_info(lacp_port_info_t *lacp_info)
-{
-    unsigned char sysid_str[40] = {0};
-
-    get_sysid_str(lacp_info->system_priority, lacp_info->system_mac, sysid_str);
-
-    printf("\r\n System ID:%s", sysid_str);
-    printf("\r\n port     :%d", lacp_info->port_no);
-    printf("\t priority :%d", lacp_info->port_priority);
-    printf("\t key      :%d", lacp_info->key);
-    printf("\r\n state    \r\n");
-    _lacp_in_display_bit(LACP_STATE_ACT, "LACP_Activity", "%d.......", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_TMT, "LACP_Timeout", ".%d......", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_AGG, "Aggregation", "..%d.....", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_SYN, "Synchronization", "...%d....", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_COL, "Collecting", "....%d...", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_DIS, "Distributing", ".....%d..", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_DEF, "Defaulted", "......%d.", lacp_info->state);
-    _lacp_in_display_bit(LACP_STATE_EXP, "Expired", ".......%d", lacp_info->state);
-
-    return ;
-
-}
-
 void print_sep(uint32_t *i)
 {
     if ((*i)%3 == 0)
@@ -288,14 +256,14 @@ static uint32_t cli_pr_get_cfg (uint32_t argc, char** argv)
     print_sep(&i);
 
     printf("\r\n actor:" );
-    print_info(&port.actor);
+    lacp_print_port_info(&port.actor);
     printf("\r\n parttor: " );
-    print_info(&port.partner);
+    lacp_print_port_info(&port.partner);
 #if 1
     printf("\r\n msg actor: " );
-    print_info(&port.msg_actor);
+    lacp_print_port_info(&port.msg_actor);
     printf("\r\n msg parttor: " );
-    print_info(&port.msg_partner);
+    lacp_print_port_info(&port.msg_partner);
 #endif
     return 0;
 
@@ -385,7 +353,7 @@ uint32_t cli_sysget_lacp_brief(uint32_t argc, char **argv)
 
     memset(uid_port_state, 0, sizeof(UID_LAC_PORT_STATE_T)*8);
 
-    get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
+    lacp_get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
 
     printf("\r\n Actor");
     printf("\r\n  Priority     : %d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
@@ -426,7 +394,7 @@ uint32_t cli_sysget_lacp_brief(uint32_t argc, char **argv)
             {
                 sprintf(master_str, "%d", uid_port_state[master_index].port_index);
                 sprintf(partner_sys_prio_str, "%d", uid_port_state[master_index].partner.port_priority);
-                get_mac_str(uid_port_state[master_index].partner.system_mac, partner_sys_id_str);
+                lacp_get_mac_str(uid_port_state[master_index].partner.system_mac, partner_sys_id_str);
                 sprintf(oper_key_str, "%d", uid_port_state[master_index].actor.key);
             }
 
@@ -446,7 +414,7 @@ void cli_print_port_info(UID_LAC_PORT_STATE_T *uid_port_state)
 
     sprintf(partner_sys_id_str, "-");
 
-    get_mac_str(uid_port_state->partner.system_mac, partner_sys_id_str);
+    lacp_get_mac_str(uid_port_state->partner.system_mac, partner_sys_id_str);
 
     printf("\r\n Actor    Port Number     : %d",
            uid_port_state->actor.port_no);
@@ -478,7 +446,7 @@ uint32_t cli_sysget_lacp_verbose(uint32_t argc, char **argv)
 
     memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
 
-    get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
+    lacp_get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
 
     printf("\r\n Priority     : %d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
     printf("\r\n Short Period : %d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
@@ -526,7 +494,7 @@ uint32_t cli_sysget_lacp_portinfo(uint32_t argc, char **argv)
         return 0;
     }
 
-    get_mac_str(uid_port_state.actor.system_mac, actor_sys_id_str);
+    lacp_get_mac_str(uid_port_state.actor.system_mac, actor_sys_id_str);
 
     sprintf(master_str, "%d", uid_port_state.master_port);
 
@@ -587,6 +555,17 @@ uint32_t cli_sys_set_period(uint32_t argc, char **argv)
     return 0;
 }
 
+uint32_t cli_debug_trace (int argc, char **argv)   
+{
+        lacp_dbg_trace(atoi(argv[1]), argv[2], argv[3][0] != 'n' && argv[3][0] != 'N');
+        return 0;
+}
+uint32_t cli_debug_pkt (int argc, char **argv)   
+{
+        lacp_dbg_pkt(atoi(argv[1]),1, argv[2][0] == 't', argv[3][0] != 'n' && argv[3][0] != 'N');
+        return 0;
+}
+
 static CMD_DSCR_T lang[] = {
 
     THE_COMMAND("no link-group", "delete the link group")
@@ -594,7 +573,8 @@ static CMD_DSCR_T lang[] = {
     THE_FUNC(lacp_agg_delete)
 
     THE_COMMAND("port link-group", "add port to static lacp")
-    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+//    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+    PARAM_STRING("slot/port", "all");
     PARAM_NUMBER("agg group on bridge", 1, 32, "1")
     THE_FUNC(lacp_port_lacp_enable)
 
@@ -638,7 +618,27 @@ static CMD_DSCR_T lang[] = {
     THE_FUNC(cli_sys_set_period)
 
 
+    THE_COMMAND("lacp debug-fsm", "add port to static lacp")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
 
+    PARAM_ENUM ("stame machine")
+    PARAM_ENUM_SEL ("rx", "rx")
+    PARAM_ENUM_SEL ("tx", "tx")
+    PARAM_ENUM_SEL ("sel", "sel")
+    PARAM_ENUM_SEL ("mux", "mux")
+    PARAM_ENUM_DEFAULT ("all")
+    PARAM_BOOL ("on/off", "trace it", "don't trace it", "n")
+    THE_FUNC(cli_debug_trace)
+
+    THE_COMMAND("lacp debug-pkt", "add port to static lacp")
+    PARAM_NUMBER("port number on bridge", 1, 4, "all")
+
+    PARAM_ENUM ("stame machine")
+    PARAM_ENUM_SEL ("rx", "rx")
+    PARAM_ENUM_SEL ("tx", "tx")
+    PARAM_ENUM_DEFAULT ("all")
+    PARAM_BOOL ("on/off", "trace it", "don't trace it", "n")
+    THE_FUNC(cli_debug_pkt)
 
 
 
