@@ -1,7 +1,7 @@
 #ifndef   __LACP_API_H__
 #define   __LACP_API_H__
 
-
+#define LACP_UINT_INVALID 0xffffffff
 enum {
     Slow_periodic_ticks   =   30,/* should be 30, faster for simulation */
     Fast_periodic_ticks   =   1,
@@ -106,7 +106,7 @@ typedef enum {
 
 
 typedef enum {
-    M_LACP_INTERNEL,
+    M_LACP_INTERNEL = 1,
     M_LACP_NOT_CREATED,
     M_RSTP_PORT_IS_ABSENT,
     M_RSTP_NOT_ENABLE,

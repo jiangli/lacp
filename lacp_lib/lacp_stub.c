@@ -28,24 +28,17 @@ Bool aggregator_has_member(uint32_t agg_id)
     else
         return False;
 }
-
-uint32_t aggregator_add_member(uint32_t agg_id, uint32_t port_index)
+uint32_t aggregator_get_member(uint32_t agg_id, uchar_t *pbmp)
 {
-    uint32_t i;
-    for (i=0; i<8; i++)
-    {
-        if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
-        {
-            g_link_groups[agg_id - 1].ports[i] = port_index;
-            g_link_groups[agg_id - 1].cnt ++;
+        memcpy(pbmp, g_link_groups[agg_id - 1].ports, 19);
+        return 0;
+}
+
+uint32_t aggregator_add_member(uint32_t agg_id, uint32_t slot, uint32_t port)
+{
+    BCM_HWW_TRUNK_SET_PBMP(slot, port, g_link_groups[agg_id - 1].ports);
+    g_link_groups[agg_id - 1].cnt ++;
             return 0;
-
-        }
-
-    }
-    printf("\r\n agg %d full !", agg_id);
-    return -1 ;
-
 
 }
 uint32_t aggregator_del_member(uint32_t port_index)

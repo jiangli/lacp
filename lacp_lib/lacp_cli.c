@@ -37,12 +37,10 @@ int DEV_GetIfPonFromIfnet(char * sIfnet, int * pSlot, int * pPort)
                 return -1;
         }
     
-        /* BEGIN: Modified by liuwei, 2012/5/4   问题单号:OLT-773 主备支持 SLOT_0 */
         if (ulSlot < 0 || ulPort<= 0 || ulPort > 8)
         {
                 return -1;
         }
-        /* END:   Modified by liuwei, 2012/5/4 */
     
         *pSlot = ulSlot;
         *pPort = ulPort;
@@ -51,64 +49,31 @@ int DEV_GetIfPonFromIfnet(char * sIfnet, int * pSlot, int * pPort)
 }
 static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
 {
-    uint32_t port_loop;
+        uint32_t ret = 0;
+        uint32_t slot;
+        uint32_t port;
 
-    uint32_t port_start = 0;
-    uint32_t port_end = max_port - 1;
-    uint32_t slot, port;
-    uint32_t port_index = 0xFFFFFFFF;
-    uint32_t agg_id = atoi(argv[2]);
-    lacp_port_cfg_t uid_cfg;
-    lacp_bitmap_t ports;
+        uint32_t agg_id = atoi(argv[2]);
 
-
-    memset(&uid_cfg, 0, sizeof(uid_cfg));
-
-    if ('a' != argv[1][0])
-    {
-        DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
-        lacp_ssp_get_global_index(slot, port, &port_index);
-        port_start = port_end = port_index;
-
-    }
+        ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+        if (ret != 0)
+        {
+                ERR_LOG(ret, 0, 0, 0);
+                return ret;
+        }
 
     if (!agg_id || agg_id >32)
     {
-        printf("aggid error. r\n");
-        return -1;
+        ERR_LOG(ret, agg_id, 0, 0);
+        return M_LACP_INTERNEL;
     }
 
-    for (port_loop  = port_start; port_loop <= port_end; port_loop++)
+    ret = trunk_port_lacp_enable(slot, port, agg_id);
+    if (ret != 0)
     {
-        lacp_bitmap_set_bit(&ports, port_loop);
+            ERR_LOG(ret, slot, port, agg_id);
+            return ret;
     }
-
-    lacp_create_ports(&ports);
-
-    for (port_loop  = port_start; port_loop <= port_end; port_loop++)
-    {
-        aggregator_add_member(agg_id, port_loop);
-
-        uid_cfg.field_mask = PT_CFG_STATE;
-        uid_cfg.lacp_enabled = True;
-        uid_cfg.agg_id = agg_id;
-
-        lacp_bitmap_set_bit(&uid_cfg.port_bmp, port_loop);
-
-        uid_cfg.field_mask |= PT_CFG_COST;
-        uid_cfg.field_mask |= PT_CFG_PRIO;
-        uid_cfg.port_priority = 2;
-        uid_cfg.field_mask |= PT_CFG_STAT;
-
-        lacp_port_set_cfg(&uid_cfg);
-
-        if (lacp_ssp_get_port_link_status(port_loop))
-            lacp_port_link_change(port_index, 1);
-        else
-            lacp_port_link_change(port_index, 0);
-
-    }
-
 
     return 0;
 

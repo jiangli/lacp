@@ -29,7 +29,10 @@ uint32_t lacp_ssp_change_to_slot_port(uint32_t port_index, uint32_t *slot, uint3
 uint32_t lacp_ssp_get_global_index( uint32_t slot, uint32_t port, uint32_t *port_index)
 {
     if (port == 0)
-        return M_LACP_INTERNEL;
+    {
+                     ERR_LOG(ret, slot, port, 0);
+                     return M_LACP_INTERNEL;
+    }
 
     *port_index = slot * 8 + (port - 1) ;
     return 0;
