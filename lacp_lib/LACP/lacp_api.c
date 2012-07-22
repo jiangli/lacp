@@ -96,7 +96,7 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
             if (uid_cfg->lacp_enabled)
             {
                 /* add to agg */
-                    lacp_port_init(port);
+                lacp_port_init(port);
                 LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_AGG, True);
                 port->agg_id = uid_cfg->agg_id;
                 lacp_port_set_reselect(port);

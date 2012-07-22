@@ -47,7 +47,7 @@ void lacp_get_sysid_str (uint32_t prio, unsigned char *addr, unsigned char *str)
 }
 
 int lacp_get_bit_str (char *buf, unsigned char bitmask,
-                        char *bit_name, char *bit_fmt, unsigned char flags)
+                      char *bit_name, char *bit_fmt, unsigned char flags)
 {
     char * p = buf;
     uint32_t the_bit = (flags & bitmask) ? 1 : 0;
@@ -55,7 +55,7 @@ int lacp_get_bit_str (char *buf, unsigned char bitmask,
     p += sprintf (p, "    ");
     p += sprintf (p, bit_fmt, the_bit);
     p += sprintf (p, " %-20s  %s\n", bit_name, the_bit ? "- yes" : "");
-    
+
     return (p-buf);
 }
 

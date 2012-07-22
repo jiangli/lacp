@@ -66,14 +66,14 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
 void
 lacp_port_init (lacp_port_t * port)
 {
-        lacp_sys_t *sys = lacp_get_sys_inst();
-        port->actor.system_priority = sys->priority;
-        LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_TMT, sys->lacp_timeout);
-        
-        port->current_while =
+    lacp_sys_t *sys = lacp_get_sys_inst();
+    port->actor.system_priority = sys->priority;
+    LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_TMT, sys->lacp_timeout);
+
+    port->current_while =
         port->periodic_timer =
             port->wait_while = 0;
-        return;
+    return;
 }
 
 void

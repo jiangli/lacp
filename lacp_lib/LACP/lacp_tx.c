@@ -24,8 +24,8 @@ tx_lacpdu(lacp_state_mach_t * fsm)
 
     if (!port->lacp_enabled)
     {
-            if (fsm->debug)
-                    lacp_trace("\r\n not enable tx");
+        if (fsm->debug)
+            lacp_trace("\r\n not enable tx");
         return 1;
     }
 

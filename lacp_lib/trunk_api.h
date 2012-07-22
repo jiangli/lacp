@@ -4,16 +4,16 @@
 
 typedef struct trunk_sys_cfg_s
 {
-        uint32_t prio;
-        uint32_t long_period;
-        uint32_t short_period;
-        uint32_t period;
+    uint32_t prio;
+    uint32_t long_period;
+    uint32_t short_period;
+    uint32_t period;
 
-}trunk_sys_cfg_t;
+} trunk_sys_cfg_t;
 typedef struct trunk_sys_state_s
-{        
-        lacp_mac_t mac;
-}trunk_sys_state_t;
+{
+    lacp_mac_t mac;
+} trunk_sys_state_t;
 
 uint32_t trunk_sys_set_prio(uint32_t prio);
 uint32_t trunk_sys_get_cfg(trunk_sys_cfg_t *cfg);

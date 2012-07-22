@@ -114,8 +114,8 @@ get_prompt (void)
 int
 bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
 {
-        uint32_t slot;
-        uint32_t port;
+    uint32_t slot;
+    uint32_t port;
 
     switch (cntrl->cmd) {
     case BR_IPC_PORT_CONNECT:

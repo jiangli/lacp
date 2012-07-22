@@ -151,7 +151,7 @@ static int cli_pr_get_cfg (int argc, char** argv)
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t port_index ;
-        char show_str[LACP_MAC_PORT_INFO_LEN + 1] = {0};
+    char show_str[LACP_MAC_PORT_INFO_LEN + 1] = {0};
 
     ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
@@ -420,7 +420,7 @@ int cli_sysget_lacp_brief(int argc, char **argv)
 
 void cli_get_status_str(uchar_t status, char *str)
 {
-        char *col_str[] = {"Non-Collecting", "Collecting"};
+    char *col_str[] = {"Non-Collecting", "Collecting"};
     char *dis_str[] = {"Non-Distributing", "Distributing"};
 
     sprintf(str, "%s & %s", col_str[LACP_STATE_GET_BIT(status, LACP_STATE_COL)], dis_str[LACP_STATE_GET_BIT(status, LACP_STATE_DIS)]);
@@ -485,8 +485,8 @@ int cli_sysget_lacp_verbose(int argc, char **argv)
 
         if (master_index != -1)
         {
-                slot = uid_port_state[master_index].slot;
-                port = uid_port_state[master_index].port;
+            slot = uid_port_state[master_index].slot;
+            port = uid_port_state[master_index].port;
             sprintf(master_str, "%d/%d", slot, port);
 
         }
@@ -527,7 +527,7 @@ int cli_sysget_lacp_portinfo(int argc, char **argv)
     ret = trunk_port_get_lacp_info(slot, port, &uid_port_state);
     if ( 0 != ret || 0 == uid_port_state.agg_id)
     {
-            printf("\r\n port is not in lacp aggregation gruop. ret:%d, agg:%d", ret, uid_port_state.agg_id);
+        printf("\r\n port is not in lacp aggregation gruop. ret:%d, agg:%d", ret, uid_port_state.agg_id);
         printf("\r\n");
         return 0;
     }
@@ -715,7 +715,7 @@ static CMD_DSCR_T lang[] = {
     THE_FUNC(cli_debug_pkt)
 
     THE_COMMAND("port lacp priority", "add port to static lacp")
-    PARAM_STRING("slot/port", "0/1") 
+    PARAM_STRING("slot/port", "0/1")
     PARAM_NUMBER("priority value", 1, 4, "all")
     THE_FUNC(cli_port_set_prio)
 

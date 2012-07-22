@@ -47,7 +47,7 @@ typedef struct {
 typedef struct {
     uint32_t valid;
     uint32_t slot;
-        uint32_t port;
+    uint32_t port;
     lacp_key_t key;
     uint32_t agg_id;
     uint32_t master_port;
@@ -86,9 +86,9 @@ typedef struct {
     uint32_t 	long_period;
 } lacp_sys_cfg_t;
 typedef struct {
-        lacp_mac_t mac;
-        
-}lacp_sys_state_t;
+    lacp_mac_t mac;
+
+} lacp_sys_state_t;
 #ifdef __LINUX__
 #  define LAC_INIT_CRITICAL_PATH_PROTECTIO
 #  define LAC_CRITICAL_PATH_START

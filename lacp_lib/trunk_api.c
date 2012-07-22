@@ -16,21 +16,21 @@ uint32_t trunk_sys_set_prio(uint32_t prio)
     uid_cfg.priority = prio;
     lacp_sys_set_cfg(&uid_cfg);
 
-    stub_db_set_sys_prio(prio);        
+    stub_db_set_sys_prio(prio);
     return 0;
 
 }
 
-#if 0        
+#if 0
 uint32_t trunk_sys_get_prio(uint32_t *prio)
 {
-        uint32_t ret = 0;
-        ret = stub_db_get_sys_prio(prio);        
-        if (ret != 0)
-        {
-            *prio  = Default_system_priority;
-        }
-        return 0;
+    uint32_t ret = 0;
+    ret = stub_db_get_sys_prio(prio);
+    if (ret != 0)
+    {
+        *prio  = Default_system_priority;
+    }
+    return 0;
 }
 #endif
 
@@ -65,36 +65,36 @@ uint32_t trunk_sys_set_period(uint32_t is_short)
 
 uint32_t trunk_sys_get_cfg(trunk_sys_cfg_t *cfg)
 {
-        uint32_t ret = 0;
-        lacp_sys_cfg_t lacp_cfg;
+    uint32_t ret = 0;
+    lacp_sys_cfg_t lacp_cfg;
 
-        ret = lacp_sys_get_cfg(&lacp_cfg);
-        if (ret != 0)
-        {
-                ERR_LOG(ret, 0, 0, 0);
-        }
+    ret = lacp_sys_get_cfg(&lacp_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, 0, 0, 0);
+    }
 
-        cfg->prio = lacp_cfg.priority;
-        cfg->long_period = lacp_cfg.long_period;
-        cfg->short_period = lacp_cfg.short_period;
-        cfg->period = lacp_cfg.period;
+    cfg->prio = lacp_cfg.priority;
+    cfg->long_period = lacp_cfg.long_period;
+    cfg->short_period = lacp_cfg.short_period;
+    cfg->period = lacp_cfg.period;
 
-        return 0;
+    return 0;
 }
 uint32_t trunk_sys_get_state(trunk_sys_state_t *cfg)
 {
-        uint32_t ret = 0;
-        lacp_sys_state_t lacp_cfg;
+    uint32_t ret = 0;
+    lacp_sys_state_t lacp_cfg;
 
-        ret = lacp_sys_get_state(&lacp_cfg);
-        if (ret != 0)
-        {
-                ERR_LOG(ret, 0, 0, 0);
-        }
+    ret = lacp_sys_get_state(&lacp_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, 0, 0, 0);
+    }
 
-        memcpy(cfg->mac, lacp_cfg.mac, 6);
+    memcpy(cfg->mac, lacp_cfg.mac, 6);
 
-        return 0;
+    return 0;
 }
 
 uint32_t trunk_port_lacp_enable(uint32_t slot, uint32_t port, uint32_t agg_id)
@@ -116,7 +116,7 @@ uint32_t trunk_port_lacp_enable(uint32_t slot, uint32_t port, uint32_t agg_id)
     lacp_bitmap_set_bit(&ports, port_index);
 
     lacp_create_ports(&ports);
-    
+
     stub_db_agg_add_member(agg_id, slot, port);
 
     uid_cfg.field_mask = PT_CFG_STATE;
@@ -131,8 +131,8 @@ uint32_t trunk_port_lacp_enable(uint32_t slot, uint32_t port, uint32_t agg_id)
     ret = trunk_port_get_prio(slot, port, &uid_cfg.port_priority);
     if (ret != 0)
     {
-            ERR_LOG(ret, slot, port, port_index);
-            return ret;
+        ERR_LOG(ret, slot, port, port_index);
+        return ret;
     }
 
     lacp_port_set_cfg(&uid_cfg);
@@ -224,7 +224,7 @@ uint32_t trunk_port_get_prio(uint32_t slot, uint32_t port, uint32_t *prio)
 {
     uint32_t ret;
     uint32_t port_index;
-    
+
     ret = lacp_ssp_get_global_index(slot, port, &port_index);
     if (ret != 0)
     {
@@ -234,7 +234,7 @@ uint32_t trunk_port_get_prio(uint32_t slot, uint32_t port, uint32_t *prio)
     ret = stub_get_port_priority(port_index, prio);
     if (ret != 0)
     {
-            *prio = Default_port_priority;
+        *prio = Default_port_priority;
     }
 
     return 0;
@@ -253,7 +253,7 @@ uint32_t trunk_port_set_prio(uint32_t slot, uint32_t port, uint32_t prio)
     uid_cfg.port_priority = prio;
     lacp_bitmap_set_bit(&uid_cfg.port_bmp, port_index);
     lacp_port_set_cfg(&uid_cfg);
-    
+
     stub_set_port_priority(port_index, prio);
 
     return 0;
@@ -268,13 +268,13 @@ uint32_t trunk_port_set_speed(uint32_t slot, uint32_t port, uint32_t speed)
     ret = lacp_ssp_get_global_index(slot, port, &port_index);
     if (ret != 0)
     {
-            return ret;
+        return ret;
     }
 
     ret = lacp_ssp_set_port_speed(port_index, speed);
     if (ret != 0)
     {
-            return ret;
+        return ret;
     }
 
     return 0;
@@ -287,13 +287,13 @@ uint32_t trunk_port_set_duplex(uint32_t slot, uint32_t port, uint32_t duplex)
     ret = lacp_ssp_get_global_index(slot, port, &port_index);
     if (ret != 0)
     {
-            return ret;
+        return ret;
     }
 
     ret = lacp_ssp_set_port_duplex(port_index, duplex);
     if (ret != 0)
     {
-            return ret;
+        return ret;
     }
 
     return 0;
@@ -304,7 +304,7 @@ uint32_t trunk_port_link_change(uint32_t slot, uint32_t port, uint32_t link_stat
 
     uint32_t ret = 0;
     uint32_t port_index;
-    
+
     lacp_ssp_get_global_index(slot, port, &port_index);
 
     lacp_port_link_change(port_index, link_status);
@@ -321,7 +321,7 @@ uint32_t trunk_port_get_lacp_info(uint32_t slot, uint32_t port, lacp_port_state_
     ret = lacp_port_get_port_state(port_index, uid_port_state);
     if ( 0 != ret || 0 == uid_port_state->agg_id)
     {
-            return M_LACP_NOT_ENABLE;
+        return M_LACP_NOT_ENABLE;
     }
 
     return 0;

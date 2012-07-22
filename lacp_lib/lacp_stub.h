@@ -1,7 +1,7 @@
 
 typedef struct {
-        uint32_t slot;
-        uint32_t port;
+    uint32_t slot;
+    uint32_t port;
     uint32_t speed;
     uint32_t duplex;
     uint32_t cd;

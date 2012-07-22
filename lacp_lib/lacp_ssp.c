@@ -186,7 +186,7 @@ uint32_t lacp_ssp_set_port_cd(uint32_t port_index, uint32_t state)
     stub_get_port_attr(port_index, &attr);
     attr.cd = state;
     stub_set_port_attr(port_index, &attr);
-    
+
     return 0;
 
 }

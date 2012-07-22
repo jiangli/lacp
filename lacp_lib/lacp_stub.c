@@ -12,7 +12,7 @@ uint32_t stub_init()
     memset(g_port_list, 0, sizeof(g_port_list));
     for (i = 0; i < sizeof(g_port_list)/sizeof(g_port_list[0]); i++)
     {
-            g_port_list[i].slot = i/8;
+        g_port_list[i].slot = i/8;
         g_port_list[i].port = i%8+1;
         g_port_list[i].speed = 1000;
         g_port_list[i].duplex = 1;
@@ -42,7 +42,7 @@ uint32_t stub_db_agg_get_member(uint32_t agg_id, uchar_t *pbmp)
 
 uint32_t stub_db_agg_add_member(uint32_t agg_id, uint32_t slot, uint32_t port)
 {
-        printf("\r\n agg:%d, slot:%d port:%d", agg_id, slot, port);
+    printf("\r\n agg:%d, slot:%d port:%d", agg_id, slot, port);
     BCM_HWW_TRUNK_SET_PBMP(slot, port, g_link_groups[agg_id - 1].ports);
     g_link_groups[agg_id - 1].cnt ++;
     return 0;
@@ -54,7 +54,7 @@ uint32_t stub_db_agg_del_member(uint32_t slot, uint32_t port)
     uint32_t j;
     for (j=0; j<32; j++)
     {
-            BCM_HWW_TRUNK_CLEAR_PBMP(slot, port, g_link_groups[j].ports);
+        BCM_HWW_TRUNK_CLEAR_PBMP(slot, port, g_link_groups[j].ports);
     }
 
     return 0;
@@ -93,34 +93,34 @@ uint32_t stub_set_port_attr(uint32_t port_index, port_attr_t *attr)
 
 uint32_t stub_get_port_priority(uint32_t port_index, uint32_t *prio)
 {
-        uint32_t ret = 0;
-        port_attr_t attr;
-        ret = stub_get_port_attr(port_index, &attr);
-        if (attr.prio == 0xffffffff)
-                return M_LACP_NOT_FOUND;
-        *prio = attr.prio;
-        return 0;
+    uint32_t ret = 0;
+    port_attr_t attr;
+    ret = stub_get_port_attr(port_index, &attr);
+    if (attr.prio == 0xffffffff)
+        return M_LACP_NOT_FOUND;
+    *prio = attr.prio;
+    return 0;
 }
 
 uint32_t stub_set_port_priority(uint32_t port_index, uint32_t prio)
 {
-        port_attr_t attr;
-        stub_get_port_attr(port_index, &attr);
-        attr.prio = prio;
-        stub_set_port_attr(port_index, &attr);
-        return 0;
+    port_attr_t attr;
+    stub_get_port_attr(port_index, &attr);
+    attr.prio = prio;
+    stub_set_port_attr(port_index, &attr);
+    return 0;
 }
 
 uint32_t stub_db_get_sys_prio(uint32_t *prio)
 {
-        if (g_sys_prio == 0xffffffff)
-                return M_LACP_NOT_FOUND;
+    if (g_sys_prio == 0xffffffff)
+        return M_LACP_NOT_FOUND;
 
-        *prio = g_sys_prio;
-        return 0;
+    *prio = g_sys_prio;
+    return 0;
 }
 uint32_t stub_db_set_sys_prio(uint32_t prio)
 {
-         g_sys_prio = prio;
-        return 0;
+    g_sys_prio = prio;
+    return 0;
 }

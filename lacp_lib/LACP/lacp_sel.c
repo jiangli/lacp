@@ -152,12 +152,12 @@ static uint32_t update_agg_ports_select(lacp_sys_t *lac_sys, uint32_t agg_id)
             port->selected = True;
             port->standby = False;
             if (port->sel->debug)
-            lacp_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, port->port_index);
+                lacp_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, port->port_index);
         } else {
             port->selected = True;
             port->standby = True;
             if (port->sel->debug)
-            lacp_trace("\r\n <%s.%d> port %d ---> Standby ",  __FUNCTION__, __LINE__, port->port_index);
+                lacp_trace("\r\n <%s.%d> port %d ---> Standby ",  __FUNCTION__, __LINE__, port->port_index);
         }
     }
     return 0;
