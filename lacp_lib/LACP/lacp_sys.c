@@ -42,7 +42,7 @@ lacp_sys_t *lacp_sys_init ()
     sys->slow_periodic_time = Slow_periodic_ticks;
     sys->fast_periodic_time = Fast_periodic_ticks;
     sys->aggregate_wait_time = Aggregate_wait_ticks;
-    LAC_INIT_CRITICAL_PATH_PROTECTIO;
+    LACP_INIT_CRITICAL_PATH_PROTECTIO
 
     return sys;
 }
@@ -78,8 +78,7 @@ uint32_t lacp_sys_update(lacp_sys_t *sys, uint32_t reason)
     register uint32_t count = 0;
 
     need_state_change = False;
-    if (reason != 2)
-        lacp_trace("\r\n update reason:%d", reason);
+
     for (;;) {			  /* loop until not need changes */
         need_state_change = lacp_iterate_machines (sys,
                             lacp_check_condition,

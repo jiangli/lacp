@@ -46,8 +46,7 @@ typedef struct {
 
 typedef struct {
     uint32_t valid;
-    uint32_t slot;
-    uint32_t port;
+    uint32_t port_index;
     lacp_key_t key;
     uint32_t agg_id;
     uint32_t master_port;
@@ -85,27 +84,21 @@ typedef struct {
     uint32_t 	short_period;
     uint32_t 	long_period;
 } lacp_sys_cfg_t;
+
 typedef struct {
     lacp_mac_t mac;
 
 } lacp_sys_state_t;
+
 #ifdef __LINUX__
-#  define LAC_INIT_CRITICAL_PATH_PROTECTIO
-#  define LAC_CRITICAL_PATH_START
-#  define LAC_CRITICAL_PATH_END
+#  define LACP_INIT_CRITICAL_PATH_PROTECTIO
+#  define LACP_CRITICAL_PATH_START
+#  define LACP_CRITICAL_PATH_END
 #else
-#  define LAC_INIT_CRITICAL_PATH_PROTECTIO  lac_out_init_sem();
-#  define LAC_CRITICAL_PATH_START			lac_out_sem_take();
-#  define LAC_CRITICAL_PATH_END				lac_out_sem_give();
-
+#  define LACP_INIT_CRITICAL_PATH_PROTECTIO  lacp_out_init_sem();
+#  define LACP_CRITICAL_PATH_START			lacp_out_sem_take();
+#  define LACP_CRITICAL_PATH_END			lacp_out_sem_give();
 #endif
-
-
-typedef enum {
-    LAC_DISABLED,
-    LAC_ENABLED,
-    LAC_EMULATION
-} UID_LAC_MODE_T;
 
 
 typedef enum {
@@ -120,16 +113,16 @@ typedef enum {
 uint32_t lacp_port_get_actor_init(uint32_t port_index, lacp_port_info_t  *admin);
 uint32_t lacp_port_get_partner_init(uint32_t port_index, lacp_port_info_t  *admin);
 lacp_sys_t *lacp_get_sys_inst (void);
-uint32_t lac_port_set_cfg(lacp_port_cfg_t * uid_cfg);
-uint32_t lac_port_get_cfg(uint32_t port_index, lacp_port_cfg_t * uid_cfg);
-uint32_t lac_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len);
-uint32_t lac_port_get_dbg_cfg(uint32_t port_index, lacp_port_t * port);
+uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg);
+uint32_t lacp_port_get_cfg(uint32_t port_index, lacp_port_cfg_t * uid_cfg);
+uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len);
+uint32_t lacp_port_get_dbg_cfg(uint32_t port_index, lacp_port_t * port);
 
 void
-lac_one_second ();
-uint32_t lac_in_enable_port(uint32_t port_index, Bool enable);
-uint32_t lac_sys_set_cfg(lacp_sys_cfg_t * uid_cfg);
-uint32_t lac_sys_get_cfg(lacp_sys_cfg_t * uid_cfg);
+lacp_one_second ();
+uint32_t lacp_in_enable_port(uint32_t port_index, Bool enable);
+uint32_t lacp_sys_set_cfg(lacp_sys_cfg_t * uid_cfg);
+uint32_t lacp_sys_get_cfg(lacp_sys_cfg_t * uid_cfg);
 uint32_t lacp_port_get_dbg_cfg(uint32_t port_index, lacp_port_t * port);
 uint32_t lacp_port_get_cfg(uint32_t port_index, lacp_port_cfg_t * uid_cfg);
 uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg);
@@ -138,7 +131,6 @@ uint32_t lacp_remove_ports(lacp_bitmap_t *ports);
 uint32_t lacp_port_link_change(uint32_t port_index, uint32_t link_status);
 uint32_t lacp_agg_get_port_state(uint32_t agg_id, lacp_port_state_t * uid_cfg, uint32_t *master_index);
 uint32_t lacp_sys_get_state(lacp_sys_state_t * uid_cfg);
-
-
-
+uint32_t lacp_dbg_trace(uint32_t port_index, char *state_name, Bool on);
+uint32_t lacp_port_get_port_state(uint32_t port_index, lacp_port_state_t * state_para);
 #endif

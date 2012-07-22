@@ -4,7 +4,7 @@
 
 #define MAX_NUMBER_OF_PORTS 32
 
-#define LACP_MAX_BITMAP_BYTE 18
+#define LACP_MAX_BITMAP_BYTE 19
 
 typedef struct lacp_bitmap_s
 {

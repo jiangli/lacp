@@ -356,7 +356,7 @@ int cli_sysget_lacp_brief(int argc, char **argv)
     uint32_t master_index = -1;
     char partner_sys_id_str[40];
     char partner_sys_prio_str[20];
-    lacp_port_state_t uid_port_state[8];
+    trunk_agg_state_t agg_state;
     char master_str[10] = {0};
     char oper_key_str[10] = {0};
     uint32_t m_index = -1;
@@ -365,7 +365,7 @@ int cli_sysget_lacp_brief(int argc, char **argv)
     uint32_t slot, port;
 
     cli_print_sys_header();
-    memset(uid_port_state, 0, sizeof(lacp_port_state_t)*8);
+    memset(&agg_state, 0, sizeof(agg_state));
 
     printf("\r\n ----------------------------------------------------------------------");
     printf("\r\n Agg  Partner  Parnter            Master   Selected   Standby   Oper ");
@@ -382,14 +382,14 @@ int cli_sysget_lacp_brief(int argc, char **argv)
 
         if (stub_db_agg_has_member(i+1))
         {
-            lacp_agg_get_port_state(i+1, uid_port_state, &master_index);
+            trunk_agg_get_state(i+1, &agg_state);
 
             for (m_index = 0; m_index < 8; m_index++)
             {
-                if (!uid_port_state[m_index].valid)
+                if (!agg_state.ports_state[m_index].valid)
                     continue;
 
-                if (uid_port_state[m_index].sel_state)
+                if (agg_state.ports_state[m_index].sel_state)
                 {
                     sel_cnt++;
                 }
@@ -398,15 +398,16 @@ int cli_sysget_lacp_brief(int argc, char **argv)
                     standby_cnt++;
                 }
             }
+            master_index = agg_state.master_index;
 
             if (master_index != -1)
             {
-                slot = uid_port_state[master_index].slot;
-                port = uid_port_state[master_index].port;
+                slot = agg_state.ports_state[master_index].slot;
+                port = agg_state.ports_state[master_index].port;
                 sprintf(master_str, "%d/%d", slot, port);
-                sprintf(partner_sys_prio_str, "%d", uid_port_state[master_index].partner.port_priority);
-                lacp_get_mac_str(uid_port_state[master_index].partner.system_mac, partner_sys_id_str);
-                sprintf(oper_key_str, "%d", uid_port_state[master_index].actor.key);
+                sprintf(partner_sys_prio_str, "%d", agg_state.ports_state[master_index].partner.port_priority);
+                lacp_get_mac_str(agg_state.ports_state[master_index].partner.system_mac, partner_sys_id_str);
+                sprintf(oper_key_str, "%d", agg_state.ports_state[master_index].actor.key);
             }
 
             printf("\r\n %-5d%-9s%-19s%-9s%-11d%-10d%-3s",
@@ -428,7 +429,7 @@ void cli_get_status_str(uchar_t status, char *str)
     return;
 
 }
-void cli_print_port_info(lacp_port_state_t *uid_port_state)
+void cli_print_port_info(trunk_port_state_t *uid_port_state)
 {
     char partner_sys_id_str[40] = {0};
     char status_str[100] = {0};
@@ -465,15 +466,13 @@ int cli_sysget_lacp_verbose(int argc, char **argv)
 {
     uint32_t i;
     uint32_t master_index = -1;
-    char actor_sys_id_str[40];
-    lacp_port_state_t uid_port_state[8];
+    trunk_agg_state_t agg_state;
     char master_str[10] = {0};
     uint32_t agg_id = atoi(argv[1]);
-    uint32_t slot, port;
 
     //TODO:: agg not exist
 
-    memset(uid_port_state, 0, sizeof(lacp_port_state_t)*8);
+    memset(&agg_state, 0, sizeof(agg_state));
 
     cli_print_sys_header();
 
@@ -481,25 +480,22 @@ int cli_sysget_lacp_verbose(int argc, char **argv)
 
     if (stub_db_agg_has_member(agg_id))
     {
-        lacp_agg_get_port_state(agg_id, uid_port_state, &master_index);
-
-        if (master_index != -1)
+        trunk_agg_get_state(agg_id, &agg_state);
+        master_index = agg_state.master_index;
+        if (master_index != LACP_UINT_INVALID)
         {
-            slot = uid_port_state[master_index].slot;
-            port = uid_port_state[master_index].port;
-            sprintf(master_str, "%d/%d", slot, port);
-
+            sprintf(master_str, "%d/%d", agg_state.ports_state[master_index].slot, agg_state.ports_state[master_index].port);
         }
 
         printf("\r\n  Master Port  : %s", master_str);
         printf("\r\n");
-
+        trunk_port_state_sort(agg_state.ports_state);
         for (i = 0; i < 8; i++)
         {
-            if (!uid_port_state[i].valid)
+            if (!agg_state.ports_state[i].valid)
                 continue;
 
-            cli_print_port_info(&uid_port_state[i]);
+            cli_print_port_info(&agg_state.ports_state[i]);
         }
 
     }
@@ -509,7 +505,7 @@ int cli_sysget_lacp_portinfo(int argc, char **argv)
 {
     uint32_t ret = 0;
     char actor_sys_id_str[40];
-    lacp_port_state_t uid_port_state;
+    trunk_port_state_t uid_port_state;
     char master_str[10] = {0};
     uint32_t slot, port;
     uint32_t slot_master, port_master;
@@ -522,8 +518,8 @@ int cli_sysget_lacp_portinfo(int argc, char **argv)
 
     trunk_port_get_prio(slot, port, &prio);
 
-    printf("\r\n Lacp Enable     : %-8s  Port Priority: %d", (agg_id == -1)? "disable" : "enable", prio);
-    memset(&uid_port_state, 0, sizeof(lacp_port_state_t));
+    printf("\r\n Lacp Enable     : %-8s  Port Priority: %d", (agg_id == 0)? "disable" : "enable", prio);
+    memset(&uid_port_state, 0, sizeof(trunk_port_state_t));
     ret = trunk_port_get_lacp_info(slot, port, &uid_port_state);
     if ( 0 != ret || 0 == uid_port_state.agg_id)
     {
@@ -610,12 +606,8 @@ int cli_debug_pkt (int argc, char **argv)
         return ret;
     }
 
-    ret = lacp_dbg_pkt(slot, port, argv[2][0] == 't', argv[3][0] != 'n' && argv[3][0] != 'N');
-    if (ret != 0)
-    {
-        ERR_LOG(ret, slot, port, 0);
-        return ret;
-    }
+    lacp_dbg_pkt(slot, port, argv[2][0] == 't', argv[3][0] != 'n' && argv[3][0] != 'N');
+
     return 0;
 }
 int cli_port_set_prio(int argc, char **argv)

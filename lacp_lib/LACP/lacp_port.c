@@ -1,6 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_statmch.h"
 #include "lacp_sys.h"
+#include "lacp_port.h"
 #include "lacp_api.h"
 #include "lacp_rx.h"
 #include "lacp_tx.h"
@@ -12,8 +13,6 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
 {
     lacp_port_t *port;
     register uint32_t iii;
-
-    lacp_trace("create portIndex:%d", port_index);
 
     /* check, if the port has just been added */
     for (port = sys->ports; port; port = port->next) {
@@ -53,22 +52,21 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     LACP_STATE_MACH_IN_LIST (mux);
     LACP_STATE_MACH_IN_LIST (sel);
     LACP_STATE_MACH_IN_LIST (rx);
-#if 1
+#if 0
     port->mux->debug = 1;
     port->sel->debug = 1;
     port->rx->debug = 1;
     port->tx->debug = 1;
 #endif
-
+    lacp_port_init(port);
     return port;
 }
 
-void
-lacp_port_init (lacp_port_t * port)
+void lacp_port_init(lacp_port_t * port)
 {
     lacp_sys_t *sys = lacp_get_sys_inst();
-    port->actor.system_priority = sys->priority;
-    LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_TMT, sys->lacp_timeout);
+    port->actor_admin.system_priority = sys->priority;
+    LACP_STATE_SET_BIT(port->actor_admin.state, LACP_STATE_TMT, sys->lacp_timeout);
 
     port->current_while =
         port->periodic_timer =
@@ -114,7 +112,7 @@ uint32_t lacp_port_rx_lacpdu (lacp_port_t * port, lacp_pdu_t * bpdu, size_t len)
     uint32_t ret = 0;
 
     ret = lacp_rxm_rx_lacpdu (port, bpdu, len);
-    if (ret)
+    if (ret != 0)
     {
         return ret;
     }
@@ -131,7 +129,6 @@ uint32_t lacp_port_set_reselect(lacp_port_t *port)
     {
         for (p = lacp_sys->ports; p; p=p->next)
         {
-            lacp_trace("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
             p->selected = False;
         }
         return 0;
@@ -144,7 +141,6 @@ uint32_t lacp_port_set_reselect(lacp_port_t *port)
             {
                 if (p->agg_id == port->agg_id)
                 {
-                    lacp_trace("\r\n<%s.%d> port:%d, selected:%d",__FUNCTION__, __LINE__,  p->port_index, False);
                     p->selected = False;
                 }
             }

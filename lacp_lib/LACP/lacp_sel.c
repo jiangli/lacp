@@ -119,6 +119,7 @@ static uint32_t update_agg_ports_select(lacp_sys_t *lac_sys, uint32_t agg_id)
     lacp_port_t *best = NULL;
     lacp_port_t *port = NULL;
     best = select_master_port(lac_sys, agg_id);
+
     for (port = lac_sys->ports; port; port = port->next)
     {
         /* reduce the search range */

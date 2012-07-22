@@ -42,7 +42,6 @@ uint32_t stub_db_agg_get_member(uint32_t agg_id, uchar_t *pbmp)
 
 uint32_t stub_db_agg_add_member(uint32_t agg_id, uint32_t slot, uint32_t port)
 {
-    printf("\r\n agg:%d, slot:%d port:%d", agg_id, slot, port);
     BCM_HWW_TRUNK_SET_PBMP(slot, port, g_link_groups[agg_id - 1].ports);
     g_link_groups[agg_id - 1].cnt ++;
     return 0;
@@ -65,7 +64,6 @@ uint32_t stub_db_agg_get_port_tid(uint32_t slot, uint32_t port)
 {
     uint32_t i,j;
 
-    printf("\r\n slot:%d, port:%d", slot, port);
     for (i=0; i<32; i++)
     {
         if (BCM_HWW_TRUNK_GET_PBMP(slot, port, g_link_groups[i].ports))
@@ -73,10 +71,21 @@ uint32_t stub_db_agg_get_port_tid(uint32_t slot, uint32_t port)
             return i+1;
         }
     }
-    return -1;
+    return 0;
 
 
 
+}
+uint32_t stub_db_port_lacp_is_enable(uint32_t slot, uint32_t port)
+{
+    if (!stub_db_agg_get_port_tid(slot, port))
+    {
+        return False;
+    }
+    else
+    {
+        return True;
+    }
 }
 
 uint32_t stub_get_port_attr(uint32_t port_index, port_attr_t *attr)

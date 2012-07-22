@@ -57,7 +57,7 @@ typedef unsigned short USHORT;
 typedef unsigned long ULONG;
 
 #ifndef uchar_t
-typedef unsigned short uchar_t;
+typedef unsigned char uchar_t;
 #endif
 
 

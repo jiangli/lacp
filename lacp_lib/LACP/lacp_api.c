@@ -11,14 +11,15 @@ uint32_t max_port = 4;
 
 uint32_t lacp_port_get_actor_init(uint32_t port_index, lacp_port_info_t  *admin)
 {
-    uint32_t ret = 0;
     lacp_mac_t sys_mac;
 
     lacp_ssp_get_mac(sys_mac);
 
     admin->port_no = port_index + 1;
     memcpy(admin->system_mac, sys_mac, sizeof(lacp_mac_t));
-    admin->key				   = Default_key;
+    admin->key = Default_key;
+    admin->system_priority = Default_system_priority;
+    admin->port_priority = Default_port_priority;
 
     LACP_STATE_SET_BIT(admin->state, LACP_STATE_ACT, Default_lacp_activity);
     LACP_STATE_SET_BIT(admin->state, LACP_STATE_TMT, Default_lacp_timeout);
@@ -26,9 +27,6 @@ uint32_t lacp_port_get_actor_init(uint32_t port_index, lacp_port_info_t  *admin)
     LACP_STATE_SET_BIT(admin->state, LACP_STATE_SYN, False);
     LACP_STATE_SET_BIT(admin->state, LACP_STATE_DEF, True);
     LACP_STATE_SET_BIT(admin->state, LACP_STATE_EXP, False);
-
-    admin->system_priority = Default_system_priority;
-    admin->port_priority = Default_port_priority;
 
     return 0;
 }
@@ -78,7 +76,7 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
     register lacp_port_t *port;
     uint32_t port_index;
 
-    LAC_CRITICAL_PATH_START;
+    LACP_CRITICAL_PATH_START;
     sys = lacp_get_sys_inst();
 
     for (port_index = 0; port_index < max_port; port_index++) {
@@ -87,7 +85,7 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
 
         port = _lacp_port_find (port_index);
         if (!port) {		  /* port is absent in the stpm :( */
-            ERR_LOG(port_index, 0, 0, 0);
+            //ERR_LOG(port_index, 0, 0, 0);
             continue;
         }
 
@@ -96,13 +94,14 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
             if (uid_cfg->lacp_enabled)
             {
                 /* add to agg */
-                lacp_port_init(port);
+                LACP_STATE_SET_BIT(port->actor_admin.state, LACP_STATE_AGG, True);
                 LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_AGG, True);
                 port->agg_id = uid_cfg->agg_id;
                 lacp_port_set_reselect(port);
             } else {			/* delete from agg. */
                 /* notify to partner*/
                 port->ntt = True;
+                LACP_STATE_SET_BIT(port->actor_admin.state, LACP_STATE_AGG, False);
                 LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_AGG, False);
                 lacp_sys_update (sys, LACP_SYS_UPDATE_READON_PORT_CFG);
 
@@ -124,6 +123,7 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
         }
         if (uid_cfg->field_mask & PT_CFG_PRIO)
         {
+            port->actor_admin.port_priority = uid_cfg->port_priority;
             port->actor.port_priority = uid_cfg->port_priority;
             lacp_port_set_reselect(port);
         }
@@ -131,14 +131,15 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
 
     lacp_sys_update (sys, LACP_SYS_UPDATE_READON_PORT_CFG);
 
-    LAC_CRITICAL_PATH_END;
+    LACP_CRITICAL_PATH_END;
     return 0;
 }
 
 uint32_t _lacp_copy_port_state(lacp_port_state_t * state_para, lacp_port_t *port)
 {
     state_para->valid = True;
-    lacp_ssp_change_to_slot_port(port->port_index, &state_para->slot, &state_para->port);
+    // lacp_ssp_change_to_slot_port(port->port_index, &state_para->slot, &state_para->port);
+    state_para->port_index = port->port_index;
     state_para->agg_id = port->agg_id;
     state_para->rx_cnt = port->rx_lacpdu_cnt;
     state_para->tx_cnt = port->tx_lacpdu_cnt;
@@ -152,6 +153,7 @@ uint32_t _lacp_copy_port_state(lacp_port_state_t * state_para, lacp_port_t *port
     {
         state_para->sel_state = False;
     }
+
     memcpy(&state_para->actor, &port->actor, sizeof(lacp_port_info_t));
     memcpy(&state_para->partner, &port->partner, sizeof(lacp_port_info_t));
     return 0;
@@ -194,8 +196,8 @@ uint32_t lacp_port_get_port_state(uint32_t port_index, lacp_port_state_t * state
     lacp_sys = lacp_get_sys_inst();
     port = _lacp_port_find (port_index);
     if (!port) {		  /* port is absent in the stpm :( */
-        printf("port is absend:%d", port_index);
-        return -1;
+        ERR_LOG(port_index, 0, 0, 0);
+        return M_LACP_NOT_FOUND;
     }
 
     _lacp_copy_port_state(state_para, port);
@@ -212,8 +214,9 @@ uint32_t lacp_port_get_dbg_cfg(uint32_t port_index, lacp_port_t * port)
 
     p = _lacp_port_find (port_index);
     if (!p) {		  /* port is absent in the stpm :( */
-        printf("port %d is absend.", port_index);
-        return 1;
+        ERR_LOG(port_index, 0, 0, 0);
+        return M_LACP_NOT_FOUND;
+
     }
 
     memcpy(port, p, sizeof(lacp_port_t));
@@ -227,10 +230,10 @@ void lacp_one_second ()
     register lacp_port_t *port;
     register uint32_t timer_index;
 
-    if (LAC_ENABLED != sys->admin_state)
+    if (LACP_ENABLED != sys->admin_state)
         return;
 
-    LAC_CRITICAL_PATH_START;
+    LACP_CRITICAL_PATH_START;
     for (port = sys->ports; port; port = port->next) {
         for (timer_index = 0; timer_index < TIMERS_NUMBER; timer_index++) {
             if (*(port->timers[timer_index]) > 0) {
@@ -242,7 +245,7 @@ void lacp_one_second ()
 
     lacp_sys_update (sys, LACP_SYS_UPDATE_READON_TIMER);
 
-    LAC_CRITICAL_PATH_END;
+    LACP_CRITICAL_PATH_END;
 }
 
 uint32_t lacp_create_ports(lacp_bitmap_t *ports)
@@ -300,7 +303,7 @@ uint32_t lacp_port_link_change(uint32_t port_index, uint32_t link_status)
 
     lacp_trace ("port p%02d => %sABLE", (uint32_t) port_index, link_status ? "EN" : "DIS");
 
-    LAC_CRITICAL_PATH_START;
+    LACP_CRITICAL_PATH_START;
 
     p = _lacp_port_find (port_index);
     if (!p) {		/* port is absent in the stpm :( */
@@ -308,6 +311,7 @@ uint32_t lacp_port_link_change(uint32_t port_index, uint32_t link_status)
     }
 
     if (p->port_enabled == link_status) {	/* nothing to do :) */
+        LACP_CRITICAL_PATH_END;
         return 0;
     }
 
@@ -331,7 +335,7 @@ uint32_t lacp_port_link_change(uint32_t port_index, uint32_t link_status)
 
     lacp_sys_update(sys, LACP_SYS_UPDATE_READON_LINK);
 
-    LAC_CRITICAL_PATH_END;
+    LACP_CRITICAL_PATH_END;
     return 0;
 
 }
@@ -357,7 +361,7 @@ uint32_t lacp_sys_set_cfg(lacp_sys_cfg_t * uid_cfg)
     uint32_t port_loop = 0;
     lacp_port_t *p;
 
-    LAC_CRITICAL_PATH_START;
+    LACP_CRITICAL_PATH_START;
     if (uid_cfg->field_mask & BR_CFG_PBMP_ADD)
     {
         for (port_loop = 0; port_loop < max_port; port_loop++)
@@ -395,7 +399,7 @@ uint32_t lacp_sys_set_cfg(lacp_sys_cfg_t * uid_cfg)
     _lacp_port_update_info();
     lacp_sys_update (sys, LACP_SYS_UPDATE_READON_SYS_CFG);
 
-    LAC_CRITICAL_PATH_END;
+    LACP_CRITICAL_PATH_END;
     return 0;
 }
 
@@ -422,6 +426,54 @@ uint32_t lacp_sys_get_state(lacp_sys_state_t * uid_cfg)
     memcpy(uid_cfg->mac, sys->mac, 6);
     return 0;
 }
+uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len)
+{
+    uint32_t ret = 0;
+    register lacp_port_t *port;
+    register lacp_sys_t *sys;
+
+    LACP_CRITICAL_PATH_START;
+
+    sys = lacp_get_sys_inst();
+    if (!sys) {
+        lacp_trace("the instance had not yet been created");
+
+        LACP_CRITICAL_PATH_END;
+        return M_LACP_NOT_CREATED;
+    }
+
+    port = _lacp_port_find (port_index);
+    if (!port) {			/* port is absent in the stpm :( */
+        LACP_CRITICAL_PATH_END;
+        return M_RSTP_PORT_IS_ABSENT;
+    }
+
+    if (!port->port_enabled) { /* port link change indication will come later :( */
+        lacp_trace ("disable port receive lacpdu port=%d :(", (uint32_t) port_index);
+        LACP_CRITICAL_PATH_END;
+        return M_RSTP_NOT_ENABLE;
+    }
+
+    if (LACP_ENABLED != sys->admin_state) { /* the stpm had not yet been enabled :( */
+        LACP_CRITICAL_PATH_END;
+        return M_RSTP_NOT_ENABLE;
+    }
+
+    ret = lacp_port_rx_lacpdu (port, bpdu, len);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, port->port_index, len, 0);
+        LACP_CRITICAL_PATH_END;
+        return ret;
+
+    }
+
+    lacp_sys_update (sys, LACP_SYS_UPDATE_READON_RX);
+    LACP_CRITICAL_PATH_END;
+
+    return ret;
+}
+
 uint32_t lacp_dbg_trace(uint32_t port_index, char *state_name, Bool on)
 {
     lacp_port_t *port;

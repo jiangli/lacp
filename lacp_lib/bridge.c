@@ -146,10 +146,11 @@ bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
 int
 bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
+    uint32_t slot, port;
 
-    lacp_rx_lacpdu (msg->header.destination_port,
-                    (lacp_pdu_t *) (msg->body.bpdu),
-                    msg->header.body_len);
+    lacp_ssp_change_to_slot_port(msg->header.destination_port, &slot, &port);
+    lacp_ssp_rx_lacpdu (slot, port, (lacp_pdu_t *) (msg->body.bpdu),
+                        msg->header.body_len);
 
     return 0;
 }

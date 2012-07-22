@@ -18,3 +18,5 @@ uint32_t lacp_ssp_get_port_oper_speed(uint32_t port_index);
 
 void lacp_ssp_get_mac (unsigned char *mac);
 const char * lacp_ssp_get_port_name (uint32_t port_index);
+uint32_t lacp_dbg_trace(uint32_t port_index, char *state_name, Bool on);
+uint32_t lacp_ssp_rx_lacpdu(uint32_t slot, uint32_t port, lacp_pdu_t * bpdu, uint32_t len);

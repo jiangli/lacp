@@ -1,6 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_port.h"
 #include "lacp_sys.h"
+#include "lacp_ssp.h"
 #include "lacp_api.h"
 #include "lacp_stub.h"
 #include "lacp_util.h"
@@ -19,7 +20,26 @@ int lacp_dbg_get_switch(int slot, int port,int direction)
 {
     return g_lacp_debug_rx_tx[slot][port-1][direction];
 }
+uint32_t lacp_ssp_rx_lacpdu(uint32_t slot, uint32_t port, lacp_pdu_t * bpdu, uint32_t len)
+{
+    uint32_t ret = 0;
+    uint32_t port_index;
+    /* check message */
+    if (!stub_db_port_lacp_is_enable(slot, port))
+        return 0;
 
+    ret = lacp_ssp_get_global_index(slot, port, &port_index);
+    if (ret != 0)
+    {
+        return ret;
+    }
+
+    if (lacp_dbg_get_switch(port_index,1,0))
+        lacp_dump_pkt(bpdu, len);
+
+    lacp_rx_lacpdu(port_index, bpdu, len);
+    return 0;
+}
 
 uint32_t lacp_ssp_change_to_slot_port(uint32_t port_index, uint32_t *slot, uint32_t *port)
 {
@@ -108,6 +128,8 @@ uint32_t lacp_ssp_set_port_speed(uint32_t port_index, uint32_t speed)
 {
     lacp_port_cfg_t uid_cfg;
     port_attr_t attr;
+
+    memset(&uid_cfg, 0, sizeof(lacp_port_cfg_t));
     stub_get_port_attr(port_index, &attr);
     attr.speed  = speed;
     stub_set_port_attr(port_index, &attr);
@@ -124,6 +146,8 @@ uint32_t lacp_ssp_set_port_duplex(uint32_t port_index, uint32_t duplex)
 {
     lacp_port_cfg_t uid_cfg;
     port_attr_t attr;
+    memset(&uid_cfg, 0, sizeof(lacp_port_cfg_t));
+
     stub_get_port_attr(port_index, &attr);
     attr.duplex = duplex;
     stub_set_port_attr(port_index, &attr);
@@ -144,14 +168,10 @@ uint32_t lacp_ssp_attach_port(uint32_t port_index, Bool attach, uint32_t tid)
         stub_get_port_attr(port_index, &attr);
         attr.tid = tid;
         stub_set_port_attr(port_index, &attr);
-
-        printf("\r\n attach %d --> %d!!",  port_index, tid);
-
     }
 
     else
     {
-        printf("\r\n !!!!!!!!! detach  tid:%d, ", tid);
         port_attr_t attr;
         stub_get_port_attr(port_index, &attr);
         attr.tid = 0;
@@ -230,7 +250,7 @@ uint32_t lacp_ssp_get_port_oper_key(uint32_t port_index)
     lacp_ssp_change_to_slot_port(port_index, &slot, &port);
 
     tid = stub_db_agg_get_port_tid(slot, port);
-    if (tid == -1)
+    if (tid == 0)
         return 0;
     speed = lacp_ssp_get_port_oper_speed(port_index);
     duplex = lacp_ssp_get_port_oper_duplex(port_index);
@@ -244,21 +264,21 @@ uint32_t lacp_ssp_out_init_sem()
 {
     //hMutex = CreateMutex(NULL,FALSE,NULL);
 
-    //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
+
     return 0;
 
 }
 uint32_t lacp_ssp_out_sem_take()
 {
     //WaitForSingleObject(hMutex,INFINITE);
-    printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+
     return 0;
 
 }
 
 uint32_t lacp_ssp_out_sem_give()
 {
-    printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
+
     return 0;
 
 }
@@ -277,53 +297,3 @@ void lacp_trace (const char *format, ...)
 }
 
 
-uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len)
-{
-    register lacp_port_t *port;
-    register lacp_sys_t *sys;
-    uint32_t iret;
-    LAC_CRITICAL_PATH_START;
-    lacp_trace(" port %d rx lacpdu", port_index);
-
-    sys = lacp_get_sys_inst();
-    if (!sys) {
-        lacp_trace("the instance had not yet been created");
-
-        LAC_CRITICAL_PATH_END;
-        return M_LACP_NOT_CREATED;
-    }
-
-    port = _lacp_port_find (port_index);
-    if (!port) {			/* port is absent in the stpm :( */
-        lacp_trace ("RX lacpdu port=%d port is absent :(", (uint32_t) port_index);
-        LAC_CRITICAL_PATH_END;
-        return M_RSTP_PORT_IS_ABSENT;
-    }
-
-    if (!port->port_enabled) { /* port link change indication will come later :( */
-        lacp_trace ("disable port receive lacpdu port=%d :(", (uint32_t) port_index);
-        LAC_CRITICAL_PATH_END;
-        return M_RSTP_NOT_ENABLE;
-    }
-
-    if (LAC_ENABLED != sys->admin_state) { /* the stpm had not yet been enabled :( */
-        LAC_CRITICAL_PATH_END;
-        return M_RSTP_NOT_ENABLE;
-    }
-
-
-    iret = lacp_port_rx_lacpdu (port, bpdu, len);
-    if (lacp_dbg_get_switch(port_index,1,0))
-        lacp_dump_pkt(bpdu, len);
-    if (iret)
-    {
-        lacp_trace("rx process error");
-        return -1;
-
-    }
-
-    lacp_sys_update (sys, LACP_SYS_UPDATE_READON_RX);
-    LAC_CRITICAL_PATH_END;
-
-    return iret;
-}

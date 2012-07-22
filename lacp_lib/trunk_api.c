@@ -10,13 +10,26 @@
 
 uint32_t trunk_sys_set_prio(uint32_t prio)
 {
+    uint32_t ret = 0;
     lacp_sys_cfg_t uid_cfg;
+
     memset(&uid_cfg, 0, sizeof(uid_cfg));
+
     uid_cfg.field_mask = BR_CFG_PRIO;
     uid_cfg.priority = prio;
-    lacp_sys_set_cfg(&uid_cfg);
+    ret = lacp_sys_set_cfg(&uid_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, prio, 0, 0);
+        return ret;
+    }
 
-    stub_db_set_sys_prio(prio);
+    ret = stub_db_set_sys_prio(prio);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, prio, 0, 0);
+        return ret;
+    }
     return 0;
 
 }
@@ -36,30 +49,50 @@ uint32_t trunk_sys_get_prio(uint32_t *prio)
 
 uint32_t trunk_sys_set_long_period(uint32_t period)
 {
+    uint32_t ret = 0;
     lacp_sys_cfg_t uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_LONG_PERIOD;
     uid_cfg.long_period = period;
-    lacp_sys_set_cfg(&uid_cfg);
+    ret = lacp_sys_set_cfg(&uid_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, period, 0, 0);
+        return ret;
+    }
     return 0;
 }
 uint32_t trunk_sys_set_short_period(uint32_t period)
 {
+    uint32_t ret = 0;
     lacp_sys_cfg_t uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_SHORT_PERIOD;
     uid_cfg.short_period = period;
-    lacp_sys_set_cfg(&uid_cfg);
+    ret = lacp_sys_set_cfg(&uid_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, period, 0, 0);
+        return ret;
+    }
+
     return 0;
 }
 
 uint32_t trunk_sys_set_period(uint32_t is_short)
 {
+    uint32_t ret = 0;
     lacp_sys_cfg_t uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_PERIOD;
     uid_cfg.period = is_short;
-    lacp_sys_set_cfg(&uid_cfg);
+    ret = lacp_sys_set_cfg(&uid_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, is_short, 0, 0);
+        return ret;
+    }
+
     return 0;
 }
 
@@ -128,25 +161,40 @@ uint32_t trunk_port_lacp_enable(uint32_t slot, uint32_t port, uint32_t agg_id)
     uid_cfg.field_mask |= PT_CFG_COST;
     uid_cfg.field_mask |= PT_CFG_STAT;
     uid_cfg.field_mask |= PT_CFG_PRIO;
-    ret = trunk_port_get_prio(slot, port, &uid_cfg.port_priority);
+    ret = trunk_port_get_prio(slot, port, (uint32_t *)&uid_cfg.port_priority);
     if (ret != 0)
     {
         ERR_LOG(ret, slot, port, port_index);
         return ret;
     }
 
-    lacp_port_set_cfg(&uid_cfg);
+    ret = lacp_port_set_cfg(&uid_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, port_index, 0, 0);
+        return ret;
+    }
 
     if (lacp_ssp_get_port_link_status(port_index))
-        lacp_port_link_change(port_index, 1);
+    {
+        ret = lacp_port_link_change(port_index, 1);
+    }
     else
-        lacp_port_link_change(port_index, 0);
+    {
+        ret = lacp_port_link_change(port_index, 0);
+    }
+    if (ret != 0)
+    {
+        ERR_LOG(ret, port_index, 0, 0);
+        return ret;
+    }
 
     return 0;
 }
 
 uint32_t trunk_port_lacp_disable_batch(lacp_bitmap_t *ports)
 {
+    uint32_t ret = 0;
     lacp_port_cfg_t uid_cfg;
 
     memset(&uid_cfg, 0, sizeof(uid_cfg));
@@ -155,22 +203,40 @@ uint32_t trunk_port_lacp_disable_batch(lacp_bitmap_t *ports)
     uid_cfg.lacp_enabled = False;
     uid_cfg.agg_id = 0;
     lacp_bitmap_copy(&uid_cfg.port_bmp, ports);
-    lacp_port_set_cfg(&uid_cfg);
-    lacp_remove_ports(ports);
+
+    ret = lacp_port_set_cfg(&uid_cfg);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, 0, 0, 0);
+        return ret;
+    }
+    ret = lacp_remove_ports(ports);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, 0, 0, 0);
+        return ret;
+    }
+
     return 0;
 }
 uint32_t trunk_agg_delete(uint32_t agg_id)
 {
     uint32_t ret = 0;
-    lacp_bitmap_t ports;
     uint32_t port_index;
-    uchar_t pbmp[19];
     uint32_t slot;
     uint32_t port;
+    uchar_t pbmp[19] = {0};
+
+    lacp_bitmap_t ports;
+
+    lacp_bitmap_clear(&ports);
 
     stub_db_agg_get_member(agg_id, pbmp);
+    lacp_memdump(pbmp, 19);
+
     for (slot = 0; slot <= 18; slot++)
     {
+
         for (port  = 1; port <= 8; port++)
         {
             if (BCM_HWW_TRUNK_GET_PBMP(slot, port, pbmp))
@@ -201,6 +267,10 @@ uint32_t trunk_port_lacp_disable(uint32_t slot, uint32_t port)
     uint32_t ret = 0;
     uint32_t port_index;
     lacp_bitmap_t ports;
+
+    lacp_bitmap_clear(&ports);
+    if (!stub_db_port_lacp_is_enable(slot, port))
+        return 0;
 
     ret = lacp_ssp_get_global_index(slot, port, &port_index);
     if (ret != 0)
@@ -246,13 +316,21 @@ uint32_t trunk_port_set_prio(uint32_t slot, uint32_t port, uint32_t prio)
     uint32_t port_index;
     uint32_t ret = 0;
 
+    memset(&uid_cfg, 0, sizeof(lacp_port_cfg_t));
     lacp_ssp_get_global_index(slot, port, &port_index);
 
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = PT_CFG_PRIO;
     uid_cfg.port_priority = prio;
     lacp_bitmap_set_bit(&uid_cfg.port_bmp, port_index);
-    lacp_port_set_cfg(&uid_cfg);
+    if (stub_db_port_lacp_is_enable(slot, port))
+    {
+        ret = lacp_port_set_cfg(&uid_cfg);
+        if (ret != 0)
+        {
+            ERR_LOG(ret, slot, port, prio);
+        }
+    }
 
     stub_set_port_priority(port_index, prio);
 
@@ -305,24 +383,109 @@ uint32_t trunk_port_link_change(uint32_t slot, uint32_t port, uint32_t link_stat
     uint32_t ret = 0;
     uint32_t port_index;
 
-    lacp_ssp_get_global_index(slot, port, &port_index);
+    if (!stub_db_port_lacp_is_enable(slot, port))
+    {
+        return 0;
+    }
 
-    lacp_port_link_change(port_index, link_status);
+    ret = lacp_ssp_get_global_index(slot, port, &port_index);
+    if (ret != 0)
+    {
+        return ret;
+    }
+
+    ret = lacp_port_link_change(port_index, link_status);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, port_index, link_status, 0);
+        return ret;
+    }
     return 0;
 
 }
 
-uint32_t trunk_port_get_lacp_info(uint32_t slot, uint32_t port, lacp_port_state_t *uid_port_state)
+int trunk_port_state_compare(void *a, void *b)
 {
+    trunk_port_state_t *state1 = (trunk_port_state_t*)a;
+    trunk_port_state_t *state2 = (trunk_port_state_t*)b;
 
+    if (state1->valid && !state2->valid)
+        return -1;
+    if (state1->slot - state2->slot)
+        return (state1->slot - state2->slot);
+    else
+        return (state1->port - state2->port);
+}
+
+uint32_t trunk_port_state_sort(trunk_port_state_t *uid_port_state)
+{
+    qsort(uid_port_state, 8, sizeof(trunk_port_state_t), trunk_port_state_compare);
+    return 0;
+}
+
+uint32_t trunk_agg_get_state(int agg_id, trunk_agg_state_t *agg_state)
+{
+    uint32_t ret = 0;
+    lacp_port_state_t uid_port_state[8];
+    uint32_t master_index = LACP_UINT_INVALID;
+    uint32_t index = 0;
+
+    memset(uid_port_state, 0, sizeof(uid_port_state));
+    ret = lacp_agg_get_port_state(agg_id, uid_port_state, &master_index);
+    if (ret != 0)
+    {
+        ERR_LOG(ret, agg_id, 0, 0);
+        return ret;
+    }
+
+
+    agg_state->master_index = master_index;
+    printf("master:%d",master_index);
+
+    for (index = 0; index < 8; index++)
+    {
+        agg_state->ports_state[index].valid = uid_port_state[index].valid;
+
+        lacp_ssp_change_to_slot_port(uid_port_state[index].port_index, &agg_state->ports_state[index].slot, &agg_state->ports_state[index].port);
+        printf("%d->%d,%d",uid_port_state[index].port_index, agg_state->ports_state[index].slot, agg_state->ports_state[index].port );
+        agg_state->ports_state[index].key = uid_port_state[index].key;
+        agg_state->ports_state[index].agg_id = uid_port_state[index].agg_id;
+        agg_state->ports_state[index].master_port = uid_port_state[index].master_port;
+        agg_state->ports_state[index].sel_state = uid_port_state[index].sel_state;
+        agg_state->ports_state[index].rx_cnt = uid_port_state[index].rx_cnt;
+        agg_state->ports_state[index].tx_cnt = uid_port_state[index].tx_cnt;
+        memcpy(&agg_state->ports_state[index].actor, &uid_port_state[index].actor, sizeof(lacp_port_info_t));
+        memcpy(&agg_state->ports_state[index].partner, &uid_port_state[index].partner, sizeof(lacp_port_info_t));
+    }
+
+    return 0;
+}
+uint32_t trunk_port_get_lacp_info(uint32_t slot, uint32_t port, trunk_port_state_t *trunk_port_state)
+{
     uint32_t ret = 0;
     uint32_t port_index;
+    lacp_port_state_t uid_port_state;
     lacp_ssp_get_global_index(slot, port, &port_index);
-    ret = lacp_port_get_port_state(port_index, uid_port_state);
-    if ( 0 != ret || 0 == uid_port_state->agg_id)
+    ret = lacp_port_get_port_state(port_index, &uid_port_state);
+    if ( 0 != ret || 0 == uid_port_state.agg_id)
     {
+        ERR_LOG(ret, port_index, 0, 0);
         return M_LACP_NOT_ENABLE;
     }
+
+    trunk_port_state->valid = uid_port_state.valid;
+
+    lacp_ssp_change_to_slot_port(uid_port_state.port_index, &trunk_port_state->slot, &trunk_port_state->port);
+    printf("%d->%d,%d",uid_port_state.port_index, trunk_port_state->slot, trunk_port_state->port );
+    trunk_port_state->key = uid_port_state.key;
+    trunk_port_state->agg_id = uid_port_state.agg_id;
+    trunk_port_state->master_port = uid_port_state.master_port;
+    trunk_port_state->sel_state = uid_port_state.sel_state;
+    trunk_port_state->rx_cnt = uid_port_state.rx_cnt;
+    trunk_port_state->tx_cnt = uid_port_state.tx_cnt;
+    memcpy(&trunk_port_state->actor, &uid_port_state.actor, sizeof(lacp_port_info_t));
+    memcpy(&trunk_port_state->partner, &uid_port_state.partner, sizeof(lacp_port_info_t));
+
 
     return 0;
 
@@ -339,7 +502,15 @@ uint32_t trunk_port_clear_stat(uint32_t slot, uint32_t port)
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = PT_CFG_STAT;
     lacp_bitmap_set_bit(&uid_cfg.port_bmp, port_index);
-    lacp_port_set_cfg(&uid_cfg);
+    if ( stub_db_port_lacp_is_enable(slot, port))
+    {
+        ret = lacp_port_set_cfg(&uid_cfg);
+        if (ret != 0)
+        {
+            ERR_LOG(ret, slot, port, port_index);
+            return ret;
+        }
+    }
     return 0;
 }
 
