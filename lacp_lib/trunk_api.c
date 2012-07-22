@@ -137,6 +137,7 @@ uint32_t trunk_port_lacp_enable(uint32_t slot, uint32_t port, uint32_t agg_id)
     lacp_port_cfg_t uid_cfg;
     lacp_bitmap_t ports;
 
+    /* TODO:: check if already enable */
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     lacp_bitmap_clear(&ports);
 
@@ -440,14 +441,12 @@ uint32_t trunk_agg_get_state(int agg_id, trunk_agg_state_t *agg_state)
 
 
     agg_state->master_index = master_index;
-    printf("master:%d",master_index);
 
     for (index = 0; index < 8; index++)
     {
         agg_state->ports_state[index].valid = uid_port_state[index].valid;
 
         lacp_ssp_change_to_slot_port(uid_port_state[index].port_index, &agg_state->ports_state[index].slot, &agg_state->ports_state[index].port);
-        printf("%d->%d,%d",uid_port_state[index].port_index, agg_state->ports_state[index].slot, agg_state->ports_state[index].port );
         agg_state->ports_state[index].key = uid_port_state[index].key;
         agg_state->ports_state[index].agg_id = uid_port_state[index].agg_id;
         agg_state->ports_state[index].master_port = uid_port_state[index].master_port;

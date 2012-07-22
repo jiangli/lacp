@@ -346,8 +346,11 @@ int cli_print_sys_header()
     trunk_sys_get_state(&sys_state);
     lacp_get_mac_str(sys_state.mac, actor_sys_id_str);
     printf("\r\n Local:");
-    printf("\r\n  Priority     : %-8d    MAC Address : %s", sys_cfg.prio, actor_sys_id_str);
-    printf("\r\n  Short Period : %-8d    Long Period : %d", sys_cfg.short_period, sys_cfg.long_period);
+    printf("\r\n  System Priority : %d", sys_cfg.prio);
+    printf("\r\n  MAC Address     : %s", actor_sys_id_str);
+    printf("\r\n  Short Period    : %-3ds", sys_cfg.short_period);
+    printf("\r\n  Long Period     : %-3ds", sys_cfg.long_period);
+    printf("\r\n  Timeout         : %s Timeout", sys_cfg.period ? "Short" : "Long");
     return 0;
 }
 int cli_sysget_lacp_brief(int argc, char **argv)
@@ -487,7 +490,7 @@ int cli_sysget_lacp_verbose(int argc, char **argv)
             sprintf(master_str, "%d/%d", agg_state.ports_state[master_index].slot, agg_state.ports_state[master_index].port);
         }
 
-        printf("\r\n  Master Port  : %s", master_str);
+        printf("\r\n  Agg Master Port : %s", master_str);
         printf("\r\n");
         trunk_port_state_sort(agg_state.ports_state);
         for (i = 0; i < 8; i++)

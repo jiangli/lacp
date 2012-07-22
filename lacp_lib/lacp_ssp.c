@@ -20,7 +20,7 @@ int lacp_dbg_get_switch(int slot, int port,int direction)
 {
     return g_lacp_debug_rx_tx[slot][port-1][direction];
 }
-uint32_t lacp_ssp_rx_lacpdu(uint32_t slot, uint32_t port, lacp_pdu_t * bpdu, uint32_t len)
+uint32_t lacp_ssp_rx_lacpdu(uint32_t slot, uint32_t port, lacp_pdu_t * pdu, uint32_t len)
 {
     uint32_t ret = 0;
     uint32_t port_index;
@@ -35,9 +35,9 @@ uint32_t lacp_ssp_rx_lacpdu(uint32_t slot, uint32_t port, lacp_pdu_t * bpdu, uin
     }
 
     if (lacp_dbg_get_switch(port_index,1,0))
-        lacp_dump_pkt(bpdu, len);
+        lacp_dump_pkt(pdu, len);
 
-    lacp_rx_lacpdu(port_index, bpdu, len);
+    lacp_rx_lacpdu(port_index, pdu, len);
     return 0;
 }
 
@@ -212,11 +212,14 @@ uint32_t lacp_ssp_set_port_cd(uint32_t port_index, uint32_t state)
 }
 
 
-uint32_t lacp_ssp_tx_pdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len)
+uint32_t lacp_ssp_tx_pdu (uint32_t port_index, unsigned char *pdu, size_t len)
 {
     //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
 //	memdump(bpdu, bpdu_len);
-    bridge_tx_bpdu(port_index, bpdu, bpdu_len);
+    bridge_tx_bpdu(port_index, pdu, len);
+    if (lacp_dbg_get_switch(port_index,1,1))
+        lacp_dump_pkt(pdu, len);
+
     return 0;
 
 }
