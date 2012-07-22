@@ -19,7 +19,7 @@
 #include "bitmap.h"
 #include "lacp_sys.h"
 #include "lacp_api.h"
-
+#include "trunk_api.h"
 
 long my_pid = 0;
 lacp_bitmap_t enabled_ports;
@@ -47,9 +47,7 @@ bridge_start ()
     register int iii;
 
     int number_of_ports = 4;
-    UID_LAC_CFG_T uid_cfg;
-    int max_valid_port = 144;
-    int i = 0;
+    lacp_sys_cfg_t uid_cfg;
 
     rl_callback_handler_install (get_prompt (), rl_read_cli);
 
@@ -79,23 +77,6 @@ bridge_start ()
     lacp_bitmap_clear (&uid_cfg.ports);
 
     /* 协议栈默认没有端口，需要初始化端口 */
-#if 0
-    uid_cfg.field_mask = BR_CFG_PBMP_ADD;
-    uid_cfg.number_of_ports = max_valid_port;
-    for (i=0; i<max_valid_port; i++)
-    {
-        /* 此处随意添加一些端口进行测试 */
-        if (i < 4)
-            lacp_bitmap_set_bit(&uid_cfg.ports, i);
-    }
-#endif
-
-    iii = lacp_sys_set_cfg(&uid_cfg);
-    if (0 != iii) {
-        printf ("FATAL: can't enable:%iii\n", iii);
-
-        return (-1);
-    }
     return 0;
 }
 
@@ -103,7 +84,7 @@ void
 bridge_shutdown (void)
 {
     BR_IPC_MSG_T msg;
-    int rc;
+//    int rc;
 
     /* send SHUTDOWN */
     msg.header.sender_pid = my_pid;
@@ -133,17 +114,23 @@ get_prompt (void)
 int
 bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
 {
+        uint32_t slot;
+        uint32_t port;
+
     switch (cntrl->cmd) {
     case BR_IPC_PORT_CONNECT:
         printf ("connected port p%02d\n", port_index);
         lacp_bitmap_set_bit (&enabled_ports, port_index);
-        lacp_port_link_change (port_index, True);
+        //lacp_port_link_change (port_index, True);
+        lacp_ssp_change_to_slot_port(port_index, &slot, &port);
+        trunk_port_link_change(slot,  port, True);
         lacp_ssp_set_port_link_status(port_index, 1);
         break;
     case BR_IPC_PORT_DISCONNECT:
         printf ("disconnected port p%02d\n", port_index);
         lacp_bitmap_clear_bit (&enabled_ports, port_index);
-        lacp_port_link_change (port_index, False);
+        lacp_ssp_change_to_slot_port(port_index, &slot, &port);
+        trunk_port_link_change(slot,  port, False);
         lacp_ssp_set_port_link_status(port_index, 0);
         break;
     case BR_IPC_BRIDGE_SHUTDOWN:
@@ -307,7 +294,7 @@ main (int argc, char **argv)
 #if 0
 int lacp_start()
 {
-    UID_LAC_CFG_T uid_cfg;
+    lacp_sys_cfg_t uid_cfg;
     lacp_bitmap_t Ports;
     int max_valid_port = 144;
     int i = 0;

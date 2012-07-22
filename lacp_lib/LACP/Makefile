@@ -7,7 +7,7 @@ INCLUDES = -I. -I../BITMAP -I../
 
 RSTPLIBS = lacp
 RSTPLIBF = lib$(RSTPLIBS).a
-CFILES = lacp_statmch.c lacp_mux.c  lacp_port.c lacp_rx.c lacp_sel.c lacp_sys.c lacp_tx.c
+CFILES = lacp_statmch.c lacp_mux.c  lacp_port.c lacp_rx.c lacp_sel.c lacp_sys.c lacp_tx.c lacp_api.c lacp_util.c
 
 OFILES= $(CFILES:.c=.o)
 

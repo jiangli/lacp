@@ -15,7 +15,7 @@ int lacp_bitmap_get_bit(lacp_bitmap_t * BitmapPtr, int Bit) ;
 void lacp_bitmap_set_bit(lacp_bitmap_t * BitmapPtr, int Bit) ;
 void lacp_bitmap_clear(lacp_bitmap_t *BitmapPtr) ;
 void lacp_bitmap_clear_bit(lacp_bitmap_t * BitmapPtr, int Bit) ;
-
+void lacp_bitmap_copy(lacp_bitmap_t * BitmapDstPtr, lacp_bitmap_t * BitmapSrcPtr) ;
 
 #endif /* __BITMAP_H */
 

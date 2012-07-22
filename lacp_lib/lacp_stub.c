@@ -1,7 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_stub.h"
 #include "lacp_api.h"
-
+uint32_t g_sys_prio = 0xffffffff;
 port_attr_t g_port_list[144];
 LINK_GROUP_T g_link_groups[32];
 
@@ -108,5 +108,19 @@ uint32_t stub_set_port_priority(uint32_t port_index, uint32_t prio)
         stub_get_port_attr(port_index, &attr);
         attr.prio = prio;
         stub_set_port_attr(port_index, &attr);
+        return 0;
+}
+
+uint32_t stub_db_get_sys_prio(uint32_t *prio)
+{
+        if (g_sys_prio == 0xffffffff)
+                return M_LACP_NOT_FOUND;
+
+        *prio = g_sys_prio;
+        return 0;
+}
+uint32_t stub_db_set_sys_prio(uint32_t prio)
+{
+         g_sys_prio = prio;
         return 0;
 }

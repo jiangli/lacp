@@ -130,6 +130,7 @@ void write_log(char *filename, int line, int ret,
     g_lastword[index].para1 = para1;
     g_lastword[index].para2 = para2;
     g_lastword[index].para3 = para3;
+    printf("\r\n error log :<%s.%d>%d,%d,%d,%d\r\n", filename, line, ret, para1, para2, para3);
 
 }
 

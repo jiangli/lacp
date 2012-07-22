@@ -48,7 +48,7 @@ int DEV_GetIfPonFromIfnet(char * sIfnet, int * pSlot, int * pPort)
 
     return 0;
 }
-static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
+static int lacp_port_lacp_enable (int argc, char** argv)
 {
     uint32_t ret = 0;
     uint32_t slot;
@@ -56,7 +56,7 @@ static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
 
     uint32_t agg_id = atoi(argv[2]);
 
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int *) &port);
     if (ret != 0)
     {
         ERR_LOG(ret, 0, 0, 0);
@@ -79,13 +79,13 @@ static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
     return 0;
 
 }
-static uint32_t lacp_port_lacp_disable (uint32_t argc, char** argv)
+static int lacp_port_lacp_disable (int argc, char** argv)
 {
     uint32_t ret = 0;
     uint32_t slot;
     uint32_t port;
 
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret != 0)
     {
         ERR_LOG(ret, 0, 0, 0);
@@ -97,7 +97,7 @@ static uint32_t lacp_port_lacp_disable (uint32_t argc, char** argv)
 }
 
 
-static uint32_t cli_br_get_cfg (uint32_t argc, char** argv)
+static int cli_br_get_cfg (int argc, char** argv)
 {
 #if 0
     uint32_t i, j;
@@ -144,15 +144,16 @@ void print_sep(uint32_t *i)
 
 }
 
-static uint32_t cli_pr_get_cfg (uint32_t argc, char** argv)
+static int cli_pr_get_cfg (int argc, char** argv)
 {
     lacp_port_t lacp_port;
     uint32_t i = 0;
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t port_index ;
+        char show_str[LACP_MAC_PORT_INFO_LEN + 1] = {0};
 
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return 0;
@@ -218,25 +219,31 @@ static uint32_t cli_pr_get_cfg (uint32_t argc, char** argv)
     print_sep(&i);
 
     printf("\r\n actor:" );
-    lacp_print_port_info(&lacp_port.actor);
+    lacp_print_port_info(show_str, &lacp_port.actor);
+    printf("%s", show_str);
+
     printf("\r\n parttor: " );
-    lacp_print_port_info(&lacp_port.partner);
+    lacp_print_port_info(show_str, &lacp_port.partner);
+    printf("%s", show_str);
 #if 1
     printf("\r\n msg actor: " );
-    lacp_print_port_info(&lacp_port.msg_actor);
+    lacp_print_port_info(show_str, &lacp_port.msg_actor);
+    printf("%s", show_str);
+
     printf("\r\n msg parttor: " );
-    lacp_print_port_info(&lacp_port.msg_partner);
+    lacp_print_port_info(show_str, &lacp_port.msg_partner);
+    printf("%s", show_str);
 #endif
     return 0;
 
 }
 
-uint32_t cli_pr_set_speed(uint32_t argc, char **argv)
+int cli_pr_set_speed(int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t speed = atoi(argv[2]);
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -247,12 +254,12 @@ uint32_t cli_pr_set_speed(uint32_t argc, char **argv)
 
 }
 
-uint32_t cli_pr_set_duplex(uint32_t argc, char **argv)
+int cli_pr_set_duplex(int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t speed = atoi(argv[2]);
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -264,7 +271,7 @@ uint32_t cli_pr_set_duplex(uint32_t argc, char **argv)
 
 }
 
-uint32_t cli_pr_get_attr(uint32_t argc, char **argv)
+int cli_pr_get_attr(int argc, char **argv)
 {
     uint32_t port_loop;
     uint32_t port_index;
@@ -278,7 +285,7 @@ uint32_t cli_pr_get_attr(uint32_t argc, char **argv)
     if ('a' != argv[1][0])
     {
 
-        ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+        ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
         if (ret !=0 )
         {
             return ret;
@@ -299,12 +306,12 @@ uint32_t cli_pr_get_attr(uint32_t argc, char **argv)
     return 0;
 }
 
-uint32_t cli_pr_set_link(uint32_t argc, char **argv)
+int cli_pr_set_link(int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t link_status = atoi(argv[2]);
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -315,7 +322,7 @@ uint32_t cli_pr_set_link(uint32_t argc, char **argv)
 
 }
 
-uint32_t lacp_agg_delete(uint32_t argc, char **argv)
+int lacp_agg_delete(int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t agg_id = atoi(argv[1]);
@@ -329,31 +336,37 @@ uint32_t lacp_agg_delete(uint32_t argc, char **argv)
     return 0;
 }
 
-uint32_t cli_sysget_lacp_brief(uint32_t argc, char **argv)
+int cli_print_sys_header()
+{
+    trunk_sys_cfg_t  sys_cfg;
+    trunk_sys_state_t  sys_state;
+    char actor_sys_id_str[40];
+
+    trunk_sys_get_cfg(&sys_cfg);
+    trunk_sys_get_state(&sys_state);
+    lacp_get_mac_str(sys_state.mac, actor_sys_id_str);
+    printf("\r\n Local:");
+    printf("\r\n  Priority     : %-8d    MAC Address : %s", sys_cfg.prio, actor_sys_id_str);
+    printf("\r\n  Short Period : %-8d    Long Period : %d", sys_cfg.short_period, sys_cfg.long_period);
+    return 0;
+}
+int cli_sysget_lacp_brief(int argc, char **argv)
 {
     uint32_t i;
-    UID_LAC_CFG_T  uid_cfg;
     uint32_t master_index = -1;
-    unsigned char actor_sys_id_str[40];
-    unsigned char partner_sys_id_str[40];
-    unsigned char partner_sys_prio_str[20];
-    UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
-    unsigned char master_str[10] = {0};
-    unsigned char oper_key_str[10] = {0};
+    char partner_sys_id_str[40];
+    char partner_sys_prio_str[20];
+    lacp_port_state_t uid_port_state[8];
+    char master_str[10] = {0};
+    char oper_key_str[10] = {0};
     uint32_t m_index = -1;
     uint32_t sel_cnt = 0 ;
     uint32_t standby_cnt = 0;
     uint32_t slot, port;
 
-    lacp_sys_get_cfg(&uid_cfg);
+    cli_print_sys_header();
+    memset(uid_port_state, 0, sizeof(lacp_port_state_t)*8);
 
-    memset(uid_port_state, 0, sizeof(UID_LAC_PORT_STATE_T)*8);
-
-    lacp_get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
-
-    printf("\r\n Actor");
-    printf("\r\n  Priority     : %-8d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
-    printf("\r\n  Short Period : %-8d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
     printf("\r\n ----------------------------------------------------------------------");
     printf("\r\n Agg  Partner  Parnter            Master   Selected   Standby   Oper ");
     printf("\r\n ID   Pri      MAC                Port     PortNum    PortNum   Key  ");
@@ -405,21 +418,21 @@ uint32_t cli_sysget_lacp_brief(uint32_t argc, char **argv)
     return 0;
 }
 
-void cli_get_status_str(uchar_t status, uchar_t *str)
+void cli_get_status_str(uchar_t status, char *str)
 {
-    uchar_t *col_str[] = {"Non-Collecting", "Collecting"};
-    uchar_t *dis_str[] = {"Non-Distributing", "Distributing"};
+        char *col_str[] = {"Non-Collecting", "Collecting"};
+    char *dis_str[] = {"Non-Distributing", "Distributing"};
 
     sprintf(str, "%s & %s", col_str[LACP_STATE_GET_BIT(status, LACP_STATE_COL)], dis_str[LACP_STATE_GET_BIT(status, LACP_STATE_DIS)]);
 
     return;
 
 }
-void cli_print_port_info(UID_LAC_PORT_STATE_T *uid_port_state)
+void cli_print_port_info(lacp_port_state_t *uid_port_state)
 {
-    unsigned char partner_sys_id_str[40] = {0};
-    unsigned char status_str[100] = {0};
-    unsigned char *role_str[] = {"STANDBY", "SELECTED"};
+    char partner_sys_id_str[40] = {0};
+    char status_str[100] = {0};
+    char *role_str[] = {"STANDBY", "SELECTED"};
     uint32_t slot, port;
 
     sprintf(partner_sys_id_str, "-");
@@ -448,26 +461,21 @@ void cli_print_port_info(UID_LAC_PORT_STATE_T *uid_port_state)
 
     return;
 }
-uint32_t cli_sysget_lacp_verbose(uint32_t argc, char **argv)
+int cli_sysget_lacp_verbose(int argc, char **argv)
 {
     uint32_t i;
-    UID_LAC_CFG_T  uid_cfg;
     uint32_t master_index = -1;
-    unsigned char actor_sys_id_str[40];
-    UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
-    unsigned char master_str[10] = {0};
+    char actor_sys_id_str[40];
+    lacp_port_state_t uid_port_state[8];
+    char master_str[10] = {0};
     uint32_t agg_id = atoi(argv[1]);
     uint32_t slot, port;
 
     //TODO:: agg not exist
-    lacp_sys_get_cfg(&uid_cfg);
 
-    memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
+    memset(uid_port_state, 0, sizeof(lacp_port_state_t)*8);
 
-    lacp_get_mac_str(uid_cfg.sys_mac, actor_sys_id_str);
-
-    printf("\r\n Priority     : %-8d    MAC Address : %s", uid_cfg.priority, actor_sys_id_str);
-    printf("\r\n Short Period : %-8d    Long Period : %d", uid_cfg.short_period, uid_cfg.long_period);
+    cli_print_sys_header();
 
     sprintf(master_str, "-");
 
@@ -483,7 +491,7 @@ uint32_t cli_sysget_lacp_verbose(uint32_t argc, char **argv)
 
         }
 
-        printf("\r\n Master Port  : %s", master_str);
+        printf("\r\n  Master Port  : %s", master_str);
         printf("\r\n");
 
         for (i = 0; i < 8; i++)
@@ -497,28 +505,25 @@ uint32_t cli_sysget_lacp_verbose(uint32_t argc, char **argv)
     }
     return 0;
 }
-uint32_t cli_sysget_lacp_portinfo(uint32_t argc, char **argv)
+int cli_sysget_lacp_portinfo(int argc, char **argv)
 {
     uint32_t ret = 0;
-    uint32_t i;
-    UID_LAC_CFG_T  uid_cfg;
-    uint32_t master_index = -1;
-    unsigned char actor_sys_id_str[40];
-    UID_LAC_PORT_STATE_T uid_port_state;
-    unsigned char master_str[10] = {0};
+    char actor_sys_id_str[40];
+    lacp_port_state_t uid_port_state;
+    char master_str[10] = {0};
     uint32_t slot, port;
     uint32_t slot_master, port_master;
     uint32_t agg_id;
     uint32_t prio;
 
-    DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    DEV_GetIfPonFromIfnet(argv[1],(int *) &slot,(int *) &port);
 
     agg_id = stub_db_agg_get_port_tid(slot, port);
 
     trunk_port_get_prio(slot, port, &prio);
 
     printf("\r\n Lacp Enable     : %-8s  Port Priority: %d", (agg_id == -1)? "disable" : "enable", prio);
-    memset(&uid_port_state, 0, sizeof(UID_LAC_PORT_STATE_T));
+    memset(&uid_port_state, 0, sizeof(lacp_port_state_t));
     ret = trunk_port_get_lacp_info(slot, port, &uid_port_state);
     if ( 0 != ret || 0 == uid_port_state.agg_id)
     {
@@ -538,12 +543,12 @@ uint32_t cli_sysget_lacp_portinfo(uint32_t argc, char **argv)
     cli_print_port_info(&uid_port_state);
     return 0;
 }
-uint32_t cli_port_clear_stat(uint32_t argc, char **argv)
+int cli_port_clear_stat(int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t slot, port;
 
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -553,37 +558,37 @@ uint32_t cli_port_clear_stat(uint32_t argc, char **argv)
     return 0;
 }
 
-uint32_t cli_sys_set_prio(uint32_t argc, char **argv)
+int cli_sys_set_prio(int argc, char **argv)
 {
     uint32_t prio = atoi(argv[1]);
     return trunk_sys_set_prio(prio);
 
 }
 
-uint32_t cli_sys_set_long_period(uint32_t argc, char **argv)
+int cli_sys_set_long_period(int argc, char **argv)
 {
     uint32_t prio = atoi(argv[1]);
     return trunk_sys_set_long_period(prio);
 
 }
-uint32_t cli_sys_set_short_period(uint32_t argc, char **argv)
+int cli_sys_set_short_period(int argc, char **argv)
 {
     uint32_t prio = atoi(argv[1]);
     return trunk_sys_set_short_period(prio);
 }
-uint32_t cli_sys_set_period(uint32_t argc, char **argv)
+int cli_sys_set_period(int argc, char **argv)
 {
     uint32_t prio = atoi(argv[1]);
     return trunk_sys_set_period(prio);
 }
 
-uint32_t cli_debug_trace (int argc, char **argv)
+int cli_debug_trace (int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t port_index;
 
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -594,12 +599,12 @@ uint32_t cli_debug_trace (int argc, char **argv)
     lacp_dbg_trace(port_index, argv[2], argv[3][0] != 'n' && argv[3][0] != 'N');
     return 0;
 }
-uint32_t cli_debug_pkt (int argc, char **argv)
+int cli_debug_pkt (int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t slot, port;
 
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -613,13 +618,13 @@ uint32_t cli_debug_pkt (int argc, char **argv)
     }
     return 0;
 }
-uint32_t cli_port_set_prio(uint32_t argc, char **argv)
+int cli_port_set_prio(int argc, char **argv)
 {
 
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t prio = atoi(argv[2]);
-    ret = DEV_GetIfPonFromIfnet(argv[1], &slot, &port);
+    ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
         return ret;
@@ -746,7 +751,7 @@ static CMD_DSCR_T lang[] = {
 }
 ;
 
-uint32_t lacp_cli_init (void)
+int lacp_cli_init (void)
 {
     cli_register_language (lang);
     stub_init();

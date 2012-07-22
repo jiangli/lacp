@@ -1,7 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_statmch.h"
 #include "lacp_sys.h"
-#include "../lacp_ssp.h"
+#include "lacp_ssp.h"
 
 #define STATES {        \
   CHOOSE(TXM_NO_PERIODIC),    \
@@ -24,7 +24,8 @@ tx_lacpdu(lacp_state_mach_t * fsm)
 
     if (!port->lacp_enabled)
     {
-        lacp_trace("\r\n not enable tx");
+            if (fsm->debug)
+                    lacp_trace("\r\n not enable tx");
         return 1;
     }
 
@@ -147,27 +148,6 @@ Bool lacp_tx_check_conditions (lacp_state_mach_t * fsm)
     };
     return False;
 }
-#if 0
-uint32_t
-LAC_transmit_dbg_sttx (uint32_t bpdu_type, STATE_MACH_T * fsm)
-{
-    register PORT_T *port = fsm->owner.port;
-
-    if (!port->adminEnable) {
-        stp_trace ("stt on disbaled port %s", port->port_name);
-        return -1;
-    }
-    switch (bpdu_type) {
-    default:
-    case 0:
-        return txRstp (fsm);
-    case 1:
-        return txTcn (fsm);
-    case 2:
-        return txConfig (fsm);
-    }
-}
-#endif
 
 
 /*

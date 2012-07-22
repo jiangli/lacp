@@ -4,6 +4,7 @@
 #include "lacp_api.h"
 #include "lacp_stub.h"
 #include "lacp_util.h"
+
 uint32_t
 bridge_tx_bpdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len);
 char *
@@ -93,6 +94,7 @@ uint32_t lacp_ssp_set_port_link_status(uint32_t port_index, uint32_t link_status
     stub_get_port_attr(port_index, &attr);
     attr.link_status  = link_status;
     stub_set_port_attr(port_index, &attr);
+    return 0;
 }
 
 uint32_t lacp_ssp_get_port_link_status(uint32_t port_index)
@@ -176,31 +178,19 @@ uint32_t lacp_ssp_get_port_cd(uint32_t port_index)
 
 }
 
-uint32_t lacp_set_port_cd(uint32_t port_index, uint32_t state)
+uint32_t lacp_ssp_set_port_cd(uint32_t port_index, uint32_t state)
 {
     port_attr_t attr;
+
+    //TODO:: read rstp port state, &
     stub_get_port_attr(port_index, &attr);
     attr.cd = state;
     stub_set_port_attr(port_index, &attr);
-
+    
     return 0;
 
 }
 
-void memdump(unsigned char *buf, uint32_t len)
-{
-    uint32_t i = 0;
-    printf("\r\n buf:0x%x, len:%d\r\n---------\r\n", (uint32_t)buf, len);
-    for (i = 0; i < len; i++)
-    {
-        if (i%16 == 0)
-            printf("\r\n");
-        printf(" %02x", *(buf + i));
-    }
-
-    printf("\r\n---------\r\n");
-
-}
 
 uint32_t lacp_ssp_tx_pdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len)
 {
@@ -213,11 +203,9 @@ uint32_t lacp_ssp_tx_pdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_
 
 uint32_t lacp_ssp_get_speed_index(uint32_t speed, uint32_t duplex)
 {
-    uint32_t speed_duplex[] = {1,10,100,1000,10000};
-
-    uint32_t i;
     if (!duplex)
         return 0;
+
     switch(speed)
     {
     case 10:

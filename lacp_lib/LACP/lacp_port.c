@@ -29,8 +29,8 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     LACP_STRDUP (port->port_name, lacp_ssp_get_port_name (port_index), "port_name");
     port->machines = NULL;
 
-    lacp_port_get_actor_admin(port_index, &port->actor_admin);
-    lacp_port_get_partner_admin(port_index, &port->partner_admin);
+    lacp_port_get_actor_init(port_index, &port->actor_admin);
+    lacp_port_get_partner_init(port_index, &port->partner_admin);
 
     port->master_port = port;
     port->selected = False;
@@ -53,23 +53,27 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     LACP_STATE_MACH_IN_LIST (mux);
     LACP_STATE_MACH_IN_LIST (sel);
     LACP_STATE_MACH_IN_LIST (rx);
-#if 0
+#if 1
     port->mux->debug = 1;
     port->sel->debug = 1;
     port->rx->debug = 1;
     port->tx->debug = 1;
 #endif
-    /* reset timers */
-    port->current_while =
-        port->periodic_timer =
-            port->wait_while = 0;
 
     return port;
 }
 
 void
-lacp_port_init (lacp_port_t * port, lacp_sys_t * LACm)
+lacp_port_init (lacp_port_t * port)
 {
+        lacp_sys_t *sys = lacp_get_sys_inst();
+        port->actor.system_priority = sys->priority;
+        LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_TMT, sys->lacp_timeout);
+        
+        port->current_while =
+        port->periodic_timer =
+            port->wait_while = 0;
+        return;
 }
 
 void
@@ -153,21 +157,15 @@ uint32_t lacp_port_set_reselect(lacp_port_t *port)
     return 0;
 }
 
-
-#if 0
-#ifdef LAC_DBG
-unsigned uint32_t
-LAC_LAC_PORT_Trace_state_machine (lacp_port_t * this, char *mach_name, unsigned uint32_t enadis,
-                                  unsigned uint32_t id)
+int lacp_dbg_trace_state_machine (lacp_port_t * port, char *mach_name, int enadis)
 {
-    register struct lacp_state_mach_s *stater;
+    register lacp_state_mach_t *stater;
 
-    for (stater = this->machines; stater; stater = stater->next) {
+    for (stater = port->machines; stater; stater = stater->next) {
         if (!strcmp (mach_name, "all") || !strcmp (mach_name, stater->name)) {
-            /* if (stater->debug != enadis) */
             {
-                lacp_trace ("port %s on %s trace %-8s (was %s) now %s",
-                            this->port_name, this->owner->name,
+                lacp_trace ("port %s trace %-8s (was %s) now %s",
+                            port->port_name,
                             stater->name,
                             stater->debug ? " enabled" : "disabled",
                             enadis ? " enabled" : "disabled");
@@ -178,6 +176,6 @@ LAC_LAC_PORT_Trace_state_machine (lacp_port_t * this, char *mach_name, unsigned 
 
     return 0;
 }
-#endif
-#endif
+
+
 

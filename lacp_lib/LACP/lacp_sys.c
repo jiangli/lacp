@@ -79,7 +79,7 @@ uint32_t lacp_sys_update(lacp_sys_t *sys, uint32_t reason)
 
     need_state_change = False;
     if (reason != 2)
-        printf("\r\n update reason:%d", reason);
+        lacp_trace("\r\n update reason:%d", reason);
     for (;;) {			  /* loop until not need changes */
         need_state_change = lacp_iterate_machines (sys,
                             lacp_check_condition,

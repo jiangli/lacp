@@ -2,7 +2,7 @@
 #include "lacp_statmch.h"
 #include "lacp_port.h"
 #include "lacp_sys.h"
-#include "../lacp_ssp.h"
+#include "lacp_ssp.h"
 
 #define STATES {        \
   CHOOSE(MUX_DETACHED),    \
@@ -16,7 +16,7 @@
 #define GET_STATE_NAME lacp_mux_get_state_name
 #include "lacp_choose.h"
 
-static uint32_t sys_is_ready(lacp_port_t *port)
+static Bool sys_is_ready(lacp_port_t *port)
 {
     lacp_port_t *p = NULL;
     lacp_sys_t *lac_sys = lacp_get_sys_inst();
@@ -32,32 +32,25 @@ static uint32_t sys_is_ready(lacp_port_t *port)
 
     return True;
 }
+
 static uint32_t disable_collecting_distributing(lacp_port_t  *port)
 {
-    lacp_trace("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
-    lacp_set_port_cd(port->port_index, False);
-    return 0;
+    return lacp_ssp_set_port_cd(port->port_index, False);
 }
 
 static uint32_t enable_collecting_distributing(lacp_port_t  *port)
 {
-    lacp_trace("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
-    lacp_set_port_cd(port->port_index, True);
-    return 0;
+    return lacp_ssp_set_port_cd(port->port_index, True);
 }
 
 static uint32_t detach_mux_from_aggregator(lacp_port_t  *port)
 {
-    lacp_trace("\r\n <%s.%d>, port:%d, agg:%d",  __FUNCTION__, __LINE__, port->port_index, port->agg_id);
-    lacp_ssp_attach_port(port->port_index, False, port->agg_id);
-    return 0;
+    return lacp_ssp_attach_port(port->port_index, False, port->agg_id);
 }
 
 static uint32_t attach_mux_to_aggregator(lacp_port_t  *port)
 {
-    lacp_trace("\r\n <%s.%d>, port:%d, agg:%d",  __FUNCTION__, __LINE__, port->port_index, port->agg_id);
-    lacp_ssp_attach_port(port->port_index, True, port->agg_id);
-    return 0;
+    return lacp_ssp_attach_port(port->port_index, True, port->agg_id);
 }
 
 void lacp_mux_enter_state (lacp_state_mach_t * fsm)
@@ -68,41 +61,64 @@ void lacp_mux_enter_state (lacp_state_mach_t * fsm)
     case LACP_BEGIN:
     case MUX_DISABLE:
         detach_mux_from_aggregator(port);
-        lacp_trace("mux to disable state. port %d actor syn ---> False", port->port_index);
+        if (fsm->debug)
+                lacp_trace("mux to disable state. port %d actor syn ---> False", port->port_index);
+
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_SYN, False);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_COL, True);
         enable_collecting_distributing(port);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_DIS, True);
         port->ntt = False;
+
+        if (fsm->debug)
+                lacp_trace("mux to disable state. port %d collecting and distributing ---> True", port->port_index);
         break;
 
     case MUX_DETACHED:
         detach_mux_from_aggregator(port);
-        lacp_trace("mux to detached state.port %d actor syn ---> False", port->port_index);
+        if (fsm->debug)
+                lacp_trace("mux to detached state.port %d actor syn ---> False", port->port_index);
+
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_SYN, False);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_COL, False);
         disable_collecting_distributing(port);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_DIS, False);
+        if (fsm->debug)
+                lacp_trace("mux to DETACHED state. port %d collecting and distributing ---> False", port->port_index);
         port->ntt = True;
         break;
 
     case MUX_WAITING:
         port->wait_while = port->system->aggregate_wait_time;
+        if (fsm->debug)
+                lacp_trace("mux to WAITING state. port %d start wait_while timer %d", port->port_index, port->wait_while);
         port->ready_n = False;
-
         break;
 
     case MUX_READY_N:
+            if (fsm->debug)
+                    lacp_trace(" port %d is ready.", port->port_index);
+
         port->ready_n = True;
         break;
 
     case MUX_ATTACHED:
         attach_mux_to_aggregator(port);
-        lacp_trace("mux to MUX_ATTACHED state. port %d actor syn ---> True", port->port_index);
+        
+        if (fsm->debug)        
+        {
+                lacp_trace("attch port %d to agg %d", port->port_index, port->agg_id);
+                lacp_trace("mux to MUX_ATTACHED state. port %d actor syn ---> True", port->port_index);
+        }
+
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_SYN, True);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_COL, False);
         disable_collecting_distributing(port);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_DIS, False);
+
+        if (fsm->debug)
+                lacp_trace("mux to MUX_ATTACHED state. port %d collecting and distributing ---> False", port->port_index);
+
         port->ntt = True;
         break;
 
@@ -110,6 +126,9 @@ void lacp_mux_enter_state (lacp_state_mach_t * fsm)
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_DIS, True);
         enable_collecting_distributing(port);
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_COL, True);
+        if (fsm->debug)
+                lacp_trace("mux to RX_TX status. port %d collecting and distributing ---> True", port->port_index);
+
         port->ntt = True;
         break;
 
@@ -139,7 +158,6 @@ Bool lacp_mux_check_conditions (lacp_state_mach_t * fsm)
         if (port->selected && !port->standby)
             return lacp_hop_2_state (fsm, MUX_WAITING);
         break;
-
 
     case MUX_WAITING:
         if (!port->wait_while)
