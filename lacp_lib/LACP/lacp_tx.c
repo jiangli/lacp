@@ -1,6 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_statmch.h"
 #include "lacp_sys.h"
+#include "lacp_api.h"
 #include "trunk_ssp.h"
 
 #define STATES {        \

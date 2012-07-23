@@ -1,7 +1,7 @@
 #ifndef   __LACP_API_H__
 #define   __LACP_API_H__
 
-
+#define LACP_PORT_MAX 4
 enum {
     Slow_periodic_ticks   =   30,/* should be 30, faster for simulation */
     Fast_periodic_ticks   =   1,

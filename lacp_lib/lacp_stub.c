@@ -4,7 +4,6 @@
 uint32_t g_sys_prio = 0xffffffff;
 port_attr_t g_port_list[144];
 LINK_GROUP_T g_link_groups[32];
-extern uint32_t LACP_PORT_MAX;
 
 uint32_t stub_init()
 {
@@ -50,7 +49,6 @@ uint32_t stub_db_agg_add_member(uint32_t agg_id, uint32_t slot, uint32_t port)
 }
 uint32_t stub_db_agg_del_member(uint32_t slot, uint32_t port)
 {
-    uint32_t i;
     uint32_t j;
     for (j=0; j<32; j++)
     {
@@ -63,7 +61,7 @@ uint32_t stub_db_agg_del_member(uint32_t slot, uint32_t port)
 }
 uint32_t stub_db_agg_get_port_tid(uint32_t slot, uint32_t port)
 {
-    uint32_t i,j;
+    uint32_t i;
 
     for (i=0; i<32; i++)
     {

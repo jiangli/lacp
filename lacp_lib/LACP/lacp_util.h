@@ -3,7 +3,7 @@
 #define __LACP_UTIL_H__
 
 
-#define LACP_MAC_PORT_INFO_LEN 1000
+#define LACP_PORT_INFO_LEN 1000
 
 void lacp_get_mac_str (unsigned char *addr, char *str);
 void lacp_get_sysid_str (uint32_t prio, unsigned char *addr, unsigned char *str);
@@ -20,5 +20,5 @@ void write_log(char *filename, int line, int ret,
 
 #define ERR_LOG(ret,para1,para2,para3) \
         write_log(__FILE__, __LINE__, ret, para1, para2, para3);
-
+int cli_pr_get_attr(int argc, char **argv);
 #endif

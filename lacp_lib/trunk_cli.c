@@ -96,7 +96,7 @@ static int lacp_port_lacp_disable (int argc, char** argv)
         return ret;
     }
 
-    ret = trunk_port_lacp_enable(slot, port);
+    ret = trunk_port_lacp_disable(slot, port);
     if (ret != 0)
     {
         ERR_LOG(ret, slot, port, 0);
@@ -637,9 +637,6 @@ static CMD_DSCR_T lang[] = {
     THE_COMMAND("no port link-group", "disable lacp")
     PARAM_STRING("slot/port", "0/1")
     THE_FUNC(lacp_port_lacp_disable)
-
-    THE_COMMAND("show link-group all", "get bridge config")
-    THE_FUNC(cli_br_get_cfg)
 
 
     THE_COMMAND("show lacp link-group brief", "get bridge config")
