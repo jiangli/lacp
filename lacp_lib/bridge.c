@@ -34,19 +34,17 @@
 
 #include "cli.h"
 #include "br_ipc.h"
-#include "lac_cli.h"
+#include "lacp_cli.h"
 
-#include "lac_base.h"
-#include "lac_port.h"
+#include "lacp_base.h"
+#include "lacp_port.h"
 #include "bitmap.h"
-#include "lac_sys.h"
-#include "uid_lac.h"
-#include "uid_lac.h"
-#include "lac_in.h"
+#include "lacp_sys.h"
+#include "lacp_api.h"
 
 
 long my_pid = 0;
-BITMAP_T enabled_ports;
+lacp_bitmap_t enabled_ports;
 IPC_SOCKET_T ipc_socket;
 extern void setuptrap();
 int
@@ -98,9 +96,9 @@ bridge_start ()
 
 
     /* 初始化lac系统 */
-    lac_sys_init();
-    BitmapClear (&enabled_ports);
-    BitmapClear (&uid_cfg.ports);
+    lacp_sys_init();
+    lacp_bitmap_clear (&enabled_ports);
+    lacp_bitmap_clear (&uid_cfg.ports);
 
     /* 协议栈默认没有端口，需要初始化端口 */
 #if 0
@@ -110,11 +108,11 @@ bridge_start ()
     {
         /* 此处随意添加一些端口进行测试 */
         if (i < 4)
-            BitmapSetBit(&uid_cfg.ports, i);
+            lacp_bitmap_set_bit(&uid_cfg.ports, i);
     }
 #endif
 
-    iii = lac_sys_set_cfg(&uid_cfg);
+    iii = lacp_sys_set_cfg(&uid_cfg);
     if (0 != iii) {
         printf ("FATAL: can't enable:%iii\n", iii);
 
@@ -160,15 +158,15 @@ bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
     switch (cntrl->cmd) {
     case BR_IPC_PORT_CONNECT:
         printf ("connected port p%02d\n", port_index);
-        BitmapSetBit (&enabled_ports, port_index);
-        lac_in_enable_port (port_index, True);
-        lac_set_port_link_status(port_index, 1);
+        lacp_bitmap_set_bit (&enabled_ports, port_index);
+        lacp_port_link_change (port_index, True);
+        lacp_ssp_set_port_link_status(port_index, 1);
         break;
     case BR_IPC_PORT_DISCONNECT:
         printf ("disconnected port p%02d\n", port_index);
-        BitmapClearBit (&enabled_ports, port_index);
-        lac_in_enable_port (port_index, False);
-        lac_set_port_link_status(port_index, 0);
+        lacp_bitmap_clear_bit (&enabled_ports, port_index);
+        lacp_port_link_change (port_index, False);
+        lacp_ssp_set_port_link_status(port_index, 0);
         break;
     case BR_IPC_BRIDGE_SHUTDOWN:
         printf ("shutdown from manager :(\n");
@@ -184,8 +182,8 @@ int
 bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
 {
 
-    lac_rx_lacpdu (msg->header.destination_port,
-                   (LACPDU_T *) (msg->body.bpdu),
+    lacp_rx_lacpdu (msg->header.destination_port,
+                   (lacp_pdu_t *) (msg->body.bpdu),
                    msg->header.body_len);
 
     return 0;
@@ -280,7 +278,7 @@ main_loop ()
         }
 
         if (!rc) {			// Timeout expired
-            lac_one_second ();
+            lacp_one_second ();
             gettimeofday (&earliest, NULL);
 
             earliest.tv_sec++;
@@ -329,15 +327,15 @@ main (int argc, char **argv)
 }
 
 #if 0
-int lac_start()
+int lacp_start()
 {
     UID_LAC_CFG_T uid_cfg;
-    BITMAP_T Ports;
+    lacp_bitmap_t Ports;
     int max_valid_port = 144;
     int i = 0;
 
     /* 初始化lac系统 */
-    lac_sys_init();
+    lacp_sys_init();
 
     /* 协议栈默认没有端口，需要初始化端口 */
     uid_cfg.field_mask = BR_CFG_PBMP_ADD;
@@ -346,10 +344,10 @@ int lac_start()
     {
         /* 此处随意添加一些端口进行测试 */
         if (i % 20 == 0)
-            BitmapSetBit(&uid_cfg.ports, i);
+            lacp_bitmap_set_bit(&uid_cfg.ports, i);
     }
 
-    lac_sys_set_cfg(&uid_cfg);
+    lacp_sys_set_cfg(&uid_cfg);
 }
 int main()
 {
@@ -358,7 +356,7 @@ int main()
     my_pid = getpid();
     printf ("my pid: %ld\n", my_pid);
 
-    if (0 == lac_start ()) {
+    if (0 == lacp_start ()) {
 //    main_loop ();
     }
 

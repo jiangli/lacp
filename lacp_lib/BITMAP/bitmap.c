@@ -1,110 +1,110 @@
 #include <string.h>
 #include "bitmap.h"
 
-void BitmapClear(BITMAP_T *BitmapPtr) 
+void lacp_bitmap_clear(lacp_bitmap_t *BitmapPtr) 
 {
-	memset(BitmapPtr->part, 0, LAC_MAX_BITMAP_BYTE); 
+	memset(BitmapPtr->part, 0, LACP_MAX_BITMAP_BYTE); 
 	return;
 }
 
-void BitmapSetAllBits(BITMAP_T * BitmapPtr)
+void lacp_bitmap_set_all_bits(lacp_bitmap_t * BitmapPtr)
 {
-	memset(BitmapPtr->part, 0xFF, LAC_MAX_BITMAP_BYTE);
+	memset(BitmapPtr->bit_array, 0xFF, LACP_MAX_BITMAP_BYTE);
 	return;
 }
 
-void BitmapClearBits(BITMAP_T * BitmapPtr, BITMAP_T * BitmapBitsPtr)
+void lacp_bitmap_clear_bits(lacp_bitmap_t * BitmapPtr, lacp_bitmap_t * BitmapBitsPtr)
 {
 	int i; 
-	for (i = 0; i < LAC_MAX_BITMAP_BYTE; i++)
+	for (i = 0; i < LACP_MAX_BITMAP_BYTE; i++)
 	{
-		BitmapPtr->part[i] &= ~(BitmapBitsPtr->part[i]); 
+		BitmapPtr->bit_array[i] &= ~(BitmapBitsPtr->bit_array[i]); 
 	}
 
 	return;
 }
          
-void BitmapSetBits(BITMAP_T * BitmapPtr, BITMAP_T * BitmapBitsPtr) 
+void lacp_bitmap_set_bits(lacp_bitmap_t * BitmapPtr, lacp_bitmap_t * BitmapBitsPtr) 
 {
 	int i; 
-	for (i = 0; i < LAC_MAX_BITMAP_BYTE; i++)
+	for (i = 0; i < LACP_MAX_BITMAP_BYTE; i++)
 	{
-		BitmapPtr->part[i] |= BitmapBitsPtr->part[i]; 
+		BitmapPtr->bit_array[i] |= BitmapBitsPtr->bit_array[i]; 
 	}
 }
 
-void BitmapOr(BITMAP_T * ResultPtr, BITMAP_T * BitmapPtr1,BITMAP_T * BitmapPtr2)
+void lacp_bitmap_or(lacp_bitmap_t * ResultPtr, lacp_bitmap_t * BitmapPtr1,lacp_bitmap_t * BitmapPtr2)
 {
 	int i; 
-	for (i = 0; i < LAC_MAX_BITMAP_BYTE; i++) 
+	for (i = 0; i < LACP_MAX_BITMAP_BYTE; i++) 
 	{
-		ResultPtr->part[i] = (BitmapPtr1)->part[i] | (BitmapPtr2)->part[i]; 
+		ResultPtr->bit_array[i] = (BitmapPtr1)->part[i] | (BitmapPtr2)->part[i]; 
 	 
 	}
 }
 
-void BitmapAnd(BITMAP_T * ResultPtr,BITMAP_T * BitmapPtr1,BITMAP_T * BitmapPtr2) 
+void lacp_bitmap_and(lacp_bitmap_t * ResultPtr,lacp_bitmap_t * BitmapPtr1,lacp_bitmap_t * BitmapPtr2) 
 { 
 	int i; 
-	for (i = 0; i < LAC_MAX_BITMAP_BYTE; i++) 
+	for (i = 0; i < LACP_MAX_BITMAP_BYTE; i++) 
 		(ResultPtr)->part[i] = (BitmapPtr1)->part[i] & (BitmapPtr2)->part[i];  
 }
 
-void BitmapNot(BITMAP_T * ResultPtr, BITMAP_T * BitmapPtr) 
+void lacp_bitmap_not(lacp_bitmap_t * ResultPtr, lacp_bitmap_t * BitmapPtr) 
 { 
 	int i; 
-	for (i = 0; i < LAC_MAX_BITMAP_BYTE; i++) 
+	for (i = 0; i < LACP_MAX_BITMAP_BYTE; i++) 
 		(ResultPtr)->part[i]= ~((BitmapPtr)->part[i]);   
 }
 
 /* Return zero if identical */
-int BitmapCmp(BITMAP_T * BitmapPtr1, BITMAP_T * BitmapPtr2) 
+int lacp_bitmap_cmp(lacp_bitmap_t * BitmapPtr1, lacp_bitmap_t * BitmapPtr2) 
 {
-	return memcmp(BitmapPtr1->part, BitmapPtr2->part, LAC_MAX_BITMAP_BYTE);
+	return memcmp(BitmapPtr1->bit_array, BitmapPtr2->bit_array, LACP_MAX_BITMAP_BYTE);
 }
 
-int BitmapIsZero(BITMAP_T *BitmapPtr) 
+int lacp_bitmap_is_zero(lacp_bitmap_t *BitmapPtr) 
 {
-	BITMAP_T  tempBitmap;	
-	memset(tempBitmap.part, 0, LAC_MAX_BITMAP_BYTE);	
-	return !memcmp((BitmapPtr)->part, &tempBitmap, LAC_MAX_BITMAP_BYTE);	
+	lacp_bitmap_t  tempBitmap;	
+	memset(tempBitmap.bit_array, 0, LACP_MAX_BITMAP_BYTE);	
+	return !memcmp((BitmapPtr)->part, &tempBitmap, LACP_MAX_BITMAP_BYTE);	
 }
         
 
-int BitmapIsAllOnes(BITMAP_T * BitmapPtr) 
+int lacp_bitmap_is_all_ones(lacp_bitmap_t * BitmapPtr) 
 {
-	BITMAP_T tempBitmap;	
-	memset(tempBitmap.part, 0xFF, LAC_MAX_BITMAP_BYTE);	
-	return memcmp((BitmapPtr)->part, &tempBitmap, LAC_MAX_BITMAP_BYTE);	
+	lacp_bitmap_t tempBitmap;	
+	memset(tempBitmap.bit_array, 0xFF, LACP_MAX_BITMAP_BYTE);	
+	return memcmp((BitmapPtr)->part, &tempBitmap, LACP_MAX_BITMAP_BYTE);	
 }
 
-int BitmapGetBit(BITMAP_T * BitmapPtr, int Bit) 
+int lacp_bitmap_get_bit(lacp_bitmap_t * BitmapPtr, int Bit) 
 { 
 	return   (BitmapPtr)->part[Bit/8] & (1 << (Bit % 8));
 }
 
-void BitmapSetBit(BITMAP_T * BitmapPtr, int Bit) 
+void lacp_bitmap_set_bit(lacp_bitmap_t * BitmapPtr, int Bit) 
 {
 	(BitmapPtr)->part[Bit/8] |= (1 << (Bit % 8)); 
 	return;
 }
 
-void BitmapClearBit(BITMAP_T * BitmapPtr, int Bit) 
+void lacp_bitmap_clear_bit(lacp_bitmap_t * BitmapPtr, int Bit) 
 {
 	(BitmapPtr)->part[Bit/8]&= ~(1 << (Bit % 8));
 	return;
 }
 
-void BitmapCopy(BITMAP_T * BitmapDstPtr, BITMAP_T * BitmapSrcPtr) 
+void lacp_bitmap_copy(lacp_bitmap_t * BitmapDstPtr, lacp_bitmap_t * BitmapSrcPtr) 
 { 
-	memcpy((BitmapDstPtr)->part, (BitmapSrcPtr)->part, LAC_MAX_BITMAP_BYTE); 
+	memcpy((BitmapDstPtr)->part, (BitmapSrcPtr)->part, LACP_MAX_BITMAP_BYTE); 
     return;
 }
 
-void BitmapXor(BITMAP_T * ResultPtr, BITMAP_T * BitmapPtr1,BITMAP_T * BitmapPtr2) 
+void lacp_bitmap_xor(lacp_bitmap_t * ResultPtr, lacp_bitmap_t * BitmapPtr1,lacp_bitmap_t * BitmapPtr2) 
 { 
 	int i; 
-	for (i = 0; i < LAC_MAX_BITMAP_BYTE; i++) 
+	for (i = 0; i < LACP_MAX_BITMAP_BYTE; i++) 
 		(ResultPtr)->part[i]= (BitmapPtr1)->part[i]^ (BitmapPtr2)->part[i];   
 		
 	return;	
