@@ -370,7 +370,7 @@ int cli_sys_get_lacp_brief(int argc, char **argv)
                 master_slot = agg_state.ports_state[master_index].slot;
                 master_port = agg_state.ports_state[master_index].port;
                 sprintf(master_port_str, "%d/%d", master_slot, master_port);
-                sprintf(partner_sys_prio_str, "%d", agg_state.ports_state[master_index].partner.port_priority);
+                sprintf(partner_sys_prio_str, "%d", agg_state.ports_state[master_index].partner.system_priority);
                 lacp_get_mac_str(agg_state.ports_state[master_index].partner.system_mac, partner_sys_mac_str);
                 sprintf(agg_oper_key_str, "%d", agg_state.ports_state[master_index].actor.key);
             }
@@ -500,6 +500,8 @@ int cli_sys_get_lacp_portinfo(int argc, char **argv)
 	}
 	
     printf("\r\n Lacp Enable     : %-8s  Port Priority: %d", (agg_id == 0)? "disable" : "enable", prio);
+    if (agg_id == 0)
+            return;
 	
     memset(&port_state, 0, sizeof(trunk_port_state_t));
 	

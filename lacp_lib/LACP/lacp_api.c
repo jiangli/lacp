@@ -416,6 +416,7 @@ uint32_t lacp_sys_get_cfg(lacp_sys_cfg_t * uid_cfg)
     memcpy(uid_cfg->sys_mac, sys->mac, 6);
     uid_cfg->short_period = sys->fast_periodic_time;
     uid_cfg->long_period = sys->slow_periodic_time;
+    uid_cfg->period = sys->lacp_timeout;
     return 0;
 }
 uint32_t lacp_sys_get_state(lacp_sys_state_t * uid_cfg)

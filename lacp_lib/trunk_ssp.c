@@ -39,7 +39,10 @@ uint32_t trunk_ssp_rx_lacpdu(uint32_t slot, uint32_t port, lacp_pdu_t * pdu, uin
     }
 
     if (trunk_dbg_get_switch(port_index,1,0))
+    {
+            printf("port %d/%d rx lacpdu.", slot, port);
         lacp_dump_pkt(pdu, len);
+    }
 
     ret = lacp_rx_lacpdu(port_index, pdu, len);
     if (ret != 0)
@@ -228,7 +231,10 @@ uint32_t trunk_ssp_tx_pdu (uint32_t port_index, unsigned char *pdu, size_t len)
 //	memdump(bpdu, bpdu_len);
     bridge_tx_bpdu(port_index, pdu, len);
     if (trunk_dbg_get_switch(port_index,1,1))
-        lacp_dump_pkt(pdu, len);
+    {
+            printf("%s tx lacpdu.", trunk_ssp_get_port_name(port_index));
+                 lacp_dump_pkt(pdu, len);
+    }
 
     return 0;
 
