@@ -16,7 +16,7 @@
 #define GET_STATE_NAME lacp_mux_get_state_name
 #include "lacp_choose.h"
 
-static int sys_is_ready(lacp_port_t *port)
+static uint32_t sys_is_ready(lacp_port_t *port)
 {
     lacp_port_t *p = NULL;
     lacp_sys_t *lac_sys = lacp_get_sys_inst();
@@ -32,39 +32,39 @@ static int sys_is_ready(lacp_port_t *port)
 
     return True;
 }
-static int disable_collecting_distributing(lacp_port_t  *port)
+static uint32_t disable_collecting_distributing(lacp_port_t  *port)
 {
     lacp_trace("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     lacp_set_port_cd(port->port_index, False);
     return 0;
 }
 
-static int enable_collecting_distributing(lacp_port_t  *port)
+static uint32_t enable_collecting_distributing(lacp_port_t  *port)
 {
     lacp_trace("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     lacp_set_port_cd(port->port_index, True);
     return 0;
 }
 
-static int detach_mux_from_aggregator(lacp_port_t  *port)
+static uint32_t detach_mux_from_aggregator(lacp_port_t  *port)
 {
     lacp_trace("\r\n <%s.%d>, port:%d, agg:%d",  __FUNCTION__, __LINE__, port->port_index, port->agg_id);
     lacp_ssp_attach_port(port->port_index, False, port->agg_id);
     return 0;
 }
 
-static int attach_mux_to_aggregator(lacp_port_t  *port)
+static uint32_t attach_mux_to_aggregator(lacp_port_t  *port)
 {
     lacp_trace("\r\n <%s.%d>, port:%d, agg:%d",  __FUNCTION__, __LINE__, port->port_index, port->agg_id);
     lacp_ssp_attach_port(port->port_index, True, port->agg_id);
     return 0;
 }
 
-void lacp_mux_enter_state (lacp_state_mach_t * this)
+void lacp_mux_enter_state (lacp_state_mach_t * fsm)
 {
-    register lacp_port_t *port = this->owner.port;
+    register lacp_port_t *port = fsm->owner.port;
 
-    switch (this->state) {
+    switch (fsm->state) {
     case LACP_BEGIN:
     case MUX_DISABLE:
         detach_mux_from_aggregator(port);
@@ -116,56 +116,56 @@ void lacp_mux_enter_state (lacp_state_mach_t * this)
     };
 }
 
-Bool lacp_mux_check_conditions (lacp_state_mach_t * this)
+Bool lacp_mux_check_conditions (lacp_state_mach_t * fsm)
 {
-    register lacp_port_t *port = this->owner.port;
+    register lacp_port_t *port = fsm->owner.port;
     if (!port->lacp_enabled)
     {
-        if (this->state == MUX_DISABLE)
+        if (fsm->state == MUX_DISABLE)
             return False;
         else
-            return lacp_hop_2_state (this, MUX_DISABLE);
+            return lacp_hop_2_state (fsm, MUX_DISABLE);
     }
 
-    switch (this->state) {
+    switch (fsm->state) {
     case LACP_BEGIN:
-        return lacp_hop_2_state (this, MUX_DETACHED);
+        return lacp_hop_2_state (fsm, MUX_DETACHED);
 
     case MUX_DISABLE:
         if (port->lacp_enabled)
-            return lacp_hop_2_state (this, MUX_DETACHED);
+            return lacp_hop_2_state (fsm, MUX_DETACHED);
 
     case MUX_DETACHED:
         if (port->selected && !port->standby)
-            return lacp_hop_2_state (this, MUX_WAITING);
+            return lacp_hop_2_state (fsm, MUX_WAITING);
         break;
 
 
     case MUX_WAITING:
         if (!port->wait_while)
-            return lacp_hop_2_state (this, MUX_READY_N);
+            return lacp_hop_2_state (fsm, MUX_READY_N);
         break;
 
     case MUX_READY_N:
         if (port->selected && !port->standby && sys_is_ready(port))
-            return lacp_hop_2_state (this, MUX_ATTACHED);
+            return lacp_hop_2_state (fsm, MUX_ATTACHED);
 
         if (!port->selected || port->standby)
-            return lacp_hop_2_state (this, MUX_DETACHED);
+            return lacp_hop_2_state (fsm, MUX_DETACHED);
         break;
 
 
     case MUX_ATTACHED:
         if (port->selected && !port->standby && LACP_STATE_GET_BIT(port->partner.state, LACP_STATE_SYN))
-            return lacp_hop_2_state (this, MUX_RX_TX);
+            return lacp_hop_2_state (fsm, MUX_RX_TX);
 
         if (!port->selected || port->standby)
-            return lacp_hop_2_state (this, MUX_DETACHED);
+            return lacp_hop_2_state (fsm, MUX_DETACHED);
         break;
 
     case MUX_RX_TX:
         if (!port->selected || port->standby || !LACP_STATE_GET_BIT(port->partner.state, LACP_STATE_SYN))
-            return lacp_hop_2_state (this, MUX_ATTACHED);
+            return lacp_hop_2_state (fsm, MUX_ATTACHED);
         break;
 
     default:

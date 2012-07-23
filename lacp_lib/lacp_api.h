@@ -29,7 +29,7 @@ enum {/*
 
 typedef struct {
     /* service data */
-    unsigned long field_mask; /* which fields to change */
+    uint32_t field_mask; /* which fields to change */
     lacp_bitmap_t port_bmp;
 
     /* protocol data */
@@ -37,20 +37,20 @@ typedef struct {
     lacp_key_t		 key;
     lacp_port_prio_t port_priority;
     lacp_state_t 	 state;
-    int 			 agg_id;
+    uint32_t		 agg_id;
     lacp_port_info_t partner;
 
 } lacp_port_cfg_t;
 
 typedef struct {
-	int valid;
-    int port_index;
+	uint32_t valid;
+    uint32_t port_index;
     lacp_key_t key;
-    int agg_id;
-    int master_port;
-    int sel_state;  /* selected or standby. readonly */
-    int rx_cnt;
-    int tx_cnt;
+    uint32_t agg_id;
+    uint32_t master_port;
+    uint32_t sel_state;  /* selected or standby. readonly */
+    uint32_t rx_cnt;
+    uint32_t tx_cnt;
     lacp_port_info_t        actor;
     lacp_port_info_t        partner;
 
@@ -74,15 +74,15 @@ typedef struct {
 
 typedef struct {
     /* service data */
-    unsigned long	  field_mask; /* which fields to change */
-    unsigned int			   number_of_ports;
-    lacp_bitmap_t		  ports;
-    int period;
+    uint32_t	field_mask; /* which fields to change */
+    uint32_t	number_of_ports;
+    lacp_bitmap_t	ports;
+    uint32_t        period;
     /* protocol data */
     lacp_sys_prio_t priority;
-    lacp_mac_t sys_mac;
-    unsigned int short_period;
-    unsigned int long_period;
+    lacp_mac_t 		sys_mac;
+    uint32_t 	short_period;
+    uint32_t 	long_period;
 } UID_LAC_CFG_T;
 
 #ifdef __LINUX__
@@ -110,18 +110,18 @@ typedef enum {
     M_RSTP_NOT_ENABLE,
 } LACP_ERROR_E;
 
-unsigned int lacp_port_get_actor_admin(int port_index, lacp_port_info_t  *admin);
-unsigned int lacp_port_get_partner_admin(int port_index, lacp_port_info_t  *admin);
+uint32_t lacp_port_get_actor_admin(uint32_t port_index, lacp_port_info_t  *admin);
+uint32_t lacp_port_get_partner_admin(uint32_t port_index, lacp_port_info_t  *admin);
 lacp_sys_t *lacp_get_sys_inst (void);
-int lac_port_set_cfg(lacp_port_cfg_t * uid_cfg);
-int lac_port_get_cfg(int port_index, lacp_port_cfg_t * uid_cfg);
-int lac_rx_lacpdu(int port_index, lacp_pdu_t * bpdu, int len);
-int lac_port_get_dbg_cfg(int port_index, lacp_port_t * port);
+uint32_t lac_port_set_cfg(lacp_port_cfg_t * uid_cfg);
+uint32_t lac_port_get_cfg(uint32_t port_index, lacp_port_cfg_t * uid_cfg);
+uint32_t lac_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len);
+uint32_t lac_port_get_dbg_cfg(uint32_t port_index, lacp_port_t * port);
 
 void
 lac_one_second ();
-int lac_in_enable_port(int port_index, Bool enable);
-int lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg);
-int lac_sys_get_cfg(UID_LAC_CFG_T * uid_cf);
+uint32_t lac_in_enable_port(uint32_t port_index, Bool enable);
+uint32_t lac_sys_set_cfg(UID_LAC_CFG_T * uid_cfg);
+uint32_t lac_sys_get_cfg(UID_LAC_CFG_T * uid_cf);
 
 #endif 

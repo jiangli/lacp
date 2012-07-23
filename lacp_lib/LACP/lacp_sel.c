@@ -33,7 +33,7 @@ static Bool partners_aport(lacp_port_t *port)
     return(False);
 }
 
-static lacp_port_t *select_master_port(lacp_sys_t *lac_sys, int agg_id)
+static lacp_port_t *select_master_port(lacp_sys_t *lac_sys, uint32_t agg_id)
 {
 
     lacp_port_t *best = NULL;
@@ -114,7 +114,7 @@ static lacp_port_t *select_master_port(lacp_sys_t *lac_sys, int agg_id)
 
 }
 
-static int update_agg_ports_select(lacp_sys_t *lac_sys, int agg_id)
+static uint32_t update_agg_ports_select(lacp_sys_t *lac_sys, uint32_t agg_id)
 {
     lacp_port_t *best = NULL;
     lacp_port_t *port = NULL;
@@ -163,7 +163,7 @@ static int update_agg_ports_select(lacp_sys_t *lac_sys, int agg_id)
 }
 
 
-int selection_logic(lacp_port_t *port)
+uint32_t selection_logic(lacp_port_t *port)
 {
     lacp_sys_t *lac_sys = port->system;
 
@@ -184,7 +184,7 @@ int selection_logic(lacp_port_t *port)
     return 0;
 }
 
-static int lacp_select(lacp_port_t *port)
+static uint32_t lacp_select(lacp_port_t *port)
 {
     return selection_logic(port);
 }

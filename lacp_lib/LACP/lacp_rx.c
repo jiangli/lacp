@@ -56,7 +56,7 @@ static Bool _lacp_rxm_same_partner(lacp_port_info_t *a, lacp_port_info_t *b)
            );
 }
 
-int lacp_rxm_rx_lacpdu (lacp_port_t * port, lacp_pdu_t *Lacpdu, int len)
+uint32_t lacp_rxm_rx_lacpdu (lacp_port_t * port, lacp_pdu_t *Lacpdu, uint32_t len)
 {
     lacp_port_t *p;
 
@@ -172,11 +172,11 @@ static void start_current_while_timer(lacp_port_t *port, Bool timeout)
         port->current_while = port->system->long_timeout_time;
 }
 
-void lacp_rx_enter_state (lacp_state_mach_t * this)
+void lacp_rx_enter_state (lacp_state_mach_t * fsm)
 {
-    register lacp_port_t *port = this->owner.port;
+    register lacp_port_t *port = fsm->owner.port;
 
-    switch (this->state) {
+    switch (fsm->state) {
     case LACP_BEGIN:
     case RXM_INITIALIZE:
         port->selected = False;
@@ -226,36 +226,36 @@ void lacp_rx_enter_state (lacp_state_mach_t * this)
     }
 }
 
-Bool lacp_rx_check_conditions (lacp_state_mach_t * this)
+Bool lacp_rx_check_conditions (lacp_state_mach_t * fsm)
 {
-    register lacp_port_t *port = this->owner.port;
+    register lacp_port_t *port = fsm->owner.port;
 
-    if (!port->port_enabled && !port->port_moved && LACP_BEGIN != this->state)
+    if (!port->port_enabled && !port->port_moved && LACP_BEGIN != fsm->state)
     {
-        if (this->state == RXM_PORT_DISABLED)
+        if (fsm->state == RXM_PORT_DISABLED)
             return False;
         else
-            return lacp_hop_2_state (this, RXM_PORT_DISABLED);
+            return lacp_hop_2_state (fsm, RXM_PORT_DISABLED);
     }
 
-    switch (this->state) {
+    switch (fsm->state) {
     case LACP_BEGIN:
-        return lacp_hop_2_state (this, RXM_INITIALIZE);
+        return lacp_hop_2_state (fsm, RXM_INITIALIZE);
 
     case RXM_INITIALIZE:
-        return lacp_hop_2_state (this, RXM_PORT_DISABLED);
+        return lacp_hop_2_state (fsm, RXM_PORT_DISABLED);
 
     case RXM_PORT_DISABLED:
         if (port->port_moved)
-            return lacp_hop_2_state (this, RXM_INITIALIZE);
+            return lacp_hop_2_state (fsm, RXM_INITIALIZE);
 
         if (port->port_enabled && port->lacp_enabled)
         {
-            return lacp_hop_2_state (this, RXM_EXPIRED);
+            return lacp_hop_2_state (fsm, RXM_EXPIRED);
         }
         if (port->port_enabled && !port->lacp_enabled)
         {
-            return lacp_hop_2_state (this, RXM_LACP_DISABLED);
+            return lacp_hop_2_state (fsm, RXM_LACP_DISABLED);
         }
 
         break;
@@ -263,34 +263,34 @@ Bool lacp_rx_check_conditions (lacp_state_mach_t * this)
     case RXM_LACP_DISABLED:
         if (port->port_enabled && port->lacp_enabled )
         {
-            return lacp_hop_2_state (this, RXM_EXPIRED);
+            return lacp_hop_2_state (fsm, RXM_EXPIRED);
         }
         break;
 
     case RXM_EXPIRED:
         if (!port->current_while)
         {
-            return lacp_hop_2_state (this, RXM_DEFAULTED);
+            return lacp_hop_2_state (fsm, RXM_DEFAULTED);
         }
         if (port->rcvd_lacpdu)
         {
-            return lacp_hop_2_state (this, RXM_CURRENT);
+            return lacp_hop_2_state (fsm, RXM_CURRENT);
         }
         break;
 
     case RXM_CURRENT:
         if (!port->current_while && !port->rcvd_lacpdu) {
-            return lacp_hop_2_state (this, RXM_EXPIRED);
+            return lacp_hop_2_state (fsm, RXM_EXPIRED);
         }
         if (port->rcvd_lacpdu) {
-            return lacp_hop_2_state (this, RXM_CURRENT);
+            return lacp_hop_2_state (fsm, RXM_CURRENT);
         }
         break;
 
     case RXM_DEFAULTED:
         if (port->rcvd_lacpdu)
         {
-            return lacp_hop_2_state (this, RXM_CURRENT);
+            return lacp_hop_2_state (fsm, RXM_CURRENT);
         }
         break;
 

@@ -71,7 +71,7 @@ typedef struct lacp_port_s /* Lac_port */
 {
     struct lacp_port_t  *next;
     struct lacp_sys_t   *system;
-    UINT            port_index; /* 端口索引,从0开始 */
+    uint32_t            port_index; /* 端口索引,从0开始 */
     char*         	port_name;
 
     lacp_state_mach_t* rx;
@@ -103,18 +103,18 @@ typedef struct lacp_port_s /* Lac_port */
     Bool          	selected;		/* 端口是否已完成聚合选择 */
     Bool            standby;			/* 端口的选中状态是否为备用 */
 	
-	UINT       	 	speed;			/* 速率,100/1000/10000 */
-    UINT        	duplex;			/* 双工，1:全双工，0:半双工 */
-    UINT        	agg_id;			/* 聚合组id,从1开始 */
+	uint32_t       	 	speed;			/* 速率,100/1000/10000 */
+    uint32_t        	duplex;			/* 双工，1:全双工，0:半双工 */
+    uint32_t        	agg_id;			/* 聚合组id,从1开始 */
 
     Bool        	rcvd_lacpdu;		/* 端口是否接收到协议报文并且未处理 */
     Bool            ntt;				/* need to transmit */
     
     Bool        	ready_n;			/* 端口是否已准备好加入聚合组 */
 
-	UINT			hold_count;		/* 端口1s内已发送的协议报文数 */
-    UINT        	tx_lacpdu_cnt;	/* 端口开启LACP后的发送协议报文数 */
-    UINT        	rx_lacpdu_cnt;	/* 端口开启LACP后的接收协议报文数 */
+	uint32_t			hold_count;		/* 端口1s内已发送的协议报文数 */
+    uint32_t        	tx_lacpdu_cnt;	/* 端口开启LACP后的发送协议报文数 */
+    uint32_t        	rx_lacpdu_cnt;	/* 端口开启LACP后的接收协议报文数 */
 } lacp_port_t;
 
 typedef struct lacpdu_t
@@ -154,8 +154,8 @@ typedef struct lacp_sys_t /* Lac_system */
 {
     lacp_port_t * ports;  /* all lacp port link list */
     lacp_bitmap_t * portmap;
-    int number_of_ports;
-    int admin_state;
+    uint32_t number_of_ports;
+    uint32_t admin_state;
 
     lacp_sys_prio_t  priority;
     lacp_mac_t       mac;
@@ -167,7 +167,7 @@ typedef struct lacp_sys_t /* Lac_system */
     lacp_timer_t aggregate_wait_time;
 
     Bool lacp_timeout;	/* 使用长超时或短超时 */
-    int tx_hold_count;
+    uint32_t tx_hold_count;
 } lacp_sys_t;
 
 

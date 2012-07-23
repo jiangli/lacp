@@ -6,7 +6,7 @@
 typedef enum STATES LACP_STATE_T;
 #undef CHOOSE
 
-char * GET_STATE_NAME (int state)
+char * GET_STATE_NAME (uint32_t state)
 {
 #define CHOOSE(a) #a
     static char    *state_names[] = STATES;

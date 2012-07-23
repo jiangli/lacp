@@ -55,7 +55,14 @@
 
 typedef unsigned short USHORT;
 typedef unsigned long ULONG;
-typedef unsigned int UINT;
+
+#ifndef uint16_t
+typedef unsigned int uint16_t;
+#endif
+
+#ifndef uint32_t
+typedef unsigned int uint32_t;
+#endif
 
 typedef unsigned char	Octet;
 
@@ -91,26 +98,26 @@ extern ULONG Ntohl (ULONG n);
 #endif
 
 #ifdef __VXWORKS__
-#define LAC_FATAL(TXT, MSG, EXCOD)                      \
+#define LACP_FATAL(TXT, MSG, EXCOD)                      \
       {lacp_trace ("FATAL:%s failed: %s:%d", TXT, MSG, EXCOD);  \
       exit (EXCOD);}
 #else
-#define LAC_FATAL(TXT, MSG, EXCOD)                      \
+#define LACP_FATAL(TXT, MSG, EXCOD)                      \
       Print ("FATAL: %s code %s:%d\n", TXT, MSG, EXCOD)
 #endif
 
-#define LAC_MALLOC(PTR, TYPE, MSG)              \
+#define LACP_MALLOC(PTR, TYPE, MSG)              \
   {                                             \
     PTR = (TYPE*) calloc (1, sizeof (TYPE));    \
     if (! PTR) {                                \
-      LAC_FATAL("malloc", MSG, -6);             \
+      LACP_FATAL("malloc", MSG, -6);             \
     }                                           \
   }
 
-#define LAC_FREE(PTR, MSG)              \
+#define LACP_FREE(PTR, MSG)              \
   {                                     \
     if (! PTR) {                        \
-      LAC_FATAL("free", MSG, -66);      \
+      LACP_FATAL("free", MSG, -66);      \
     }                                   \
     free (PTR);                         \
     PTR = NULL;                         \
@@ -118,25 +125,23 @@ extern ULONG Ntohl (ULONG n);
 
 char* strdup(const char* str);
 
-#define LAC_STRDUP(PTR, SRC, MSG)       \
+#define LACP_STRDUP(PTR, SRC, MSG)       \
   {                                     \
     PTR = strdup (SRC);                 \
     if (! PTR) {                        \
-      LAC_FATAL("strdup", MSG, -7);     \
+      LACP_FATAL("strdup", MSG, -7);     \
     }                                   \
   }
 
-#define LAC_NEW_IN_LIST(WHAT, TYPE, LIST, MSG)  \
+#define LACP_NEW_IN_LIST(WHAT, TYPE, LIST, MSG)  \
   {                                             \
-    LAC_MALLOC(WHAT, TYPE, MSG);                \
+    LACP_MALLOC(WHAT, TYPE, MSG);                \
     WHAT->next = LIST;                          \
     LIST = WHAT;                                \
   }
 
-void LAC_break_trace (void);
 
+#include "lacp_type.h"
 
-
-#include "lac_type.h"
 #endif /*  _LACP_BASE_H__ */
 

@@ -9,7 +9,7 @@
 #define LACP_SYS_UPDATE_READON_PORT_CREATE 6
 lacp_sys_t *lacp_get_sys_inst (void);
 
-int lacp_sys_update(lacp_sys_t *this, int reason);
+uint32_t lacp_sys_update(lacp_sys_t *sys, uint32_t reason);
 lacp_sys_t *lacp_sys_init ();
 
 #endif

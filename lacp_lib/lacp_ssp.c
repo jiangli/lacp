@@ -4,18 +4,18 @@
 #include "lacp_api.h"
 
 
-int
-bridge_tx_bpdu (int port_index, unsigned char *bpdu, size_t bpdu_len);
+uint32_t
+bridge_tx_bpdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len);
 char *
 UT_sprint_time_stamp (char ticks_accuracy);
 
-unsigned int lacp_ssp_change_to_slot_port(unsigned int port_index, unsigned int *slot, unsigned int *port)
+uint32_t lacp_ssp_change_to_slot_port(uint32_t port_index, uint32_t *slot, uint32_t *port)
 {
 	*slot = port_index / 8;
 	*port = port_index % 8 + 1;
 	return 0;
 }
-unsigned int lacp_ssp_get_global_index( unsigned int slot, unsigned int port, unsigned int *port_index)
+uint32_t lacp_ssp_get_global_index( uint32_t slot, uint32_t port, uint32_t *port_index)
 {
 	if (port == 0)
 		return M_LACP_INTERNEL;
@@ -24,10 +24,10 @@ unsigned int lacp_ssp_get_global_index( unsigned int slot, unsigned int port, un
 	return 0;
 }
 
-const char * lacp_ssp_get_port_name (int port_index)
+const char * lacp_ssp_get_port_name (uint32_t port_index)
 {
-	unsigned int ret = 0;
-	unsigned int slot, port;
+	uint32_t ret = 0;
+	uint32_t slot, port;
     static char tmp[4];
 
 	ret = lacp_ssp_change_to_slot_port(port_index, &slot, &port);
@@ -57,14 +57,14 @@ void lacp_ssp_get_port_mac (unsigned char *mac)
     return ;
 }
 
-int lacp_ssp_get_port_oper_speed(int port_index)
+uint32_t lacp_ssp_get_port_oper_speed(uint32_t port_index)
 {
 	port_attr_t attr;
 	stub_get_port_attr(port_index, &attr);
     return attr.speed;
 
 }
-int lacp_ssp_get_port_oper_duplex(int port_index)
+uint32_t lacp_ssp_get_port_oper_duplex(uint32_t port_index)
 {
 	port_attr_t attr;
 	stub_get_port_attr(port_index, &attr);
@@ -72,7 +72,7 @@ int lacp_ssp_get_port_oper_duplex(int port_index)
 }
 
 
-int lacp_ssp_set_port_link_status(int port_index, int link_status)
+uint32_t lacp_ssp_set_port_link_status(uint32_t port_index, uint32_t link_status)
 {
 	port_attr_t attr;
 	stub_get_port_attr(port_index, &attr);
@@ -80,14 +80,14 @@ int lacp_ssp_set_port_link_status(int port_index, int link_status)
 	stub_set_port_attr(port_index, &attr);
 }
 
-int lacp_ssp_get_port_link_status(int port_index)
+uint32_t lacp_ssp_get_port_link_status(uint32_t port_index)
 {
 	port_attr_t attr;
 	stub_get_port_attr(port_index, &attr);
     return attr.link_status;
 }
 
-int lacp_ssp_set_port_speed(int port_index, int speed)
+uint32_t lacp_ssp_set_port_speed(uint32_t port_index, uint32_t speed)
 {
     lacp_port_cfg_t uid_cfg;
 	port_attr_t attr;
@@ -103,7 +103,7 @@ int lacp_ssp_set_port_speed(int port_index, int speed)
     return 0;
 
 }
-int lacp_ssp_set_port_duplex(int port_index, int duplex)
+uint32_t lacp_ssp_set_port_duplex(uint32_t port_index, uint32_t duplex)
 {
     lacp_port_cfg_t uid_cfg;
 	port_attr_t attr;
@@ -119,7 +119,7 @@ int lacp_ssp_set_port_duplex(int port_index, int duplex)
 
 }
 
-int lacp_ssp_attach_port(int port_index, Bool attach, int tid)
+uint32_t lacp_ssp_attach_port(uint32_t port_index, Bool attach, uint32_t tid)
 {
     if(attach)
     {		
@@ -144,7 +144,7 @@ int lacp_ssp_attach_port(int port_index, Bool attach, int tid)
     return 0;
 }
 
-int lacp_ssp_get_port_attach_tid(int port_index, int *tid)
+uint32_t lacp_ssp_get_port_attach_tid(uint32_t port_index, uint32_t *tid)
 {
 	
 	port_attr_t attr;
@@ -153,7 +153,7 @@ int lacp_ssp_get_port_attach_tid(int port_index, int *tid)
     return 0;
 
 }
-int lacp_ssp_get_port_cd(int port_index)
+uint32_t lacp_ssp_get_port_cd(uint32_t port_index)
 {
 	port_attr_t attr;
 	stub_get_port_attr(port_index, &attr);
@@ -161,7 +161,7 @@ int lacp_ssp_get_port_cd(int port_index)
 
 }
 
-int lacp_set_port_cd(int port_index, int state)
+uint32_t lacp_set_port_cd(uint32_t port_index, uint32_t state)
 {
 	port_attr_t attr;
 	stub_get_port_attr(port_index, &attr);
@@ -172,10 +172,10 @@ int lacp_set_port_cd(int port_index, int state)
 
 }
 
-void memdump(unsigned char *buf, int len)
+void memdump(unsigned char *buf, uint32_t len)
 {
-    int i = 0;
-    printf("\r\n buf:0x%x, len:%d\r\n---------\r\n", (unsigned int)buf, len);
+    uint32_t i = 0;
+    printf("\r\n buf:0x%x, len:%d\r\n---------\r\n", (uint32_t)buf, len);
     for (i = 0; i < len; i++)
     {
         if (i%16 == 0)
@@ -187,7 +187,7 @@ void memdump(unsigned char *buf, int len)
 
 }
 
-int lacp_ssp_tx_pdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
+uint32_t lacp_ssp_tx_pdu (uint32_t port_index, unsigned char *bpdu, size_t bpdu_len)
 {
     //printf("\r\n %s.%d",  __FUNCTION__, __LINE__);
 //	memdump(bpdu, bpdu_len);
@@ -196,11 +196,11 @@ int lacp_ssp_tx_pdu (int port_index, unsigned char *bpdu, size_t bpdu_len)
 
 }
 
-int lacp_ssp_get_speed_index(int speed, int duplex)
+uint32_t lacp_ssp_get_speed_index(uint32_t speed, uint32_t duplex)
 {
-    int speed_duplex[] = {1,10,100,1000,10000};
+    uint32_t speed_duplex[] = {1,10,100,1000,10000};
 
-    int i;
+    uint32_t i;
     if (!duplex)
         return 0;
     switch(speed)
@@ -219,9 +219,9 @@ int lacp_ssp_get_speed_index(int speed, int duplex)
 }
 
 //HANDLE hMutex;
-int lacp_ssp_get_port_oper_key(int port_index)
+uint32_t lacp_ssp_get_port_oper_key(uint32_t port_index)
 {
-    int speed, duplex, tid;
+    uint32_t speed, duplex, tid;
     tid = aggregator_get_id(port_index);
     speed = lacp_ssp_get_port_oper_speed(port_index);
     duplex = lacp_ssp_get_port_oper_duplex(port_index);
@@ -231,7 +231,7 @@ int lacp_ssp_get_port_oper_key(int port_index)
 
 }
 
-int lacp_out_init_sem()
+uint32_t lacp_ssp_out_init_sem()
 {
     //hMutex = CreateMutex(NULL,FALSE,NULL);
 
@@ -239,7 +239,7 @@ int lacp_out_init_sem()
     return 0;
 
 }
-int lacp_out_sem_take()
+uint32_t lacp_ssp_out_sem_take()
 {
     //WaitForSingleObject(hMutex,INFINITE);
     printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
@@ -247,7 +247,7 @@ int lacp_out_sem_take()
 
 }
 
-int lacp_out_sem_give()
+uint32_t lacp_ssp_out_sem_give()
 {
     printf("\r\n <%s.%d>",  __FUNCTION__, __LINE__);
     return 0;

@@ -2,9 +2,9 @@
 port_attr_t g_port_list[144];
 LINK_GROUP_T g_link_groups[32];
 
-int aggregator_init()
+uint32_t aggregator_init()
 {
-    int i;
+    uint32_t i;
     memset(g_link_groups, 0xff, sizeof(g_link_groups));
     for (i = 0; i < 32; i++)
         g_link_groups[i].cnt = 0;
@@ -20,7 +20,7 @@ int aggregator_init()
 
 }
 
-Bool aggregator_has_member(int agg_id)
+Bool aggregator_has_member(uint32_t agg_id)
 {
 	if (g_link_groups[agg_id - 1].cnt)
 		return True;
@@ -28,9 +28,9 @@ Bool aggregator_has_member(int agg_id)
 		return False;
 }
 
-int aggregator_add_member(int agg_id, int port_index)
+uint32_t aggregator_add_member(uint32_t agg_id, uint32_t port_index)
 {
-    int i;
+    uint32_t i;
     for (i=0; i<8; i++)
     {
         if (g_link_groups[agg_id - 1].ports[i] == 0xffffffff)
@@ -47,10 +47,10 @@ int aggregator_add_member(int agg_id, int port_index)
 
 
 }
-int aggregator_del_member(int port_index)
+uint32_t aggregator_del_member(uint32_t port_index)
 {
-    int i;
-    int j;
+    uint32_t i;
+    uint32_t j;
     for (j=0; j<32; j++)
     {
         for (i=0; i<8; i++)
@@ -70,9 +70,9 @@ int aggregator_del_member(int port_index)
 
 
 }
-int aggregator_get_id(int port_index)
+uint32_t aggregator_get_id(uint32_t port_index)
 {
-    int i,j;
+    uint32_t i,j;
     for (i=0; i<32; i++)
     {
         for (j=0; j<8; j++)
@@ -87,13 +87,13 @@ int aggregator_get_id(int port_index)
 
 }
 
-int stub_get_port_attr(int port_index, port_attr_t *attr)
+uint32_t stub_get_port_attr(uint32_t port_index, port_attr_t *attr)
 {
 	memcpy(attr, g_port_list[port_index], sizeof(port_attr_t));
 	return 0;
 }
 
-int stub_set_port_attr(int port_index, port_attr_t *attr)
+uint32_t stub_set_port_attr(uint32_t port_index, port_attr_t *attr)
 {
 	memcpy(attr, g_port_list[port_index], sizeof(port_attr_t));
 	return 0;

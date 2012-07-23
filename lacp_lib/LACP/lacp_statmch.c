@@ -9,15 +9,15 @@
 lacp_state_mach_t *
 lacp_state_mach_create (void (*concreteEnterState) (lacp_state_mach_t *),
                        Bool (*concreteCheckCondition) (lacp_state_mach_t *),
-                       char *(*concreteGetStatName) (int),
+                       char *(*concreteGetStatName) (uint32_t),
                        void *owner, char *name)
 {
     lacp_state_mach_t *fsm;
 
-    LAC_MALLOC (fsm, lacp_state_mach_t, "state machine");
+    LACP_MALLOC (fsm, lacp_state_mach_t, "state machine");
 
     fsm->state = LACP_BEGIN;
-    LAC_STRDUP (fsm->name, name, "stpm name");
+    LACP_STRDUP (fsm->name, name, "stpm name");
     fsm->change_state = False;
 #if LAC_DBG
     fsm->debug = False;
@@ -34,8 +34,8 @@ lacp_state_mach_create (void (*concreteEnterState) (lacp_state_mach_t *),
 void
 lacp_state_mach_delete (lacp_state_mach_t * fsm)
 {
-    LAC_FREE (fsm->name, "stpm name");
-    LAC_FREE (fsm, "state machine");
+    LACP_FREE (fsm->name, "stpm name");
+    LACP_FREE (fsm, "state machine");
 }
 
 Bool
@@ -54,7 +54,7 @@ lacp_check_condition (lacp_state_mach_t * fsm)
 Bool
 lacp_change_state (lacp_state_mach_t * fsm)
 {
-    register int number_of_loops;
+    register uint32_t number_of_loops;
 
     for (number_of_loops = 0;; number_of_loops++) {
         if (!fsm->change_state)
@@ -68,7 +68,7 @@ lacp_change_state (lacp_state_mach_t * fsm)
 }
 
 Bool
-lacp_hop_2_state (lacp_state_mach_t * fsm, unsigned int new_state)
+lacp_hop_2_state (lacp_state_mach_t * fsm, uint32_t new_state)
 {
 #ifdef LAC_DBG
     switch (fsm->debug) {

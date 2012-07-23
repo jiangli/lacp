@@ -8,25 +8,25 @@
 #include "lacp_sel.h"
 #include "../lacp_ssp.h"
 
-lacp_port_t *lacp_port_create (lacp_sys_t * lacp_sys, int port_index)
+lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
 {
     lacp_port_t *port;
-    register unsigned int iii;
+    register uint32_t iii;
 
     lacp_trace("create portIndex:%d", port_index);
 
     /* check, if the port has just been added */
-    for (port = lacp_sys->ports; port; port = port->next) {
+    for (port = sys->ports; port; port = port->next) {
         if (port->port_index == port_index) {
             return NULL;
         }
     }
 
     /* add port to system */
-    LAC_NEW_IN_LIST (port, lacp_port_t, lacp_sys->ports, "port create");
-    port->system = lacp_sys;
+    LACP_NEW_IN_LIST (port, lacp_port_t, sys->ports, "port create");
+    port->system = sys;
     port->port_index = port_index;
-    LAC_STRDUP (port->port_name, lacp_ssp_get_port_name (port_index), "port_name");
+    LACP_STRDUP (port->port_name, lacp_ssp_get_port_name (port_index), "port_name");
     port->machines = NULL;
 
 	lacp_port_get_actor_admin(port_index, &port->actor_admin);
@@ -68,49 +68,49 @@ lacp_port_t *lacp_port_create (lacp_sys_t * lacp_sys, int port_index)
 }
 
 void
-lacp_port_init (lacp_port_t * this, lacp_sys_t * LACm)
+lacp_port_init (lacp_port_t * port, lacp_sys_t * LACm)
 {
 }
 
 void
-lacp_port_delete (lacp_port_t * this)
+lacp_port_delete (lacp_port_t * port)
 {
-    lacp_sys_t *lacp_sys;
+    lacp_sys_t *sys;
     register lacp_port_t *prev;
     register lacp_port_t *tmp;
     register lacp_state_mach_t *stater;
     register void *pv;
 
-    lacp_sys = this->system;
+    sys = port->system;
 
-    LAC_FREE (this->port_name, "port name");
-    for (stater = this->machines; stater;) {
+    LACP_FREE (port->port_name, "port name");
+    for (stater = port->machines; stater;) {
         pv = (void *) stater->next;
         lacp_state_mach_delete (stater);
         stater = (lacp_state_mach_t *) pv;
     }
 
     prev = NULL;
-    for (tmp = lacp_sys->ports; tmp; tmp = tmp->next) {
-        if (tmp->port_index == this->port_index) {
+    for (tmp = sys->ports; tmp; tmp = tmp->next) {
+        if (tmp->port_index == port->port_index) {
             if (prev) {
-                prev->next = this->next;
+                prev->next = port->next;
             } else {
-                lacp_sys->ports = this->next;
+                sys->ports = port->next;
             }
-            LAC_FREE (this, "LAC instance");
+            LACP_FREE (port, "LACP instance");
             break;
         }
         prev = tmp;
     }
 }
 
-unsigned int lacp_port_rx_lacpdu (lacp_port_t * this, lacp_pdu_t * bpdu, size_t len)
+uint32_t lacp_port_rx_lacpdu (lacp_port_t * port, lacp_pdu_t * bpdu, size_t len)
 {
-    int ret = 0;
+    uint32_t ret = 0;
 
 
-    ret = lacp_rxm_rx_lacpdu (this, bpdu, len);
+    ret = lacp_rxm_rx_lacpdu (port, bpdu, len);
     if (ret)
     {
         return ret;
@@ -119,7 +119,7 @@ unsigned int lacp_port_rx_lacpdu (lacp_port_t * this, lacp_pdu_t * bpdu, size_t 
     return 0;
 }
 
-int lacp_port_set_reselect(lacp_port_t *port)
+uint32_t lacp_port_set_reselect(lacp_port_t *port)
 {
     lacp_port_t  *p;
     lacp_sys_t *lacp_sys;
@@ -157,9 +157,9 @@ int lacp_port_set_reselect(lacp_port_t *port)
 
 #if 0
 #ifdef LAC_DBG
-unsigned int
-LAC_LAC_PORT_Trace_state_machine (lacp_port_t * this, char *mach_name, unsigned int enadis,
-                                  unsigned int id)
+unsigned uint32_t
+LAC_LAC_PORT_Trace_state_machine (lacp_port_t * this, char *mach_name, unsigned uint32_t enadis,
+                                  unsigned uint32_t id)
 {
     register struct lacp_state_mach_s *stater;
 

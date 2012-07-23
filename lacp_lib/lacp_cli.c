@@ -15,22 +15,21 @@
 #include "lacp_port.h"
 #include "lacp_sys.h"
 #include "lacp_api.h"
-#include "lacp_in.h"
 #include "../lacp_ssp.h"
 
-extern  int aggregator_init();
+extern  uint32_t aggregator_init();
 
-extern int max_port;
+extern uint32_t max_port;
 
-static int lacp_port_lacp_enable (int argc, char** argv)
+static uint32_t lacp_port_lacp_enable (uint32_t argc, char** argv)
 {
-    int port_loop;
+    uint32_t port_loop;
 
-    int port_start = 0;
-    int port_end = max_port - 1;
+    uint32_t port_start = 0;
+    uint32_t port_end = max_port - 1;
 
-    int port_index = 0xFFFFFFFF;
-    int agg_id = atoi(argv[2]);
+    uint32_t port_index = 0xFFFFFFFF;
+    uint32_t agg_id = atoi(argv[2]);
     lacp_port_cfg_t uid_cfg;
     lacp_bitmap_t ports;
 
@@ -84,9 +83,9 @@ static int lacp_port_lacp_enable (int argc, char** argv)
     return 0;
 
 }
-static int _lacp_port_lacp_delete_range(int port_start, int port_end)
+static uint32_t _lacp_port_lacp_delete_range(uint32_t port_start, uint32_t port_end)
 {
-    int port_loop;
+    uint32_t port_loop;
     lacp_port_cfg_t uid_cfg;
 
     memset(&uid_cfg, 0, sizeof(uid_cfg));
@@ -102,11 +101,11 @@ static int _lacp_port_lacp_delete_range(int port_start, int port_end)
     lacp_port_set_cfg(&uid_cfg);
     lacp_remove_ports(&uid_cfg.port_bmp);
 }
-static int lacp_port_lacp_disable (int argc, char** argv)
+static uint32_t lacp_port_lacp_disable (uint32_t argc, char** argv)
 {
-    int port_start = 0;
-    int port_end = max_port - 1;
-    int port_index;
+    uint32_t port_start = 0;
+    uint32_t port_end = max_port - 1;
+    uint32_t port_index;
 
     if ('a' != argv[1][0])
     {
@@ -118,10 +117,10 @@ static int lacp_port_lacp_disable (int argc, char** argv)
 }
 
 
-static int cli_br_get_cfg (int argc, char** argv)
+static uint32_t cli_br_get_cfg (uint32_t argc, char** argv)
 {
 	#if 0
-    int i, j;
+    uint32_t i, j;
     lacp_port_cfg_t uid_cfg;
 
     printf("\r\n agg_id  ports list");
@@ -156,7 +155,7 @@ static int cli_br_get_cfg (int argc, char** argv)
 }
 
 static void
-get_sysid_str (int prio, unsigned char *addr, unsigned char *str)
+get_sysid_str (uint32_t prio, unsigned char *addr, unsigned char *str)
 {
     sprintf((char *)str, "%u-%02x:%02x:%02x:%02x:%02x:%02x", prio,
             (unsigned char) addr[0],
@@ -186,7 +185,7 @@ static void
 _lacp_in_display_bit (unsigned char bitmask,
                      char *bit_name, char *bit_fmt, unsigned char flags)
 {
-    int the_bit = (flags & bitmask) ? 1 : 0;
+    uint32_t the_bit = (flags & bitmask) ? 1 : 0;
 
     printf ("    ");
     printf (bit_fmt, the_bit);
@@ -217,7 +216,7 @@ static void print_info(lacp_port_info_t *lacp_info)
 
 }
 
-void print_sep(int *i)
+void print_sep(uint32_t *i)
 {
     if ((*i)%3 == 0)
         printf("\r\n");
@@ -227,11 +226,11 @@ void print_sep(int *i)
 
 }
 
-static int cli_pr_get_cfg (int argc, char** argv)
+static uint32_t cli_pr_get_cfg (uint32_t argc, char** argv)
 {
-    int port_index = atoi(argv[1]);
+    uint32_t port_index = atoi(argv[1]);
     lacp_port_t port;
-    int i = 0;
+    uint32_t i = 0;
 
     lacp_port_get_dbg_cfg(port_index, &port);
 
@@ -297,34 +296,34 @@ static int cli_pr_get_cfg (int argc, char** argv)
 
 }
 
-int cli_pr_set_speed(int argc, char **argv)
+uint32_t cli_pr_set_speed(uint32_t argc, char **argv)
 {
 
-    int port_index = atoi(argv[1]);
-    int speed = atoi(argv[2]);
+    uint32_t port_index = atoi(argv[1]);
+    uint32_t speed = atoi(argv[2]);
     lacp_set_port_speed(port_index, speed);
     return 0;
 
 }
 
-int cli_pr_set_duplex(int argc, char **argv)
+uint32_t cli_pr_set_duplex(uint32_t argc, char **argv)
 {
 
-    int port_index = atoi(argv[1]);
-    int speed = atoi(argv[2]);
+    uint32_t port_index = atoi(argv[1]);
+    uint32_t speed = atoi(argv[2]);
     lacp_ssp_set_port_duplex(port_index, speed);
     return 0;
 
 
 }
 
-int cli_pr_get_attr(int argc, char **argv)
+uint32_t cli_pr_get_attr(uint32_t argc, char **argv)
 {
-    int port_loop;
-    int port_index;
+    uint32_t port_loop;
+    uint32_t port_index;
 
-    int port_start = 0;
-    int port_end = max_port;
+    uint32_t port_start = 0;
+    uint32_t port_end = max_port;
 	port_attr attr;
     if ('a' != argv[1][0])
     {
@@ -346,36 +345,36 @@ int cli_pr_get_attr(int argc, char **argv)
     return 0;
 }
 
-int cli_pr_set_link(int argc, char **argv)
+uint32_t cli_pr_set_link(uint32_t argc, char **argv)
 {
-    int port_index = atoi(argv[1]);
-    int link_status = atoi(argv[2]);
+    uint32_t port_index = atoi(argv[1]);
+    uint32_t link_status = atoi(argv[2]);
     lacp_port_link_change(port_index, link_status);
     return 0;
 
 }
 
-int lacp_agg_delete(int argc, char **argv)
+uint32_t lacp_agg_delete(uint32_t argc, char **argv)
 {
-    int agg_id = atoi(argv[1]);
+    uint32_t agg_id = atoi(argv[1]);
     _lacp_port_lacp_delete_range(0, max_port - 1);
     return 0;
 }
 
-int cli_sysget_lacp_brief(int argc, char **argv)
+uint32_t cli_sysget_lacp_brief(uint32_t argc, char **argv)
 {
-    int i;
+    uint32_t i;
     UID_LAC_CFG_T  uid_cfg;
-    int master_index = -1;
+    uint32_t master_index = -1;
     unsigned char actor_sys_id_str[40];
     unsigned char partner_sys_id_str[40];
     unsigned char partner_sys_prio_str[20];
     UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
     unsigned char master_str[10] = {0};
     unsigned char oper_key_str[10] = {0};
-    int m_index = -1;
-    int sel_cnt = 0 ;
-    int standby_cnt = 0;
+    uint32_t m_index = -1;
+    uint32_t sel_cnt = 0 ;
+    uint32_t standby_cnt = 0;
 
     lacp_sys_get_cfg(&uid_cfg);
 
@@ -461,15 +460,15 @@ void cli_print_port_info(UID_LAC_PORT_STATE_T *uid_port_state)
 
     return;
 }
-int cli_sysget_lacp_verbose(int argc, char **argv)
+uint32_t cli_sysget_lacp_verbose(uint32_t argc, char **argv)
 {
-    int i;
+    uint32_t i;
     UID_LAC_CFG_T  uid_cfg;
-    int master_index = -1;
+    uint32_t master_index = -1;
     unsigned char actor_sys_id_str[40];
     UID_LAC_PORT_STATE_T uid_port_state[8] = {0};
     unsigned char master_str[10] = {0};
-    int agg_id = atoi(argv[1]);
+    uint32_t agg_id = atoi(argv[1]);
     lacp_sys_get_cfg(&uid_cfg);
 
     memset(uid_port_state, 0xff, sizeof(UID_LAC_PORT_STATE_T)*8);
@@ -503,16 +502,16 @@ int cli_sysget_lacp_verbose(int argc, char **argv)
     }
     return 0;
 }
-int cli_sysget_lacp_portinfo(int argc, char **argv)
+uint32_t cli_sysget_lacp_portinfo(uint32_t argc, char **argv)
 {
-    int ret = 0;
-    int i;
+    uint32_t ret = 0;
+    uint32_t i;
     UID_LAC_CFG_T  uid_cfg;
-    int master_index = -1;
+    uint32_t master_index = -1;
     unsigned char actor_sys_id_str[40];
     UID_LAC_PORT_STATE_T uid_port_state;
     unsigned char master_str[10] = {0};
-    int port_index = atoi(argv[1]);
+    uint32_t port_index = atoi(argv[1]);
 
     memset(&uid_port_state, 0, sizeof(UID_LAC_PORT_STATE_T));
     ret = lacp_port_get_port_state(port_index, &uid_port_state);
@@ -533,28 +532,28 @@ int cli_sysget_lacp_portinfo(int argc, char **argv)
     cli_print_port_info(&uid_port_state);
     return 0;
 }
-int cli_port_clear_stat(int argc, char **argv)
+uint32_t cli_port_clear_stat(uint32_t argc, char **argv)
 {
     lacp_port_cfg_t uid_cfg;
-    int port_index = atoi(argv[1]);
+    uint32_t port_index = atoi(argv[1]);
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = PT_CFG_STAT;
     lacp_bitmap_set_bit(&uid_cfg.port_bmp, port_index);
     lacp_port_set_cfg(&uid_cfg);
     return 0;
 }
-int cli_sys_set_prio(int argc, char **argv)
+uint32_t cli_sys_set_prio(uint32_t argc, char **argv)
 {
-    int prio = atoi(argv[1]);
+    uint32_t prio = atoi(argv[1]);
     UID_LAC_CFG_T uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_PRIO;
     uid_cfg.priority = prio;
     lacp_sys_set_cfg(&uid_cfg);
 }
-int cli_sys_set_long_period(int argc, char **argv)
+uint32_t cli_sys_set_long_period(uint32_t argc, char **argv)
 {
-    int prio = atoi(argv[1]);
+    uint32_t prio = atoi(argv[1]);
     UID_LAC_CFG_T uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_LONG_PERIOD;
@@ -562,9 +561,9 @@ int cli_sys_set_long_period(int argc, char **argv)
     lacp_sys_set_cfg(&uid_cfg);
     return 0;
 }
-int cli_sys_set_short_period(int argc, char **argv)
+uint32_t cli_sys_set_short_period(uint32_t argc, char **argv)
 {
-    int prio = atoi(argv[1]);
+    uint32_t prio = atoi(argv[1]);
     UID_LAC_CFG_T uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_SHORT_PERIOD;
@@ -572,9 +571,9 @@ int cli_sys_set_short_period(int argc, char **argv)
     lacp_sys_set_cfg(&uid_cfg);
     return 0;
 }
-int cli_sys_set_period(int argc, char **argv)
+uint32_t cli_sys_set_period(uint32_t argc, char **argv)
 {
-    int prio = atoi(argv[1]);
+    uint32_t prio = atoi(argv[1]);
     UID_LAC_CFG_T uid_cfg;
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     uid_cfg.field_mask = BR_CFG_PERIOD;
@@ -668,7 +667,7 @@ static CMD_DSCR_T lang[] = {
 }
 ;
 
-int lacp_cli_init (void)
+uint32_t lacp_cli_init (void)
 {
     cli_register_language (lang);
     aggregator_init();

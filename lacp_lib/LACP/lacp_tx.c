@@ -15,11 +15,11 @@
 
 static lacp_pdu_t lacpdu_packet;
 
-static int
-tx_lacpdu(lacp_state_mach_t * this)
+static uint32_t
+tx_lacpdu(lacp_state_mach_t * fsm)
 {   /* 17.19.15 (page 67) & 9.3.1 (page 23) */
-    register int port_index;
-    register lacp_port_t *port = this->owner.port;
+    register uint32_t port_index;
+    register lacp_port_t *port = fsm->owner.port;
     const unsigned char slow_protocols_address[] = {0x01, 0x80, 0xc2, 0x00, 0x00, 0x02};
 
     if (!port->lacp_enabled)
@@ -28,7 +28,7 @@ tx_lacpdu(lacp_state_mach_t * this)
         return 1;
     }
 
-    port = this->owner.port;
+    port = fsm->owner.port;
     port_index = port->port_index;
 
     memset(&lacpdu_packet, 0, sizeof(lacp_pdu_t));
@@ -72,11 +72,11 @@ tx_lacpdu(lacp_state_mach_t * this)
 }
 
 
-void lacp_tx_enter_state (lacp_state_mach_t * this)
+void lacp_tx_enter_state (lacp_state_mach_t * fsm)
 {
-    register lacp_port_t *port = this->owner.port;
+    register lacp_port_t *port = fsm->owner.port;
 
-    switch (this->state) {
+    switch (fsm->state) {
     case LACP_BEGIN:
     case TXM_NO_PERIODIC:
         port->periodic_timer = 0;
@@ -97,61 +97,61 @@ void lacp_tx_enter_state (lacp_state_mach_t * this)
         break;
 
     case TXM_TX:
-        tx_lacpdu (this);
+        tx_lacpdu (fsm);
         port->hold_count++;
         port->ntt = False;
         break;
     };
 }
 
-Bool lacp_tx_check_conditions (lacp_state_mach_t * this)
+Bool lacp_tx_check_conditions (lacp_state_mach_t * fsm)
 {
-    register lacp_port_t *port = this->owner.port;
+    register lacp_port_t *port = fsm->owner.port;
 
-    if (LACP_BEGIN == this->state || !port->lacp_enabled || !port->port_enabled
+    if (LACP_BEGIN == fsm->state || !port->lacp_enabled || !port->port_enabled
             || ((LACP_STATE_GET_BIT(port->actor.state, LACP_STATE_ACT) == LACP_PASSIVE )
                 && (LACP_STATE_GET_BIT(port->partner.state, LACP_STATE_ACT) == LACP_PASSIVE)))
     {
-        if (TXM_NO_PERIODIC == this->state)
+        if (TXM_NO_PERIODIC == fsm->state)
         {
             return False;
         }
         else
         {
-            return lacp_hop_2_state (this, TXM_NO_PERIODIC);
+            return lacp_hop_2_state (fsm, TXM_NO_PERIODIC);
         }
     }
 
-    switch (this->state) {
+    switch (fsm->state) {
     case TXM_NO_PERIODIC:
-        return lacp_hop_2_state (this, TXM_IDLE);
+        return lacp_hop_2_state (fsm, TXM_IDLE);
 
     case TXM_PERIODIC_TX:
-        return lacp_hop_2_state (this, TXM_IDLE);
+        return lacp_hop_2_state (fsm, TXM_IDLE);
 
     case TXM_IDLE:
         if (!port->periodic_timer)
         {
-            return lacp_hop_2_state (this, TXM_PERIODIC_TX);
+            return lacp_hop_2_state (fsm, TXM_PERIODIC_TX);
         }
 
         if (port->ntt && port->hold_count < port->system->tx_hold_count)
         {
-            return lacp_hop_2_state (this, TXM_TX);
+            return lacp_hop_2_state (fsm, TXM_TX);
         }
         break;
 		
     case TXM_TX:
-        return lacp_hop_2_state (this, TXM_IDLE);
+        return lacp_hop_2_state (fsm, TXM_IDLE);
 
     };
     return False;
 }
 #if 0
-int
-LAC_transmit_dbg_sttx (int bpdu_type, STATE_MACH_T * this)
+uint32_t
+LAC_transmit_dbg_sttx (uint32_t bpdu_type, STATE_MACH_T * fsm)
 {
-    register PORT_T *port = this->owner.port;
+    register PORT_T *port = fsm->owner.port;
 
     if (!port->adminEnable) {
         stp_trace ("stt on disbaled port %s", port->port_name);
@@ -160,11 +160,11 @@ LAC_transmit_dbg_sttx (int bpdu_type, STATE_MACH_T * this)
     switch (bpdu_type) {
     default:
     case 0:
-        return txRstp (this);
+        return txRstp (fsm);
     case 1:
-        return txTcn (this);
+        return txTcn (fsm);
     case 2:
-        return txConfig (this);
+        return txConfig (fsm);
     }
 }
 #endif
