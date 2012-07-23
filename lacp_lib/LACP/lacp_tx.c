@@ -27,7 +27,7 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     {
         if (fsm->debug)
             trunk_trace("\r\n port %d 's lacp is not enable, cann't tx lacpdu.", port->port_index);
-		
+
         return M_LACP_NOT_ENABLE;
     }
 
@@ -42,7 +42,7 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     lacpdu_packet.protocol_subtype = 1;
     lacpdu_packet.protocol_version = 1;
 
-	/* actor tlv */
+    /* actor tlv */
     lacpdu_packet.type_actor = 1;
     lacpdu_packet.len_actor = 20;
     lacpdu_packet.actor.system_priority = htons(port->actor.system_priority);
@@ -52,7 +52,7 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     lacpdu_packet.actor.port_no = htons(port->actor.port_no);
     lacpdu_packet.actor.state = port->actor.state;
 
-	/* partner tlv */
+    /* partner tlv */
     lacpdu_packet.type_partner = 2;
     lacpdu_packet.len_partner = 20;
     lacpdu_packet.partner.system_priority = htons(port->partner.system_priority);

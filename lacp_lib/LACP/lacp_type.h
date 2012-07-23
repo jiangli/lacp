@@ -67,7 +67,7 @@ typedef struct lacp_port_info_s /* lacp_port_info_t */
 #define TIMERS_NUMBER   3
 #include "lacp_statmch.h"
 
-typedef struct lacp_port_s 
+typedef struct lacp_port_s
 {
     struct lacp_port_s  *next;
     struct lacp_sys_s   *system;

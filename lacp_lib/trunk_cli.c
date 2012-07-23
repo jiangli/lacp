@@ -102,7 +102,7 @@ static int lacp_port_lacp_disable (int argc, char** argv)
         ERR_LOG(ret, slot, port, 0);
         return ret;
     }
-	
+
     return 0;
 }
 
@@ -215,7 +215,7 @@ int cli_pr_set_speed(int argc, char **argv)
     uint32_t ret = 0;
     uint32_t slot, port;
     uint32_t speed = (uint32_t)atoi(argv[2]);
-	
+
     ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
     if (ret !=0 )
     {
@@ -265,7 +265,7 @@ int lacp_agg_delete(int argc, char **argv)
 {
     uint32_t ret = 0;
     uint32_t agg_id = (uint32_t)atoi(argv[1]);
-	
+
     ret = trunk_agg_delete(agg_id);
     if (ret != 0)
     {
@@ -284,17 +284,17 @@ int cli_print_sys_header()
     char sys_mac_str[TRUNK_MAC_STR_LEN + 1] = {0};
 
     ret = trunk_sys_get_cfg(&sys_cfg);
-	if (ret != 0)
-	{		
-		return ret;
-	}
-	
+    if (ret != 0)
+    {
+        return ret;
+    }
+
     ret = trunk_sys_get_state(&sys_state);
-	if (ret != 0)
-	{		
-		return ret;
-	}
-	
+    if (ret != 0)
+    {
+        return ret;
+    }
+
     lacp_get_mac_str(sys_state.mac, sys_mac_str);
 
     printf("\r\n  System Priority : %d", sys_cfg.prio);
@@ -302,7 +302,7 @@ int cli_print_sys_header()
     printf("\r\n  Short Period    : %-3ds", sys_cfg.short_period);
     printf("\r\n  Long Period     : %-3ds", sys_cfg.long_period);
     printf("\r\n  Timeout         : %s Timeout", sys_cfg.period ? "Short" : "Long");
-	
+
     return 0;
 }
 
@@ -316,7 +316,7 @@ int cli_sys_get_lacp_brief(int argc, char **argv)
     uint32_t selected_cnt = 0 ;
     uint32_t standby_cnt = 0;
     uint32_t master_slot;
-	uint32_t master_port;
+    uint32_t master_port;
     char partner_sys_mac_str[TRUNK_MAC_STR_LEN + 1] = {0};
     char partner_sys_prio_str[TRUNK_PRIO_STR_LEN + 1] = {0};
     char master_port_str[TRUNK_PORT_STR_LEN + 1] = {0};
@@ -329,10 +329,10 @@ int cli_sys_get_lacp_brief(int argc, char **argv)
     printf("\r\n Agg  Partner  Parnter            Master   Selected   Standby   Oper ");
     printf("\r\n ID   Pri      MAC                Port     PortNum    PortNum   Key  ");
     printf("\r\n ----------------------------------------------------------------------");
-	
+
     for (agg_index = 0; agg_index < TRUNK_ID_MAX; agg_index++)
     {
-		/* 初始化 */
+        /* 初始化 */
         selected_cnt = standby_cnt = 0;
         master_index = TRUNK_UINT_INVALID;
         sprintf(master_port_str, "-");
@@ -343,10 +343,10 @@ int cli_sys_get_lacp_brief(int argc, char **argv)
         if (stub_db_agg_has_member(agg_index + 1))
         {
             ret = trunk_agg_get_state(agg_index + 1, &agg_state);
-			if (ret != 0)
-			{		
-				continue;
-			}
+            if (ret != 0)
+            {
+                continue;
+            }
 
             for (port_loop = 0; port_loop < TRUNK_PORT_NUMBER_MAX; port_loop++)
             {
@@ -362,7 +362,7 @@ int cli_sys_get_lacp_brief(int argc, char **argv)
                     standby_cnt++;
                 }
             }
-			
+
             master_index = agg_state.master_index;
 
             if (master_index != TRUNK_UINT_INVALID)
@@ -380,7 +380,7 @@ int cli_sys_get_lacp_brief(int argc, char **argv)
         }
 
     }
-	
+
     printf("\r\n ----------------------------------------------------------------------\r\n");
     return 0;
 }
@@ -431,7 +431,7 @@ void cli_print_port_info(trunk_port_state_t *port_state)
 int cli_sys_get_lacp_verbose(int argc, char **argv)
 {
     uint32_t ret = 0;
-	uint32_t port_loop;
+    uint32_t port_loop;
     uint32_t master_index = TRUNK_UINT_INVALID;
     trunk_agg_state_t agg_state;
     uint32_t agg_id = (uint32_t)atoi(argv[1]);
@@ -448,11 +448,11 @@ int cli_sys_get_lacp_verbose(int argc, char **argv)
     if (stub_db_agg_has_member(agg_id))
     {
         ret = trunk_agg_get_state(agg_id, &agg_state);
-		if (ret != 0)
-		{
-			return ret;
-		}
-		
+        if (ret != 0)
+        {
+            return ret;
+        }
+
         master_index = agg_state.master_index;
         if (master_index != TRUNK_UINT_INVALID)
         {
@@ -486,25 +486,25 @@ int cli_sys_get_lacp_portinfo(int argc, char **argv)
     uint32_t prio;
 
     ret = DEV_GetIfPonFromIfnet(argv[1],(int *) &slot,(int *) &port);
-	if (ret != 0)
-	{
-		return ret;
-	}
-	
+    if (ret != 0)
+    {
+        return ret;
+    }
+
     agg_id = stub_db_agg_get_port_tid(slot, port);
 
     ret = trunk_port_get_prio(slot, port, &prio);
-	if (ret != 0)
-	{
-		return ret;
-	}
-	
+    if (ret != 0)
+    {
+        return ret;
+    }
+
     printf("\r\n Lacp Enable     : %-8s  Port Priority: %d", (agg_id == 0)? "disable" : "enable", prio);
     if (agg_id == 0)
-            return;
-	
+        return;
+
     memset(&port_state, 0, sizeof(trunk_port_state_t));
-	
+
     ret = trunk_port_get_lacp_info(slot, port, &port_state);
     if ( 0 != ret || 0 == port_state.agg_id)
     {
@@ -537,10 +537,10 @@ int cli_port_clear_stat(int argc, char **argv)
     }
 
     ret = trunk_port_clear_stat(slot, port);
-	if (ret != 0)
-	{
-		return ret;
-	}
+    if (ret != 0)
+    {
+        return ret;
+    }
     return 0;
 }
 

@@ -107,7 +107,7 @@ uint32_t trunk_sys_get_cfg(trunk_sys_cfg_t *cfg)
     if (ret != 0)
     {
         ERR_LOG(ret, 0, 0, 0);
-		return ret;
+        return ret;
     }
 
     cfg->prio = sys_cfg.priority;
@@ -128,7 +128,7 @@ uint32_t trunk_sys_get_state(trunk_sys_state_t *cfg)
     if (ret != 0)
     {
         ERR_LOG(ret, 0, 0, 0);
-		return ret;
+        return ret;
     }
 
     memcpy(cfg->mac, sys_cfg.mac, 6);
@@ -144,7 +144,7 @@ uint32_t trunk_port_lacp_enable(uint32_t slot, uint32_t port, uint32_t agg_id)
     lacp_bitmap_t ports;
 
     /* TODO:: check if already enable */
-	
+
     memset(&uid_cfg, 0, sizeof(uid_cfg));
     lacp_bitmap_clear(&ports);
 
@@ -276,7 +276,7 @@ uint32_t trunk_port_lacp_disable(uint32_t slot, uint32_t port)
     lacp_bitmap_t ports;
 
     lacp_bitmap_clear(&ports);
-	
+
     if (!stub_db_port_lacp_is_enable(slot, port))
         return 0;
 
@@ -337,7 +337,7 @@ uint32_t trunk_port_set_prio(uint32_t slot, uint32_t port, uint32_t prio)
         if (ret != 0)
         {
             ERR_LOG(ret, slot, port, prio);
-			return ret;
+            return ret;
         }
     }
 
@@ -472,13 +472,13 @@ uint32_t trunk_port_get_lacp_info(uint32_t slot, uint32_t port, trunk_port_state
     uint32_t ret = 0;
     uint32_t port_index;
     lacp_port_state_t port_state;
-	
+
     ret = trunk_ssp_get_global_index(slot, port, &port_index);
-	if (ret != 0)
-	{
-		return ret;
-	}
-	
+    if (ret != 0)
+    {
+        return ret;
+    }
+
     ret = lacp_port_get_port_state(port_index, &port_state);
     if ( 0 != ret || 0 == port_state.agg_id)
     {
@@ -489,7 +489,7 @@ uint32_t trunk_port_get_lacp_info(uint32_t slot, uint32_t port, trunk_port_state
     trunk_port_state->valid = port_state.valid;
 
     lacp_ssp_change_to_slot_port(port_state.port_index, &trunk_port_state->slot, &trunk_port_state->port);
-	
+
     trunk_port_state->key = port_state.key;
     trunk_port_state->agg_id = port_state.agg_id;
     trunk_port_state->master_port = port_state.master_port;

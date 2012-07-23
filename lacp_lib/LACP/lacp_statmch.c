@@ -78,17 +78,17 @@ lacp_hop_2_state (lacp_state_mach_t * fsm, uint32_t new_state)
         if (new_state == fsm->state || new_state == fsm->ignoreHop2State)
             break;
         trunk_trace ("%-8s(%s): %s=>%s",
-                    fsm->name, fsm->owner.port->port_name,
-                    (*(fsm->concreteGetStatName)) (fsm->state),
-                    (*(fsm->concreteGetStatName)) (new_state));
+                     fsm->name, fsm->owner.port->port_name,
+                     (*(fsm->concreteGetStatName)) (fsm->state),
+                     (*(fsm->concreteGetStatName)) (new_state));
         break;
     case 2:
         if (new_state == fsm->state)
             break;
         trunk_trace ("%s: %s=>%s",
-                    fsm->name,
-                    (*(fsm->concreteGetStatName)) (fsm->state),
-                    (*(fsm->concreteGetStatName)) (new_state));
+                     fsm->name,
+                     (*(fsm->concreteGetStatName)) (fsm->state),
+                     (*(fsm->concreteGetStatName)) (new_state));
         break;
     }
 #endif

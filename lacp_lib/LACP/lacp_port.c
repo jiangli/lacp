@@ -161,10 +161,10 @@ int lacp_dbg_trace_state_machine (lacp_port_t * port, char *mach_name, int enadi
         if (!strcmp (mach_name, "all") || !strcmp (mach_name, stater->name)) {
             {
                 trunk_trace ("port %s trace %-8s (was %s) now %s",
-                            port->port_name,
-                            stater->name,
-                            stater->debug ? " enabled" : "disabled",
-                            enadis ? " enabled" : "disabled");
+                             port->port_name,
+                             stater->name,
+                             stater->debug ? " enabled" : "disabled",
+                             enadis ? " enabled" : "disabled");
             }
             stater->debug = enadis;
         }
