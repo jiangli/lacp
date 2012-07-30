@@ -67,7 +67,7 @@ typedef struct lacp_port_info_s /* lacp_port_info_t */
 #define TIMERS_NUMBER   3
 #include "lacp_statmch.h"
 
-typedef struct lacp_port_s /* Lac_port */
+typedef struct lacp_port_s 
 {
     struct lacp_port_s  *next;
     struct lacp_sys_s   *system;
@@ -150,7 +150,7 @@ typedef struct lacpdu_t
 #define slow_protocols_ethertype (USHORT)0x4242};
 #define lacp_subtype  (Octet)1};
 
-typedef struct lacp_sys_s /* Lac_system */
+typedef struct lacp_sys_s
 {
     lacp_port_t * ports;  /* all lacp port link list */
     lacp_bitmap_t * portmap;

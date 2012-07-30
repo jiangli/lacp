@@ -7,7 +7,7 @@
 #include "lacp_tx.h"
 #include "lacp_mux.h"
 #include "lacp_sel.h"
-#include "../lacp_ssp.h"
+#include "trunk_ssp.h"
 
 lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
 {
@@ -25,7 +25,7 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     LACP_NEW_IN_LIST (port, lacp_port_t, sys->ports, "port create");
     port->system = sys;
     port->port_index = port_index;
-    LACP_STRDUP (port->port_name, lacp_ssp_get_port_name (port_index), "port_name");
+    LACP_STRDUP (port->port_name, trunk_ssp_get_port_name (port_index), "port_name");
     port->machines = NULL;
 
     lacp_port_get_actor_init(port_index, &port->actor_admin);
@@ -37,8 +37,8 @@ lacp_port_t *lacp_port_create (lacp_sys_t * sys, uint32_t port_index)
     port->lacp_enabled = False;
     port->port_moved = False;
     port->agg_id = 0;
-    port->speed = lacp_ssp_get_port_oper_speed(port->port_index);
-    port->duplex = lacp_ssp_get_port_oper_duplex(port->port_index);
+    port->speed = trunk_ssp_get_port_oper_speed(port->port_index);
+    port->duplex = trunk_ssp_get_port_oper_duplex(port->port_index);
     port->rx_lacpdu_cnt = 0;
     port->tx_lacpdu_cnt = 0;
 
@@ -160,7 +160,7 @@ int lacp_dbg_trace_state_machine (lacp_port_t * port, char *mach_name, int enadi
     for (stater = port->machines; stater; stater = stater->next) {
         if (!strcmp (mach_name, "all") || !strcmp (mach_name, stater->name)) {
             {
-                lacp_trace ("port %s trace %-8s (was %s) now %s",
+                trunk_trace ("port %s trace %-8s (was %s) now %s",
                             port->port_name,
                             stater->name,
                             stater->debug ? " enabled" : "disabled",

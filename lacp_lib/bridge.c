@@ -124,14 +124,14 @@ bridge_control (int port_index, BR_IPC_CNTRL_BODY_T * cntrl)
         //lacp_port_link_change (port_index, True);
         lacp_ssp_change_to_slot_port(port_index, &slot, &port);
         trunk_port_link_change(slot,  port, True);
-        lacp_ssp_set_port_link_status(port_index, 1);
+        trunk_ssp_set_port_link_status(port_index, 1);
         break;
     case BR_IPC_PORT_DISCONNECT:
         printf ("disconnected port p%02d\n", port_index);
         lacp_bitmap_clear_bit (&enabled_ports, port_index);
         lacp_ssp_change_to_slot_port(port_index, &slot, &port);
         trunk_port_link_change(slot,  port, False);
-        lacp_ssp_set_port_link_status(port_index, 0);
+        trunk_ssp_set_port_link_status(port_index, 0);
         break;
     case BR_IPC_BRIDGE_SHUTDOWN:
         printf ("shutdown from manager :(\n");
@@ -149,7 +149,7 @@ bridge_rx_bpdu (BR_IPC_MSG_T * msg, size_t msgsize, int number_of_ports)
     uint32_t slot, port;
 
     lacp_ssp_change_to_slot_port(msg->header.destination_port, &slot, &port);
-    lacp_ssp_rx_lacpdu (slot, port, (lacp_pdu_t *) (msg->body.bpdu),
+    trunk_ssp_rx_lacpdu (slot, port, (lacp_pdu_t *) (msg->body.bpdu),
                         msg->header.body_len);
 
     return 0;

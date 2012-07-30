@@ -1,7 +1,9 @@
 #ifndef __LACP_TRUNK_H__
 #define __LACP_TRUNK_H__
 
-
+#define TRUNK_ID_MAX 32
+#define TRUNK_UINT_INVALID 0xffffffff
+#define TRUNK_PORT_NUMBER_MAX 8
 typedef struct trunk_sys_cfg_s
 {
     uint32_t prio;
@@ -32,7 +34,6 @@ typedef struct {
 
 typedef struct {
     uint32_t master_index;
-    uint32_t master_port;
     trunk_port_state_t ports_state[8];
 } trunk_agg_state_t;
 

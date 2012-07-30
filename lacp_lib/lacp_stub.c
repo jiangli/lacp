@@ -4,6 +4,7 @@
 uint32_t g_sys_prio = 0xffffffff;
 port_attr_t g_port_list[144];
 LINK_GROUP_T g_link_groups[32];
+extern uint32_t LACP_PORT_MAX;
 
 uint32_t stub_init()
 {
@@ -133,3 +134,39 @@ uint32_t stub_db_set_sys_prio(uint32_t prio)
     g_sys_prio = prio;
     return 0;
 }
+
+int cli_pr_get_attr(int argc, char **argv)
+{
+    uint32_t port_loop;
+    uint32_t port_index;
+
+    uint32_t port_start = 0;
+    uint32_t port_end = LACP_PORT_MAX;
+    port_attr_t attr;
+    uint32_t ret = 0;
+    uint32_t slot, port;
+
+    if ('a' != argv[1][0])
+    {
+
+        ret = DEV_GetIfPonFromIfnet(argv[1], (int *)&slot,(int*) &port);
+        if (ret !=0 )
+        {
+            return ret;
+        }
+        trunk_ssp_get_global_index(slot, port, &port_index);
+        port_start = port_end = port_index;
+    }
+
+    printf("port    speed    duplex    rx&tx    chip_tgid");
+    for (port_loop = port_start; port_loop < port_end; port_loop++)
+    {
+        stub_get_port_attr(port_loop, &attr);
+        printf("\r\n%-4d     %-4d     %-4d     %-4d     %-4d", port_loop, attr.speed,
+               attr.duplex,  attr.cd, attr.tid);
+    }
+
+    printf("\r\n");
+    return 0;
+}
+

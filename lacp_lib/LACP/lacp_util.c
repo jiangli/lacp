@@ -62,21 +62,21 @@ int lacp_get_bit_str (char *buf, unsigned char bitmask,
 void lacp_copy_info(lacp_port_info_t *from, lacp_port_info_t *to)
 {
     to->port_priority		  = from->port_priority;
-    to->port_no            = from->port_no;
+    to->port_no               = from->port_no;
     to->system_priority 	  = from->system_priority;
-    memcpy(to->system_mac, from->system_mac, 6);
     to->key 				  = from->key;
     to->state                 = from->state;
+    memcpy(to->system_mac, from->system_mac, 6);
 }
 
 void lacp_copy_info_from_net(lacp_port_info_t *from, lacp_port_info_t *to)
 {
     to->port_priority		  = ntohs(from->port_priority);
-    to->port_no            = ntohs(from->port_no);
+    to->port_no               = ntohs(from->port_no);
     to->system_priority 	  = ntohs(from->system_priority);
-    memcpy(to->system_mac, from->system_mac, 6);
     to->key 				  = ntohs(from->key);
     to->state		          = from->state;
+    memcpy(to->system_mac, from->system_mac, 6);
 }
 
 int lacp_print_port_info(char *buf, lacp_port_info_t *lacp_info)
@@ -107,7 +107,7 @@ int lacp_print_port_info(char *buf, lacp_port_info_t *lacp_info)
 
 void lacp_dump_pkt(lacp_pdu_t *pkt, uint32_t len)
 {
-    char show_str[LACP_MAC_PORT_INFO_LEN + 1] = {0};
+    char show_str[LACP_PORT_INFO_LEN + 1] = {0};
     lacp_port_info_t actor, partner;
 
     lacp_memdump((unsigned char *)pkt, len);

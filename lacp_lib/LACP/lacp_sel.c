@@ -1,7 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_statmch.h"
 #include "lacp_sys.h"
-#include "lacp_ssp.h"
+#include "trunk_ssp.h"
 #define STATES {        \
   CHOOSE(SEL_INIT),    \
   CHOOSE(SEL_SELECTION),    \
@@ -45,7 +45,7 @@ static lacp_port_t *select_master_port(lacp_sys_t *lac_sys, uint32_t agg_id)
         if (agg_id != p->agg_id )
             continue;
 
-        p->actor.key = lacp_ssp_get_port_oper_key(p->port_index);
+        p->actor.key = trunk_ssp_get_port_oper_key(p->port_index);
     }
 
     /* select best port(master port) */
@@ -106,9 +106,9 @@ static lacp_port_t *select_master_port(lacp_sys_t *lac_sys, uint32_t agg_id)
     }
 #if 0
     if (best)
-        lacp_trace("\r\n agg %d get best port: %d", agg_id, best->port_index);
+        trunk_trace("\r\n agg %d get best port: %d", agg_id, best->port_index);
     else
-        lacp_trace("\r\n agg %d NO best port.", agg_id);
+        trunk_trace("\r\n agg %d NO best port.", agg_id);
 #endif
     return best;
 
@@ -153,12 +153,12 @@ static uint32_t update_agg_ports_select(lacp_sys_t *lac_sys, uint32_t agg_id)
             port->selected = True;
             port->standby = False;
             if (port->sel->debug)
-                lacp_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, port->port_index);
+                trunk_trace("\r\n <%s.%d> port %d ---> Selected",  __FUNCTION__, __LINE__, port->port_index);
         } else {
             port->selected = True;
             port->standby = True;
             if (port->sel->debug)
-                lacp_trace("\r\n <%s.%d> port %d ---> Standby ",  __FUNCTION__, __LINE__, port->port_index);
+                trunk_trace("\r\n <%s.%d> port %d ---> Standby ",  __FUNCTION__, __LINE__, port->port_index);
         }
     }
     return 0;

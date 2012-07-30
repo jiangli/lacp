@@ -2,7 +2,7 @@
 #include "lacp_statmch.h"
 #include "lacp_port.h"
 #include "lacp_sys.h"
-#include "lacp_ssp.h"
+#include "trunk_ssp.h"
 #include "lacp_util.h"
 
 /* The Receive Machine */
@@ -20,13 +20,13 @@
 #include "lacp_choose.h"
 
 
-static Bool _lacp_rxm_same_port(lacp_port_info_t *a, lacp_port_info_t *b)
+static Bool _same_port(lacp_port_info_t *a, lacp_port_info_t *b)
 {
     return (  (a->port_no == b->port_no)
               && (!memcmp(a->system_mac, b->system_mac, 6))
            );
 }
-static Bool _lacp_rxm_same_partner(lacp_port_info_t *a, lacp_port_info_t *b)
+static Bool _same_partner(lacp_port_info_t *a, lacp_port_info_t *b)
 {
     return (  (a->port_priority == b->port_priority)
               && (a->port_no == b->port_no)
@@ -57,10 +57,10 @@ uint32_t lacp_rxm_rx_lacpdu (lacp_port_t * port, lacp_pdu_t *Lacpdu, uint32_t le
         if (p == port) continue;
 
         if (p->rx->state == RXM_PORT_DISABLED
-                && _lacp_rxm_same_port(&p->partner, &port->msg_actor))
+                && _same_port(&p->partner, &port->msg_actor))
         {
             if (port->rx->debug)
-                lacp_trace("port %d ' partner  moved to port %d \r\n", p->port_index, port->port_index);
+                trunk_trace("port %d ' partner  moved to port %d \r\n", p->port_index, port->port_index);
             p->port_moved = True;
             break;
         }
@@ -85,7 +85,7 @@ static void update_partner_syn(lacp_port_t *port)
     Bool partner_sync = False;
     Bool partner_matched = False;
 
-    if ((_lacp_rxm_same_partner(&port->msg_partner, &port->actor)
+    if ((_same_partner(&port->msg_partner, &port->actor)
             || (!LACP_STATE_GET_BIT(port->msg_actor.state, LACP_STATE_AGG)))
             && ((LACP_STATE_GET_BIT(port->msg_actor.state, LACP_STATE_ACT))
                 || (LACP_STATE_GET_BIT(port->actor.state, LACP_STATE_ACT)
@@ -96,23 +96,23 @@ static void update_partner_syn(lacp_port_t *port)
     else
     {
         if (port->rx->debug)
-            lacp_trace("\r\n port:%d 's partner didn't catch up with him  ! ", port->port_index);
+            trunk_trace("\r\n port:%d 's partner didn't catch up with him  ! ", port->port_index);
         port->ntt = True;
         partner_matched = False;
     }
 
     partner_sync = partner_matched && LACP_STATE_GET_BIT(port->msg_actor.state, LACP_STATE_SYN);
     if (port->rx->debug)
-        lacp_trace("rx fsm partner match check. port %d partner  syn ---> %d", port->port_index, partner_sync);
+        trunk_trace("rx fsm partner match check. port %d partner  syn ---> %d", port->port_index, partner_sync);
     LACP_STATE_SET_BIT(port->partner.state, LACP_STATE_SYN, partner_sync);
 }
 
 static void update_selected(lacp_port_t *port)
 {
-    if (!_lacp_rxm_same_partner(&port->msg_actor, &port->partner))
+    if (!_same_partner(&port->msg_actor, &port->partner))
     {
         if (port->rx->debug)
-            lacp_trace("<%s.%d> port:%d has new partner", __FUNCTION__, __LINE__, port->port_index);
+            trunk_trace("<%s.%d> port:%d has new partner", __FUNCTION__, __LINE__, port->port_index);
         port->selected	= False;
         lacp_port_set_reselect(port);
 //        LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_SYN, False);
@@ -121,7 +121,7 @@ static void update_selected(lacp_port_t *port)
 
 static void update_ntt(lacp_port_t *port)
 {
-    if ( !(_lacp_rxm_same_partner(&port->msg_partner, &port->actor))
+    if ( !(_same_partner(&port->msg_partner, &port->actor))
             || (LACP_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LACP_STATE_ACT))
             || (LACP_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LACP_STATE_TMT))
             || (LACP_STATE_CMP_BIT(port->msg_partner.state, port->actor.state, LACP_STATE_SYN))
@@ -138,15 +138,15 @@ static void record_pdu(lacp_port_t *port)
 
 static void update_default_selected(lacp_port_t *port)
 {
-    if (!_lacp_rxm_same_partner(&port->partner_admin, &port->partner))
+    if (!_same_partner(&port->partner_admin, &port->partner))
     {
         port->selected = False;
 
         LACP_STATE_SET_BIT(port->actor.state, LACP_STATE_SYN, False);
         if (port->rx->debug)
         {
-            lacp_trace("<%s.%d> port:%d to default make selected false.", __FUNCTION__, __LINE__, port->port_index);
-            lacp_trace("rx fsm to default. port %d actor  syn ---> False", port->port_index);
+            trunk_trace("<%s.%d> port:%d to default make selected false.", __FUNCTION__, __LINE__, port->port_index);
+            trunk_trace("rx fsm to default. port %d actor  syn ---> False", port->port_index);
         }
     }
 }
@@ -175,7 +175,7 @@ void lacp_rx_enter_state (lacp_state_mach_t * fsm)
 
     case RXM_PORT_DISABLED:
         if (fsm->debug)
-            lacp_trace("rx fsm to disabled. port %d partner  syn ---> False", port->port_index);
+            trunk_trace("rx fsm to disabled. port %d partner  syn ---> False", port->port_index);
         LACP_STATE_SET_BIT(port->partner.state, LACP_STATE_SYN, False);
         port->rcvd_lacpdu = False;
         port->current_while = 0;
@@ -190,7 +190,7 @@ void lacp_rx_enter_state (lacp_state_mach_t * fsm)
 
     case RXM_EXPIRED:
         if (fsm->debug)
-            lacp_trace("rx fsm to expired. port %d partner syn ---> False", port->port_index);
+            trunk_trace("rx fsm to expired. port %d partner syn ---> False", port->port_index);
         LACP_STATE_SET_BIT(port->partner.state, LACP_STATE_SYN, False);
         LACP_STATE_SET_BIT(port->partner.state, LACP_STATE_TMT, LACP_SHORT_TIMEOUT);
         start_current_while_timer(port, LACP_SHORT_TIMEOUT);

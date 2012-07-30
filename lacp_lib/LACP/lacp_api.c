@@ -4,16 +4,14 @@
 #include "lacp_port.h"
 #include "lacp_sys.h"
 #include "lacp_api.h"
-#include "lacp_ssp.h"
+#include "trunk_ssp.h"
 #include "lacp_util.h"
-
-uint32_t max_port = 4;
 
 uint32_t lacp_port_get_actor_init(uint32_t port_index, lacp_port_info_t  *admin)
 {
     lacp_mac_t sys_mac;
 
-    lacp_ssp_get_mac(sys_mac);
+    trunk_ssp_get_mac(sys_mac);
 
     admin->port_no = port_index + 1;
     memcpy(admin->system_mac, sys_mac, sizeof(lacp_mac_t));
@@ -79,7 +77,7 @@ uint32_t lacp_port_set_cfg(lacp_port_cfg_t * uid_cfg)
     LACP_CRITICAL_PATH_START;
     sys = lacp_get_sys_inst();
 
-    for (port_index = 0; port_index < max_port; port_index++) {
+    for (port_index = 0; port_index < LACP_PORT_MAX; port_index++) {
         if (!lacp_bitmap_get_bit (&uid_cfg->port_bmp, port_index))
             continue;
 
@@ -253,7 +251,7 @@ uint32_t lacp_create_ports(lacp_bitmap_t *ports)
     uint32_t port_index;
     lacp_sys_t *lacp_sys = lacp_get_sys_inst();
 
-    for (port_index = 0; port_index < max_port; port_index++)
+    for (port_index = 0; port_index < LACP_PORT_MAX; port_index++)
     {
         if (lacp_bitmap_get_bit(ports, port_index))
         {
@@ -280,7 +278,7 @@ uint32_t lacp_remove_ports(lacp_bitmap_t *ports)
     lacp_port_t *port;
     lacp_sys_t *lacp_sys = lacp_get_sys_inst();
 
-    for (port_index = 0; port_index < max_port; port_index++)
+    for (port_index = 0; port_index < LACP_PORT_MAX; port_index++)
     {
         if (lacp_bitmap_get_bit(ports, port_index))
         {
@@ -301,7 +299,7 @@ uint32_t lacp_port_link_change(uint32_t port_index, uint32_t link_status)
     lacp_sys_t *sys = lacp_get_sys_inst();
     lacp_port_t *p;
 
-    lacp_trace ("port p%02d => %sABLE", (uint32_t) port_index, link_status ? "EN" : "DIS");
+    trunk_trace ("port p%02d => %sABLE", (uint32_t) port_index, link_status ? "EN" : "DIS");
 
     LACP_CRITICAL_PATH_START;
 
@@ -324,8 +322,8 @@ uint32_t lacp_port_link_change(uint32_t port_index, uint32_t link_status)
         p->port_enabled = False;
     }
 
-    p->speed = lacp_ssp_get_port_oper_speed(p->port_index);
-    p->duplex = lacp_ssp_get_port_oper_duplex(p->port_index);
+    p->speed = trunk_ssp_get_port_oper_speed(p->port_index);
+    p->duplex = trunk_ssp_get_port_oper_duplex(p->port_index);
     if (!p->duplex)
     {
         LACP_STATE_SET_BIT(p->actor.state, LACP_STATE_AGG, False);
@@ -364,14 +362,14 @@ uint32_t lacp_sys_set_cfg(lacp_sys_cfg_t * uid_cfg)
     LACP_CRITICAL_PATH_START;
     if (uid_cfg->field_mask & BR_CFG_PBMP_ADD)
     {
-        for (port_loop = 0; port_loop < max_port; port_loop++)
+        for (port_loop = 0; port_loop < LACP_PORT_MAX; port_loop++)
             if (lacp_bitmap_get_bit(&uid_cfg->ports, port_loop))
                 lacp_port_create(sys, port_loop);
     }
 
     if (uid_cfg->field_mask & BR_CFG_PBMP_DEL)
     {
-        for (port_loop = 0; port_loop < max_port; port_loop++)
+        for (port_loop = 0; port_loop < LACP_PORT_MAX; port_loop++)
             if (lacp_bitmap_get_bit(&uid_cfg->ports, port_loop))
             {
                 p = _lacp_port_find( port_loop);
@@ -408,7 +406,7 @@ uint32_t lacp_sys_get_cfg(lacp_sys_cfg_t * uid_cfg)
     lacp_sys_t *sys = lacp_get_sys_inst();
     lacp_port_t *port;
 
-    uid_cfg->number_of_ports = max_port;
+    uid_cfg->number_of_ports = LACP_PORT_MAX;
     for (port = sys->ports; port; port = port->next)
     {
         lacp_bitmap_set_bit(&uid_cfg->ports, port->port_index);
@@ -436,7 +434,7 @@ uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len)
 
     sys = lacp_get_sys_inst();
     if (!sys) {
-        lacp_trace("the instance had not yet been created");
+        trunk_trace("the instance had not yet been created");
 
         LACP_CRITICAL_PATH_END;
         return M_LACP_NOT_CREATED;
@@ -449,7 +447,7 @@ uint32_t lacp_rx_lacpdu(uint32_t port_index, lacp_pdu_t * bpdu, uint32_t len)
     }
 
     if (!port->port_enabled) { /* port link change indication will come later :( */
-        lacp_trace ("disable port receive lacpdu port=%d :(", (uint32_t) port_index);
+        trunk_trace ("disable port receive lacpdu port=%d :(", (uint32_t) port_index);
         LACP_CRITICAL_PATH_END;
         return M_RSTP_NOT_ENABLE;
     }

@@ -104,7 +104,7 @@ extern ULONG Ntohl (ULONG n);
 
 #ifdef __VXWORKS__
 #define LACP_FATAL(TXT, MSG, EXCOD)                      \
-      {lacp_trace ("FATAL:%s failed: %s:%d", TXT, MSG, EXCOD);  \
+      {trunk_trace ("FATAL:%s failed: %s:%d", TXT, MSG, EXCOD);  \
       exit (EXCOD);}
 #else
 #define LACP_FATAL(TXT, MSG, EXCOD)                      \

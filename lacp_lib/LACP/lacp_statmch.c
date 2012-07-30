@@ -4,7 +4,7 @@
 #include "lacp_base.h"
 #include "lacp_port.h"
 #include "lacp_statmch.h"
-#include "../lacp_ssp.h"
+#include "trunk_ssp.h"
 
 lacp_state_mach_t *
 lacp_state_mach_create (void (*concreteEnterState) (lacp_state_mach_t *),
@@ -77,7 +77,7 @@ lacp_hop_2_state (lacp_state_mach_t * fsm, uint32_t new_state)
     case 1:
         if (new_state == fsm->state || new_state == fsm->ignoreHop2State)
             break;
-        lacp_trace ("%-8s(%s): %s=>%s",
+        trunk_trace ("%-8s(%s): %s=>%s",
                     fsm->name, fsm->owner.port->port_name,
                     (*(fsm->concreteGetStatName)) (fsm->state),
                     (*(fsm->concreteGetStatName)) (new_state));
@@ -85,7 +85,7 @@ lacp_hop_2_state (lacp_state_mach_t * fsm, uint32_t new_state)
     case 2:
         if (new_state == fsm->state)
             break;
-        lacp_trace ("%s: %s=>%s",
+        trunk_trace ("%s: %s=>%s",
                     fsm->name,
                     (*(fsm->concreteGetStatName)) (fsm->state),
                     (*(fsm->concreteGetStatName)) (new_state));

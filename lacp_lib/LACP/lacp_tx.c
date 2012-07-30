@@ -1,7 +1,7 @@
 #include "lacp_base.h"
 #include "lacp_statmch.h"
 #include "lacp_sys.h"
-#include "lacp_ssp.h"
+#include "trunk_ssp.h"
 
 #define STATES {        \
   CHOOSE(TXM_NO_PERIODIC),    \
@@ -17,7 +17,7 @@ static lacp_pdu_t lacpdu_packet;
 
 static uint32_t
 tx_lacpdu(lacp_state_mach_t * fsm)
-{   /* 17.19.15 (page 67) & 9.3.1 (page 23) */
+{
     register uint32_t port_index;
     register lacp_port_t *port = fsm->owner.port;
     const unsigned char slow_protocols_address[] = {0x01, 0x80, 0xc2, 0x00, 0x00, 0x02};
@@ -25,22 +25,23 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     if (!port->lacp_enabled)
     {
         if (fsm->debug)
-            lacp_trace("\r\n not enable tx");
-        return 1;
+            trunk_trace("\r\n port %d 's lacp is not enable, cann't tx lacpdu.", port->port_index);
+		
+        return M_LACP_NOT_ENABLE;
     }
 
-    port = fsm->owner.port;
     port_index = port->port_index;
 
     memset(&lacpdu_packet, 0, sizeof(lacp_pdu_t));
 
     memcpy(lacpdu_packet.slow_protocols_address, slow_protocols_address, 6);
-    lacp_ssp_get_mac (lacpdu_packet.src_address);
+    trunk_ssp_get_mac (lacpdu_packet.src_address);
     lacpdu_packet.ethertype = htons (0x8809);
 
     lacpdu_packet.protocol_subtype = 1;
     lacpdu_packet.protocol_version = 1;
 
+	/* actor tlv */
     lacpdu_packet.type_actor = 1;
     lacpdu_packet.len_actor = 20;
     lacpdu_packet.actor.system_priority = htons(port->actor.system_priority);
@@ -50,7 +51,7 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     lacpdu_packet.actor.port_no = htons(port->actor.port_no);
     lacpdu_packet.actor.state = port->actor.state;
 
-
+	/* partner tlv */
     lacpdu_packet.type_partner = 2;
     lacpdu_packet.len_partner = 20;
     lacpdu_packet.partner.system_priority = htons(port->partner.system_priority);
@@ -60,7 +61,6 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     lacpdu_packet.partner.port_no = htons(port->partner.port_no);
     lacpdu_packet.partner.state = port->partner.state;
 
-
     lacpdu_packet.type_collector = 3;
     lacpdu_packet.len_collector = 16;
     lacpdu_packet.collector_max_delay = htons(10);
@@ -69,7 +69,7 @@ tx_lacpdu(lacp_state_mach_t * fsm)
     port->tx_lacpdu_cnt++;
 
     /* tx */
-    return lacp_ssp_tx_pdu (port_index, (unsigned char *) &lacpdu_packet, sizeof(lacp_pdu_t));
+    return trunk_ssp_tx_pdu (port_index, (unsigned char *) &lacpdu_packet, sizeof(lacp_pdu_t));
 }
 
 
@@ -85,7 +85,6 @@ void lacp_tx_enter_state (lacp_state_mach_t * fsm)
         break;
 
     case TXM_PERIODIC_TX:
-
         port->ntt = True;
         if (LACP_STATE_GET_BIT(port->partner.state, LACP_STATE_TMT) == LACP_LONG_TIMEOUT)
         {
